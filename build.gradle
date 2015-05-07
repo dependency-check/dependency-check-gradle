@@ -1,0 +1,23 @@
+apply plugin: 'idea'
+apply plugin: 'groovy'
+apply plugin: 'maven'
+
+repositories {
+     mavenCentral()
+}
+
+dependencies {
+    compile localGroovy()
+    compile gradleApi()
+}
+
+group = 'com.tools.security'
+version = '0.0.1'
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: uri('../repo'))
+        }
+    }
+}

@@ -1,0 +1,11 @@
+.idea/
+.gradle
+
+*.iml
+*.ipr
+*.iws
+
+out/
+build/
+
+gradle-app.setting
