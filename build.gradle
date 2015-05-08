@@ -3,12 +3,16 @@ apply plugin: 'groovy'
 apply plugin: 'maven'
 
 repositories {
-     mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-    compile localGroovy()
-    compile gradleApi()
+    compile(
+            localGroovy(),
+            gradleApi(),
+            'org.owasp:dependency-check-core:1.2.10',
+            'org.owasp:dependency-check-utils:1.2.10'
+    )
 }
 
 group = 'com.tools.security'
@@ -17,7 +21,7 @@ version = '0.0.1'
 uploadArchives {
     repositories {
         mavenDeployer {
-            repository(url: uri('../repo'))
+            repository(url: uri('../../../repo'))
         }
     }
 }
