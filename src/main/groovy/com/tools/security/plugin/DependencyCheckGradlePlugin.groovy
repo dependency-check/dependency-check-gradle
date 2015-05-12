@@ -8,8 +8,6 @@ import org.slf4j.LoggerFactory
 
 class DependencyCheckGradlePlugin implements Plugin<Project> {
 
-    private Logger logger = LoggerFactory.getLogger(getClass())
-
     @Override
     void apply(Project project) {
         project.tasks.create("dependencyCheck", DependencyCheckTask)
