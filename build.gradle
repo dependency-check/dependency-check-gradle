@@ -1,9 +1,16 @@
+plugins {
+    id 'nu.studer.plugindev' version '1.0.3'
+}
+
 apply plugin: 'idea'
 apply plugin: 'groovy'
 apply plugin: 'maven'
 
 repositories {
     mavenCentral()
+    maven {
+        url 'http://dl.bintray.com/wei/maven'
+    }
 }
 
 dependencies {
@@ -18,10 +25,37 @@ dependencies {
 group = 'com.tools.security'
 version = '0.0.1'
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: uri('../../../repo'))
-        }
-    }
+//-------------------------------
+// Local debug use only
+//
+//uploadArchives {
+//    repositories {
+//        mavenDeployer {
+//            repository(url: uri('../../../repo'))
+//        }
+//    }
+//}
+//-------------------------------
+
+plugindev {
+    pluginId = 'dependency.check'
+    pluginName = 'dependency-check'
+    pluginImplementationClass 'com.tools.security.plugin.DependencyCheckGradlePlugin'
+    pluginDescription 'This is dependency check gradle plugin.'
+    pluginLicenses 'Apache-2.0'
+    pluginTags 'dependency check', 'security'
+    authorId 'wmaintw'
+    authorName 'Wei Ma'
+    authorEmail 'wma@thoughtworks.com'
+    projectUrl 'https://github.com/wmaintw/DependencyCheck'
+    projectIssuesUrl 'https://github.com/wmaintw/DependencyCheck/issues'
+    projectVcsUrl 'git@github.com:wmaintw/DependencyCheck.git'
+    projectInceptionYear '2015'
+    done()
+}
+
+bintray {
+    user = bintrayUser
+    key = bintrayUserKey
+    pkg.repo = bintrayRepo
 }
