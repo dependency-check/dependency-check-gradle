@@ -1,3 +1,15 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+
+    dependencies {
+        classpath "com.gradle.publish:plugin-publish-plugin:0.9.0"
+    }
+}
+
 plugins {
     id 'nu.studer.plugindev' version '1.0.3'
 }
@@ -5,12 +17,10 @@ plugins {
 apply plugin: 'idea'
 apply plugin: 'groovy'
 apply plugin: 'maven'
+apply plugin: "com.gradle.plugin-publish"
 
 repositories {
     mavenCentral()
-    maven {
-        url 'http://dl.bintray.com/wei/maven'
-    }
 }
 
 dependencies {
@@ -37,6 +47,7 @@ version = '0.0.1'
 //}
 //-------------------------------
 
+// publish to Bintray
 plugindev {
     pluginId = 'dependency.check'
     pluginName = 'dependency-check'
@@ -58,4 +69,19 @@ bintray {
     user = bintrayUser
     key = bintrayUserKey
     pkg.repo = bintrayRepo
+}
+
+// publish to gradle plugin portal
+pluginBundle {
+    website = 'https://github.com/wmaintw/DependencyCheck'
+    vcsUrl = 'git@github.com:wmaintw/DependencyCheck.git'
+    description = 'This is dependency check gradle plugin.'
+    tags = ['dependency check', 'security']
+
+    plugins {
+        dependencyCheckPlugin {
+            id = 'dependency.check'
+            displayName = 'dependency-check'
+        }
+    }
 }
