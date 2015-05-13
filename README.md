@@ -17,7 +17,7 @@ Please refer to either one of the solution
 
 #### Solution 1，Bintray
 
-`
+```
 apply plugin: "dependency-check"
 
 buildscript {
@@ -33,7 +33,7 @@ buildscript {
         )
     }
 }
-`
+```
 
 #### Solution 2，Gradle Plugin Portal
 
@@ -41,7 +41,7 @@ buildscript {
 
 **Build script snippet for new, incubating, plugin mechanism introduced in Gradle 2.1:**
 
-`
+```
 // buildscript {
 //     ...
 // }
@@ -51,11 +51,11 @@ plugins {
 }
 
 // apply plugin: ...
-`
+```
 
 **Build script snippet for use in all Gradle versions:**
 
-`
+```
 buildscript {
   repositories {
     maven {
@@ -68,7 +68,7 @@ buildscript {
 }
 
 apply plugin: "dependency.check"
-`
+```
 
 #### Solution 3，Maven Central
 
@@ -78,8 +78,8 @@ working in progress
 
 Once gradle plugin applied, run following gradle task to check the dependencies:
 
-`
+```
 gradle dependencyCheck
-`
+```
 
 The reports will be generated automatically under `./reports` folder.
