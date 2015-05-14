@@ -70,6 +70,38 @@ buildscript {
 apply plugin: "dependency.check"
 ```
 
+**If your project includes multiple sub-project, configure build script this way:**
+
+```
+allprojects {
+    //other plugins you may use
+    //apply plugin: "java"
+
+    apply plugin: "dependency-check"
+
+    repositories {
+        mavenCentral()
+    }
+}
+```
+
+or
+
+```
+subprojects {
+    //other plugins you may use
+    //apply plugin: "java"
+
+    apply plugin: "dependency-check"
+
+    repositories {
+        mavenCentral()
+    }
+}
+```
+
+In this way, the dependency check will be executed for all projects (including root project) or just sub projects.
+
 #### Solution 3，Maven Central
 
 working in progress
@@ -83,3 +115,5 @@ gradle dependencyCheck
 ```
 
 The reports will be generated automatically under `./reports` folder.
+
+If your project includes multiple sub-projects, the report will be generated for each sub-project in different sub-directory.
