@@ -73,6 +73,17 @@ apply plugin: "dependency.check"
 **If your project includes multiple sub-project, configure build script this way:**
 
 ```
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.1"
+  }
+}
+
 allprojects {
     //other plugins you may use
     //apply plugin: "java"
@@ -88,6 +99,17 @@ allprojects {
 or
 
 ```
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.1"
+  }
+}
+
 subprojects {
     //other plugins you may use
     //apply plugin: "java"
