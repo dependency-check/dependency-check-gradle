@@ -33,7 +33,7 @@ dependencies {
 }
 
 group = 'com.tools.security'
-version = '0.0.1'
+version = '0.0.2'
 
 //-------------------------------
 // Local debug use only
