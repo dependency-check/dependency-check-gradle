@@ -12,6 +12,8 @@ import org.owasp.dependencycheck.utils.Settings
 
 class DependencyCheckTask extends DefaultTask {
 
+    def currentProjectName = project.getName()
+
     @TaskAction
     def check() {
         Settings.initialize()
@@ -24,7 +26,7 @@ class DependencyCheckTask extends DefaultTask {
     }
 
     def verifyDependencies(engine) {
-        logger.lifecycle("Verifying dependencies")
+        logger.lifecycle("Verifying dependencies for project ${currentProjectName}")
         getAllDependencies(project).each { engine.scan(it) }
     }
 
@@ -38,14 +40,14 @@ class DependencyCheckTask extends DefaultTask {
             dependency.getVulnerabilities()
         }.flatten()
 
-        logger.lifecycle("Found ${vulnerabilities.size()} vulnerabilities")
+        logger.lifecycle("Found ${vulnerabilities.size()} vulnerabilities in project ${currentProjectName}")
     }
 
     def generateReport(Engine engine) {
-        logger.lifecycle("Generating report")
-        def reportGenerator = new ReportGenerator(project.getName(), engine.dependencies, engine.analyzers,
+        logger.lifecycle("Generating report for project ${currentProjectName}")
+        def reportGenerator = new ReportGenerator(currentProjectName, engine.dependencies, engine.analyzers,
                 new CveDB().databaseProperties)
-        reportGenerator.generateReports("./reports", ReportGenerator.Format.ALL)
+        reportGenerator.generateReports("./reports/${currentProjectName}", ReportGenerator.Format.ALL)
     }
 
     def getAllDependencies(project) {
