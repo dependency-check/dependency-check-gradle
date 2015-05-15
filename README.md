@@ -139,3 +139,20 @@ gradle dependencyCheck
 The reports will be generated automatically under `./reports` folder.
 
 If your project includes multiple sub-projects, the report will be generated for each sub-project in different sub-directory.
+
+### What if you are behind a proxy?
+
+Maybe you have to use proxy to access internet, in this case, you could configure proxy settings for this plugin:
+
+```
+dependencyCheck {
+    proxyServer = "127.0.0.1"      // required, the server name or IP address of the proxy
+    proxyPort = 3128               // required, the port number of the proxy
+
+    // optional, the proxy server might require username
+    // proxyUsername = "username"
+
+    // optional, the proxy server might require password
+    // proxyPassword = "password"
+}
+```
