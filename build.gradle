@@ -33,18 +33,18 @@ dependencies {
 }
 
 group = 'com.tools.security'
-version = '0.0.2'
+version = '0.0.3'
 
 //-------------------------------
 // Local debug use only
 //
-//uploadArchives {
-//    repositories {
-//        mavenDeployer {
-//            repository(url: uri('../../../repo'))
-//        }
-//    }
-//}
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: uri('../../../repo'))
+        }
+    }
+}
 //-------------------------------
 
 // publish to Bintray
