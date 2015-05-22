@@ -29,7 +29,7 @@ buildscript {
     }
     dependencies {
         classpath(
-                'com.tools.security:dependency-check:0.0.2'
+                'com.tools.security:dependency-check:0.0.3'
         )
     }
 }
@@ -47,7 +47,7 @@ buildscript {
 // }
 
 plugins {
-    id "dependency.check" version "0.0.2"
+    id "dependency.check" version "0.0.3"
 }
 
 // apply plugin: ...
@@ -63,7 +63,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.2"
+    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.3"
   }
 }
 
@@ -80,7 +80,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.2"
+    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.3"
   }
 }
 
@@ -106,7 +106,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.2"
+    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.3"
   }
 }
 
