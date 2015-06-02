@@ -52,6 +52,7 @@ class DependencyCheckTask extends DefaultTask {
     def initializeSettings() {
         Settings.initialize()
         overrideProxySetting()
+        overrideCveUrlSetting()
     }
 
     def verifyDependencies(engine) {
@@ -100,5 +101,13 @@ class DependencyCheckTask extends DefaultTask {
                 artifact.getFile()
             }
         }.flatten();
+    }
+
+    def overrideCveUrlSetting() {
+        setString(Settings.KEYS.CVE_MODIFIED_20_URL, project.dependencyCheck.cveUrl20Modified)
+        setString(Settings.KEYS.CVE_MODIFIED_12_URL, project.dependencyCheck.cveUrl12Modified)
+        setString(Settings.KEYS.CVE_START_YEAR, "${project.dependencyCheck.cveStartYear}")
+        setString(Settings.KEYS.CVE_SCHEMA_2_0, project.dependencyCheck.cveUrl20Base)
+        setString(Settings.KEYS.CVE_SCHEMA_1_2, project.dependencyCheck.cveUrl12Base)
     }
 }

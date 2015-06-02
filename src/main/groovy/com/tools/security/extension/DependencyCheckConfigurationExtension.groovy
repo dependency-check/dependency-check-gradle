@@ -23,4 +23,10 @@ class DependencyCheckConfigurationExtension {
     Integer proxyPort
     String proxyUsername = ""
     String proxyPassword = ""
+
+    String cveUrl12Modified = "https://nvd.nist.gov/download/nvdcve-Modified.xml.gz"
+    String cveUrl20Modified = "https://nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-Modified.xml.gz"
+    Integer cveStartYear = 2002
+    String cveUrl12Base = "https://nvd.nist.gov/download/nvdcve-%d.xml.gz"
+    String cveUrl20Base = "https://nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-%d.xml.gz"
 }
