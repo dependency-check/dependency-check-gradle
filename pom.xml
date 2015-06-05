@@ -22,7 +22,7 @@ Copyright (c) 2015 Wei Ma. All Rights Reserved.
     <parent>
         <groupId>org.owasp</groupId>
         <artifactId>dependency-check-parent</artifactId>
-        <version>1.2.11-SNAPSHOT</version>
+        <version>1.2.12-SNAPSHOT</version>
     </parent>
 
     <artifactId>dependency-check-gradle</artifactId>
