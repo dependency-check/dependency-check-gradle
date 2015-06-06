@@ -17,6 +17,7 @@ Please refer to either one of the solution
 
 #### Solution 1，Install from Maven Central
 
+```groovy
 buildscript {
     repositories {
         mavenCentral()
@@ -25,6 +26,7 @@ buildscript {
         classpath 'com.thoughtworks.tools:dependency-check:0.0.4'
     }
 }
+```
 
 apply plugin: 'dependency.check'
 
@@ -89,9 +91,9 @@ The reports will be generated automatically under `./reports` folder.
 
 If your project includes multiple sub-projects, the report will be generated for each sub-project in different sub-directory.
 
-### FAQ
+## FAQ
 
-## What if I'm behind a proxy?
+### What if I'm behind a proxy?
 
 Maybe you have to use proxy to access internet, in this case, you could configure proxy settings for this plugin:
 
@@ -108,7 +110,7 @@ dependencyCheck {
 }
 ```
 
-## What if my project includes multiple sub-project? How can I use this plugin for each of them including the root project?**
+### What if my project includes multiple sub-project? How can I use this plugin for each of them including the root project?**
 
 Try put 'apply plugin: "dependency-check"' inside the 'allprojects' or 'subprojects' if you'd like to check all sub-projects only, see below:
 
