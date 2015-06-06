@@ -51,8 +51,8 @@ dependencies {
     )
 }
 
-group = 'com.tools.security'
-version = '0.0.3'
+group = 'com.thoughtworks.tools'
+version = '0.0.4'
 
 //-------------------------------
 // Local debug use only
