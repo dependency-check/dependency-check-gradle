@@ -36,7 +36,7 @@ apply plugin: 'dependency.check'
 
 **Build script snippet for new, incubating, plugin mechanism introduced in Gradle 2.1:**
 
-```
+```groovy
 plugins {
     id "dependency.check" version "0.0.4"
 }
@@ -44,7 +44,7 @@ plugins {
 
 **Build script snippet for use in all Gradle versions:**
 
-```
+```groovy
 buildscript {
   repositories {
     maven {
@@ -61,7 +61,7 @@ apply plugin: "dependency.check"
 
 #### Solution 3，Install from Bintray
 
-```
+```groovy
 apply plugin: "dependency-check"
 
 buildscript {
@@ -97,7 +97,7 @@ If your project includes multiple sub-projects, the report will be generated for
 
 Maybe you have to use proxy to access internet, in this case, you could configure proxy settings for this plugin:
 
-```
+```groovy
 dependencyCheck {
     proxyServer = "127.0.0.1"      // required, the server name or IP address of the proxy
     proxyPort = 3128               // required, the port number of the proxy
@@ -110,12 +110,13 @@ dependencyCheck {
 }
 ```
 
-### What if my project includes multiple sub-project? How can I use this plugin for each of them including the root project?**
+### What if my project includes multiple sub-project? How can I use this plugin for each of them including the root project?
 
 Try put 'apply plugin: "dependency-check"' inside the 'allprojects' or 'subprojects' if you'd like to check all sub-projects only, see below:
 
 (1) For all projects including root project:
-```
+
+```groovy
 buildscript {
   repositories {
     mavenCentral()
@@ -131,7 +132,8 @@ allprojects {
 ```
 
 (2) For all sub-projects:
-```
+
+```groovy
 buildscript {
   repositories {
     mavenCentral()
