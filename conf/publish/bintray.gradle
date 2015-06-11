@@ -1,0 +1,23 @@
+// publish to Bintray
+plugindev {
+    pluginId = 'dependency.check'
+    pluginName = 'dependency-check'
+    pluginImplementationClass 'com.tools.security.plugin.DependencyCheckGradlePlugin'
+    pluginDescription 'This is dependency check gradle plugin.'
+    pluginLicenses 'Apache-2.0'
+    pluginTags 'dependency check', 'security'
+    authorId 'wmaintw'
+    authorName 'Wei Ma'
+    authorEmail 'wma@thoughtworks.com'
+    projectUrl 'https://github.com/wmaintw/DependencyCheck'
+    projectIssuesUrl 'https://github.com/wmaintw/DependencyCheck/issues'
+    projectVcsUrl 'git@github.com:wmaintw/DependencyCheck.git'
+    projectInceptionYear '2015'
+    done()
+}
+
+bintray {
+    user = bintrayUser
+    key = bintrayUserKey
+    pkg.repo = bintrayRepo
+}

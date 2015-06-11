@@ -1,0 +1,14 @@
+// publish to gradle plugin portal
+pluginBundle {
+    website = 'https://github.com/wmaintw/DependencyCheck'
+    vcsUrl = 'git@github.com:wmaintw/DependencyCheck.git'
+    description = 'This is dependency check gradle plugin.'
+    tags = ['dependency check', 'security']
+
+    plugins {
+        dependencyCheckPlugin {
+            id = 'dependency.check'
+            displayName = 'dependency-check'
+        }
+    }
+}

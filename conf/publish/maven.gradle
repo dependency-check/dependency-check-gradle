@@ -1,0 +1,57 @@
+//upload to maven central
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: sonatypeUsername, password: sonatypePassword)
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: sonatypeUsername, password: sonatypePassword)
+            }
+
+            pom.project {
+                name 'Dependency Check Gradle Plugin'
+                packaging 'jar'
+                description 'Dependency-Check is a utility that attempts to detect publicly disclosed vulnerabilities contained within project dependencies.'
+                url 'https://github.com/wmaintw/DependencyCheck/tree/master/dependency-check-gradle'
+
+                scm {
+                    connection 'git@github.com:wmaintw/DependencyCheck.git'
+                    developerConnection 'git@github.com:wmaintw/DependencyCheck.git'
+                    url 'https://github.com/wmaintw/DependencyCheck'
+                }
+
+                licenses {
+                    license {
+                        name 'The Apache License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'wmaintw'
+                        name 'Wei Ma'
+                        email 'wma@thoughtworks.com'
+                    }
+                }
+            }
+        }
+    }
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}

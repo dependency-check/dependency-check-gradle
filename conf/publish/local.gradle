@@ -1,0 +1,8 @@
+//Local debug use only
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: uri('../../../repo'))
+        }
+    }
+}
