@@ -52,7 +52,7 @@ dependencies {
 }
 
 group = 'com.thoughtworks.tools'
-version = '0.0.4'
+version = '0.0.5'
 
 apply from: 'conf/publish/local.gradle'
 //apply from: 'conf/publish/maven.gradle'
