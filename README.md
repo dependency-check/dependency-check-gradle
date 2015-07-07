@@ -93,6 +93,11 @@ If your project includes multiple sub-projects, the report will be generated for
 
 ## FAQ
 
+> **Questions List:**
+> - What if I'm behind a proxy?
+> - What if my project includes multiple sub-project? How can I use this plugin for each of them including the root project?
+> - How to customize the report directory?
+
 ### What if I'm behind a proxy?
 
 Maybe you have to use proxy to access internet, in this case, you could configure proxy settings for this plugin:
@@ -149,3 +154,17 @@ subprojects {
 ```
 
 In this way, the dependency check will be executed for all projects (including root project) or just sub projects.
+
+### How to customize the report directory?
+
+By default, all reports will be placed under `./reports` folder, to change the default directory, just modify it in the configuration section like this:
+
+```groovy
+subprojects {
+    apply plugin: "dependency-check"
+
+    dependencyCheck {
+        outputDirectory = "./customized-path/security-report"
+    }
+}
+```
