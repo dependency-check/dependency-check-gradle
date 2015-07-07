@@ -47,7 +47,7 @@ dependencies {
             localGroovy(),
             gradleApi(),
             'org.owasp:dependency-check-core:1.2.11',
-            'org.owasp:dependency-check-utils:1.2.10'
+            'org.owasp:dependency-check-utils:1.2.11'
     )
 }
 
