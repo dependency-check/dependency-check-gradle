@@ -77,7 +77,12 @@ class DependencyCheckTask extends DefaultTask {
         logger.lifecycle("Generating report for project ${currentProjectName}")
         def reportGenerator = new ReportGenerator(currentProjectName, engine.dependencies, engine.analyzers,
                 new CveDB().databaseProperties)
-        reportGenerator.generateReports("./reports/${currentProjectName}", ReportGenerator.Format.ALL)
+
+        reportGenerator.generateReports(generateReportDirectory(currentProjectName), ReportGenerator.Format.ALL)
+    }
+
+    def generateReportDirectory(String currentProjectName) {
+        "${project.dependencyCheck.outputDirectory}/${currentProjectName}"
     }
 
     def overrideProxySetting() {
