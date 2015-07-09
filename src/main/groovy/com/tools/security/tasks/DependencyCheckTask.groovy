@@ -52,6 +52,7 @@ class DependencyCheckTask extends DefaultTask {
     def initializeSettings() {
         Settings.initialize()
         overrideProxySetting()
+        overrideCveUrlSetting()
     }
 
     def verifyDependencies(engine) {
@@ -76,7 +77,12 @@ class DependencyCheckTask extends DefaultTask {
         logger.lifecycle("Generating report for project ${currentProjectName}")
         def reportGenerator = new ReportGenerator(currentProjectName, engine.dependencies, engine.analyzers,
                 new CveDB().databaseProperties)
-        reportGenerator.generateReports("./reports/${currentProjectName}", ReportGenerator.Format.ALL)
+
+        reportGenerator.generateReports(generateReportDirectory(currentProjectName), ReportGenerator.Format.ALL)
+    }
+
+    def generateReportDirectory(String currentProjectName) {
+        "${project.dependencyCheck.outputDirectory}/${currentProjectName}"
     }
 
     def overrideProxySetting() {
@@ -100,5 +106,13 @@ class DependencyCheckTask extends DefaultTask {
                 artifact.getFile()
             }
         }.flatten();
+    }
+
+    def overrideCveUrlSetting() {
+        setString(Settings.KEYS.CVE_MODIFIED_20_URL, project.dependencyCheck.cveUrl20Modified)
+        setString(Settings.KEYS.CVE_MODIFIED_12_URL, project.dependencyCheck.cveUrl12Modified)
+        setString(Settings.KEYS.CVE_START_YEAR, "${project.dependencyCheck.cveStartYear}")
+        setString(Settings.KEYS.CVE_SCHEMA_2_0, project.dependencyCheck.cveUrl20Base)
+        setString(Settings.KEYS.CVE_SCHEMA_1_2, project.dependencyCheck.cveUrl12Base)
     }
 }
