@@ -23,7 +23,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.thoughtworks.tools:dependency-check:0.0.4'
+        classpath 'com.thoughtworks.tools:dependency-check:0.0.5'
     }
 }
 ```
@@ -38,7 +38,7 @@ apply plugin: 'dependency.check'
 
 ```groovy
 plugins {
-    id "dependency.check" version "0.0.4"
+    id "dependency.check" version "0.0.5"
 }
 ```
 
@@ -52,7 +52,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.4"
+    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.5"
   }
 }
 
@@ -73,7 +73,7 @@ buildscript {
     }
     dependencies {
         classpath(
-                'com.tools.security:dependency-check:0.0.4'
+                'com.tools.security:dependency-check:0.0.5'
         )
     }
 }
@@ -127,7 +127,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.4"
+    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.5"
   }
 }
 
@@ -144,7 +144,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.4"
+    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.5"
   }
 }
 
