@@ -34,6 +34,24 @@ class DependencyCheckTask extends DefaultTask {
 
     def currentProjectName = project.getName()
 
+    String proxyServer
+    Integer proxyPort
+    String proxyUsername = ""
+    String proxyPassword = ""
+
+    String cveUrl12Modified = "https://nvd.nist.gov/download/nvdcve-Modified.xml.gz"
+    String cveUrl20Modified = "https://nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-Modified.xml.gz"
+    Integer cveStartYear = 2002
+    String cveUrl12Base = "https://nvd.nist.gov/download/nvdcve-%d.xml.gz"
+    String cveUrl20Base = "https://nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-%d.xml.gz"
+
+    String outputDirectory = "./reports"
+
+    DependencyCheckTask() {
+        group = 'Dependency Check'
+        description = 'Produce dependency security report.'
+    }
+
     @TaskAction
     def check() {
         initializeSettings()
@@ -82,22 +100,22 @@ class DependencyCheckTask extends DefaultTask {
     }
 
     def generateReportDirectory(String currentProjectName) {
-        "${project.dependencyCheck.outputDirectory}/${currentProjectName}"
+        "${outputDirectory}/${currentProjectName}"
     }
 
     def overrideProxySetting() {
         if (isProxySettingExist()) {
-            logger.lifecycle("Using proxy ${project.dependencyCheck.proxyServer}:${project.dependencyCheck.proxyPort}")
+            logger.lifecycle("Using proxy ${getProxyServer()}:${getProxyPort()}")
 
-            setString(Settings.KEYS.PROXY_SERVER, project.dependencyCheck.proxyServer)
-            setString(Settings.KEYS.PROXY_PORT, "${project.dependencyCheck.proxyPort}")
-            setString(Settings.KEYS.PROXY_USERNAME, project.dependencyCheck.proxyUsername)
-            setString(Settings.KEYS.PROXY_PASSWORD, project.dependencyCheck.proxyPassword)
+            setString(Settings.KEYS.PROXY_SERVER, getProxyServer())
+            setString(Settings.KEYS.PROXY_PORT, "${getProxyPort()}")
+            setString(Settings.KEYS.PROXY_USERNAME, getProxyUsername())
+            setString(Settings.KEYS.PROXY_PASSWORD, getProxyPassword())
         }
     }
 
     def isProxySettingExist() {
-        project.dependencyCheck.proxyServer != null && project.dependencyCheck.proxyPort != null
+        getProxyServer() != null && getProxyPort() != null
     }
 
     def getAllDependencies(project) {
@@ -109,10 +127,10 @@ class DependencyCheckTask extends DefaultTask {
     }
 
     def overrideCveUrlSetting() {
-        setString(Settings.KEYS.CVE_MODIFIED_20_URL, project.dependencyCheck.cveUrl20Modified)
-        setString(Settings.KEYS.CVE_MODIFIED_12_URL, project.dependencyCheck.cveUrl12Modified)
-        setString(Settings.KEYS.CVE_START_YEAR, "${project.dependencyCheck.cveStartYear}")
-        setString(Settings.KEYS.CVE_SCHEMA_2_0, project.dependencyCheck.cveUrl20Base)
-        setString(Settings.KEYS.CVE_SCHEMA_1_2, project.dependencyCheck.cveUrl12Base)
+        setString(Settings.KEYS.CVE_MODIFIED_20_URL, getCveUrl20Modified())
+        setString(Settings.KEYS.CVE_MODIFIED_12_URL, getCveUrl12Modified())
+        setString(Settings.KEYS.CVE_START_YEAR, "${getCveStartYear()}")
+        setString(Settings.KEYS.CVE_SCHEMA_2_0, getCveUrl20Base())
+        setString(Settings.KEYS.CVE_SCHEMA_1_2, getCveUrl12Base())
     }
 }

@@ -49,6 +49,10 @@ dependencies {
             'org.owasp:dependency-check-core:1.2.11',
             'org.owasp:dependency-check-utils:1.2.11'
     )
+
+    testCompile ('com.netflix.nebula:nebula-test:2.2.+'){
+        exclude group: 'org.codehaus.groovy'
+    }
 }
 
 group = 'com.thoughtworks.tools'
@@ -57,4 +61,4 @@ version = '0.0.5'
 apply from: 'conf/publish/local.gradle'
 //apply from: 'conf/publish/maven.gradle'
 apply from: 'conf/publish/gradlePluginsPortal.gradle'
-apply from: 'conf/publish/bintray.gradle'        // according to the documentation of plugindev, this line has to be placed and the very end of the build file
+//apply from: 'conf/publish/bintray.gradle'        // according to the documentation of plugindev, this line has to be placed and the very end of the build file

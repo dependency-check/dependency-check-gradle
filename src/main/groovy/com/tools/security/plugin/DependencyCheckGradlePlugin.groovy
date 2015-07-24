@@ -24,6 +24,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 class DependencyCheckGradlePlugin implements Plugin<Project> {
+    static final String EXTENSION_NAME = 'dependencyCheck'
 
     @Override
     void apply(Project project) {
@@ -32,10 +33,22 @@ class DependencyCheckGradlePlugin implements Plugin<Project> {
     }
 
     def initializeConfigurations(Project project) {
-        project.extensions.create("dependencyCheck", DependencyCheckConfigurationExtension)
+        project.extensions.create(EXTENSION_NAME, DependencyCheckConfigurationExtension)
     }
 
     def registerTasks(Project project) {
-        project.tasks.create("dependencyCheck", DependencyCheckTask)
+        project.task('dependencyCheck', type: DependencyCheckTask) {
+            def extension = project.extensions.findByName(EXTENSION_NAME)
+            conventionMapping.proxyServer = { extension.proxyServer }
+            conventionMapping.proxyPort = { extension.proxyPort }
+            conventionMapping.proxyUsername = { extension.proxyUsername }
+            conventionMapping.proxyPassword = { extension.proxyPassword }
+            conventionMapping.cveUrl12Modified = { extension.cveUrl12Modified }
+            conventionMapping.cveUrl20Modified = { extension.cveUrl20Modified }
+            conventionMapping.cveStartYear = { extension.cveStartYear }
+            conventionMapping.cveUrl12Base = { extension.cveUrl12Base }
+            conventionMapping.cveUrl20Base = { extension.cveUrl20Base }
+            conventionMapping.outputDirectory = { extension.outputDirectory }
+        }
     }
 }
