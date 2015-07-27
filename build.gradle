@@ -27,10 +27,10 @@ buildscript {
         classpath "com.gradle.publish:plugin-publish-plugin:0.9.0"
     }
 }
-
+/*
 plugins {
     id 'nu.studer.plugindev' version '1.0.3'
-}
+}*/
 
 apply plugin: 'idea'
 apply plugin: 'groovy'
@@ -62,3 +62,20 @@ apply from: 'conf/publish/local.gradle'
 //apply from: 'conf/publish/maven.gradle'
 apply from: 'conf/publish/gradlePluginsPortal.gradle'
 //apply from: 'conf/publish/bintray.gradle'        // according to the documentation of plugindev, this line has to be placed and the very end of the build file
+
+sourceSets {
+    integTest {
+        groovy.srcDir file('src/integTest/groovy')
+        resources.srcDir file('src/integTest/resources')
+        compileClasspath = sourceSets.main.output + configurations.testRuntime
+        runtimeClasspath = output + compileClasspath
+    }
+}
+
+task integTest(type: Test) {
+    group = 'verification'
+    testClassesDir = sourceSets.integTest.output.classesDir
+    classpath = sourceSets.integTest.runtimeClasspath
+    reports.html.destination = file("$buildDir/reports/integ")
+    jvmArgs '-XX:MaxPermSize=256m'
+}
