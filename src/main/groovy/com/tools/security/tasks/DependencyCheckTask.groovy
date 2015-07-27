@@ -100,7 +100,7 @@ class DependencyCheckTask extends DefaultTask {
     }
 
     def generateReportDirectory(String currentProjectName) {
-        "${outputDirectory}/${currentProjectName}"
+        "${getOutputDirectory()}/${currentProjectName}"
     }
 
     def overrideProxySetting() {
