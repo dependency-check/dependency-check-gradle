@@ -61,6 +61,8 @@ class DependencyCheckTask extends DefaultTask {
         analyzeDependencies(engine)
         retrieveVulnerabilities(engine)
         generateReport(engine)
+
+        cleanup(engine)
     }
 
     private Engine initializeEngine() {
@@ -71,6 +73,11 @@ class DependencyCheckTask extends DefaultTask {
         Settings.initialize()
         overrideProxySetting()
         overrideCveUrlSetting()
+    }
+
+    def cleanup(engine) {
+        Settings.cleanup(true)
+        engine.cleanup();
     }
 
     def verifyDependencies(engine) {
@@ -94,7 +101,7 @@ class DependencyCheckTask extends DefaultTask {
     def generateReport(Engine engine) {
         logger.lifecycle("Generating report for project ${currentProjectName}")
         def reportGenerator = new ReportGenerator(currentProjectName, engine.dependencies, engine.analyzers,
-                new CveDB().databaseProperties)
+            new CveDB().databaseProperties)
 
         reportGenerator.generateReports(generateReportDirectory(currentProjectName), ReportGenerator.Format.ALL)
     }
