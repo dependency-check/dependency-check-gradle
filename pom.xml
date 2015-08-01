@@ -26,7 +26,8 @@ Copyright (c) 2015 Wei Ma. All Rights Reserved.
     </parent>
 
     <artifactId>dependency-check-gradle</artifactId>
-    <packaging>jar</packaging>
+    <!-- we must use gradle to build this, as such the packaging is pom -->
+    <packaging>pom</packaging>
 
     <name>Dependency-Check Gradle Plugin</name>
     <description>dependency-check-gradle is a Gradle Plugin that uses dependency-check-core to detect publicly disclosed vulnerabilities associated with the project's dependencies. The plugin will generate a report listing the dependency, any identified Common Platform Enumeration (CPE) identifiers, and the associated Common Vulnerability and Exposure (CVE) entries.</description>
