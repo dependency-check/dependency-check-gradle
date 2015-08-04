@@ -20,7 +20,7 @@ Copyright (c) 2015 Jeremy Long. All Rights Reserved.
     <bannerLeft>
         <name>OWASP dependency-check-gradle</name>
         <alt>OWASP dependency-check-gradle</alt>
-        <!--src>./images/dc-jenkins.svg</src-->
+        <src>./images/dc-gradle.svg</src>
     </bannerLeft>
     <body>
         <breadcrumbs>
