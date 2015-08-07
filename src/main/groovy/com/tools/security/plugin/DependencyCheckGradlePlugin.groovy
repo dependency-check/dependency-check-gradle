@@ -49,6 +49,7 @@ class DependencyCheckGradlePlugin implements Plugin<Project> {
             conventionMapping.cveUrl12Base = { extension.cveUrl12Base }
             conventionMapping.cveUrl20Base = { extension.cveUrl20Base }
             conventionMapping.outputDirectory = { extension.outputDirectory }
+            conventionMapping.quickQueryTimestamp = { extension.quickQueryTimestamp }
         }
     }
 }

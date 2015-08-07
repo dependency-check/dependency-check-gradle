@@ -58,6 +58,7 @@ class DependencyCheckGradlePluginSpec extends PluginProjectSpec {
         task.cveUrl12Base == 'https://nvd.nist.gov/download/nvdcve-%d.xml.gz'
         task.cveUrl20Base == 'https://nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-%d.xml.gz'
         task.outputDirectory == './reports'
+        task.quickQueryTimestamp == true
     }
 
     def 'tasks use correct values when extension is used'() {
@@ -73,6 +74,7 @@ class DependencyCheckGradlePluginSpec extends PluginProjectSpec {
             cveUrl12Base = 'cveUrl12Base'
             cveUrl20Base = 'cveUrl20Base'
             outputDirectory = 'outputDirectory'
+            quickQueryTimestamp = false
         }
 
         then:
@@ -87,5 +89,6 @@ class DependencyCheckGradlePluginSpec extends PluginProjectSpec {
         task.cveUrl12Base == 'cveUrl12Base'
         task.cveUrl20Base == 'cveUrl20Base'
         task.outputDirectory == 'outputDirectory'
+        task.quickQueryTimestamp == false
     }
 }

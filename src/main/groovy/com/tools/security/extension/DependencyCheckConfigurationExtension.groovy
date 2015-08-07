@@ -31,4 +31,6 @@ class DependencyCheckConfigurationExtension {
     String cveUrl20Base = "https://nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-%d.xml.gz"
 
     String outputDirectory = "./reports"
+
+    Boolean quickQueryTimestamp = true;
 }

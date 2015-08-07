@@ -28,6 +28,7 @@ import org.owasp.dependencycheck.dependency.Dependency
 import org.owasp.dependencycheck.reporting.ReportGenerator
 import org.owasp.dependencycheck.utils.Settings
 
+import static org.owasp.dependencycheck.utils.Settings.setBoolean
 import static org.owasp.dependencycheck.utils.Settings.setString
 
 class DependencyCheckTask extends DefaultTask {
@@ -46,6 +47,8 @@ class DependencyCheckTask extends DefaultTask {
     String cveUrl20Base = "https://nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-%d.xml.gz"
 
     String outputDirectory = "./reports"
+
+    Boolean quickQueryTimestamp = true;
 
     DependencyCheckTask() {
         group = 'Dependency Check'
@@ -73,6 +76,7 @@ class DependencyCheckTask extends DefaultTask {
         Settings.initialize()
         overrideProxySetting()
         overrideCveUrlSetting()
+        overrideDownloaderSetting()
     }
 
     def cleanup(engine) {
@@ -139,5 +143,9 @@ class DependencyCheckTask extends DefaultTask {
         setString(Settings.KEYS.CVE_START_YEAR, "${getCveStartYear()}")
         setString(Settings.KEYS.CVE_SCHEMA_2_0, getCveUrl20Base())
         setString(Settings.KEYS.CVE_SCHEMA_1_2, getCveUrl12Base())
+    }
+
+    def overrideDownloaderSetting() {
+        setBoolean(Settings.KEYS.DOWNLOADER_QUICK_QUERY_TIMESTAMP, getQuickQueryTimestamp())
     }
 }
