@@ -46,8 +46,8 @@ dependencies {
     compile(
             localGroovy(),
             gradleApi(),
-            'org.owasp:dependency-check-core:1.2.11',
-            'org.owasp:dependency-check-utils:1.2.11'
+            'org.owasp:dependency-check-core:1.3.0',
+            'org.owasp:dependency-check-utils:1.3.0'
     )
 
     testCompile ('com.netflix.nebula:nebula-test:2.2.+'){
