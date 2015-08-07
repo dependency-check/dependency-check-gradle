@@ -50,18 +50,10 @@ dependencies {
             'org.owasp:dependency-check-utils:1.3.0'
     )
 
-    testCompile ('com.netflix.nebula:nebula-test:2.2.+'){
+    testCompile ('com.netflix.nebula:nebula-test:2.2.2'){
         exclude group: 'org.codehaus.groovy'
     }
 }
-
-group = 'com.thoughtworks.tools'
-version = '0.0.6'
-
-apply from: 'conf/publish/local.gradle'
-//apply from: 'conf/publish/maven.gradle'
-apply from: 'conf/publish/gradlePluginsPortal.gradle'
-//apply from: 'conf/publish/bintray.gradle'        // according to the documentation of plugindev, this line has to be placed and the very end of the build file
 
 sourceSets {
     integTest {
@@ -79,3 +71,11 @@ task integTest(type: Test) {
     reports.html.destination = file("$buildDir/reports/integ")
     jvmArgs '-XX:MaxPermSize=256m'
 }
+
+group = 'com.thoughtworks.tools'
+version = '0.0.6'
+
+apply from: 'conf/publish/local.gradle'
+//apply from: 'conf/publish/maven.gradle'
+apply from: 'conf/publish/gradlePluginsPortal.gradle'
+//apply from: 'conf/publish/bintray.gradle'        // according to the documentation of plugindev, this line has to be placed and the very end of the build file
