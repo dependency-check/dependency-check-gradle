@@ -7,6 +7,8 @@ This is a DependencyCheck gradle plugin designed for project which use Gradle as
 
 Dependency-Check is a utility that attempts to detect publicly disclosed vulnerabilities contained within project dependencies. It does this by determining if there is a Common Platform Enumeration (CPE) identifier for a given dependency. If found, it will generate a report linking to the associated CVE entries.
 
+Current latest version is `0.0.6`
+
 =========
 
 ## Usage
@@ -15,7 +17,7 @@ Dependency-Check is a utility that attempts to detect publicly disclosed vulnera
 
 Please refer to either one of the solution
 
-#### Solution 1，Install from Maven Central
+#### Solution 1，Install from Maven Central (Recommended)
 
 ```groovy
 buildscript {
@@ -23,7 +25,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.thoughtworks.tools:dependency-check:0.0.5'
+        classpath 'com.thoughtworks.tools:dependency-check:0.0.6'
     }
 }
 ```
@@ -38,7 +40,7 @@ apply plugin: 'dependency.check'
 
 ```groovy
 plugins {
-    id "dependency.check" version "0.0.5"
+    id "dependency.check" version "0.0.6"
 }
 ```
 
@@ -52,11 +54,11 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.5"
+    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.6"
   }
 }
 
-apply plugin: "dependency.check"
+apply plugin: "dependency-check"
 ```
 
 #### Solution 3，Install from Bintray
@@ -73,7 +75,7 @@ buildscript {
     }
     dependencies {
         classpath(
-                'com.tools.security:dependency-check:0.0.5'
+                'com.tools.security:dependency-check:0.0.6'
         )
     }
 }
@@ -115,6 +117,19 @@ dependencyCheck {
 }
 ```
 
+In addition, if the proxy only allow HTTP `GET` or `POST` methods, you will find that the update process will always fail,
+ the root cause is that every time you run `dependencyCheck` task, it will try to query the latest timestamp to determine whether need to perform an update action,
+ and for performance reason the HTTP method it uses by default is `HEAD`, which probably is disabled or not supported by the proxy. To avoid this problem, you can simply change the HTTP method by below configuration:
+
+```groovy
+dependencyCheck {
+    proxyServer = "127.0.0.1"      // required, the server name or IP address of the proxy
+    proxyPort = 3128               // required, the port number of the proxy
+
+    quickQueryTimestamp = false    // when set to false, it means use HTTP GET method to query timestamp. (default value is true)
+}
+```
+
 ### What if my project includes multiple sub-project? How can I use this plugin for each of them including the root project?
 
 Try put 'apply plugin: "dependency-check"' inside the 'allprojects' or 'subprojects' if you'd like to check all sub-projects only, see below:
@@ -127,7 +142,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.5"
+    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.6"
   }
 }
 
@@ -144,7 +159,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.5"
+    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.6"
   }
 }
 
