@@ -22,11 +22,11 @@ Copyright (c) 2015 Wei Ma. All Rights Reserved.
     <parent>
         <groupId>org.owasp</groupId>
         <artifactId>dependency-check-parent</artifactId>
-        <version>1.3.0</version>
+        <version>1.3.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>dependency-check-gradle</artifactId>
-    <version>0.0.5</version>
+    <version>0.0.6</version>
     <!-- we must use gradle to build this, as such the packaging is pom -->
     <packaging>pom</packaging>
 
