@@ -48,17 +48,17 @@ class DependencyCheckGradlePluginSpec extends PluginProjectSpec {
         expect:
         task.group == 'Dependency Check'
         task.description == 'Produce dependency security report.'
-        task.proxyServer == null
-        task.proxyPort == null
-        task.proxyUsername == ''
-        task.proxyPassword == ''
-        task.cveUrl12Modified == 'https://nvd.nist.gov/download/nvdcve-Modified.xml.gz'
-        task.cveUrl20Modified == 'https://nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-Modified.xml.gz'
-        task.cveStartYear == 2002
-        task.cveUrl12Base == 'https://nvd.nist.gov/download/nvdcve-%d.xml.gz'
-        task.cveUrl20Base == 'https://nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-%d.xml.gz'
-        task.outputDirectory == './reports'
-        task.quickQueryTimestamp == true
+        project.dependencyCheck.proxyServer == null
+        project.dependencyCheck.proxyPort == null
+        project.dependencyCheck.proxyUsername == null
+        project.dependencyCheck.proxyPassword == null
+        project.dependencyCheck.cveUrl12Modified == null
+        project.dependencyCheck.cveUrl20Modified == null
+        project.dependencyCheck.cveStartYear == null
+        project.dependencyCheck.cveUrl12Base == null
+        project.dependencyCheck.cveUrl20Base == null
+        project.dependencyCheck.outputDirectory == './reports'
+        project.dependencyCheck.quickQueryTimestamp == null
     }
 
     def 'tasks use correct values when extension is used'() {
@@ -78,17 +78,16 @@ class DependencyCheckGradlePluginSpec extends PluginProjectSpec {
         }
 
         then:
-        Task task = project.tasks.findByName( 'dependencyCheck' )
-        task.proxyServer == '127.0.0.1'
-        task.proxyPort == 3128
-        task.proxyUsername == 'proxyUsername'
-        task.proxyPassword == 'proxyPassword'
-        task.cveUrl12Modified == 'cveUrl12Modified'
-        task.cveUrl20Modified == 'cveUrl20Modified'
-        task.cveStartYear == 2002
-        task.cveUrl12Base == 'cveUrl12Base'
-        task.cveUrl20Base == 'cveUrl20Base'
-        task.outputDirectory == 'outputDirectory'
-        task.quickQueryTimestamp == false
+        project.dependencyCheck.proxyServer == '127.0.0.1'
+        project.dependencyCheck.proxyPort == 3128
+        project.dependencyCheck.proxyUsername == 'proxyUsername'
+        project.dependencyCheck.proxyPassword == 'proxyPassword'
+        project.dependencyCheck.cveUrl12Modified == 'cveUrl12Modified'
+        project.dependencyCheck.cveUrl20Modified == 'cveUrl20Modified'
+        project.dependencyCheck.cveStartYear == 2002
+        project.dependencyCheck.cveUrl12Base == 'cveUrl12Base'
+        project.dependencyCheck.cveUrl20Base == 'cveUrl20Base'
+        project.dependencyCheck.outputDirectory == 'outputDirectory'
+        project.dependencyCheck.quickQueryTimestamp == false
     }
 }
