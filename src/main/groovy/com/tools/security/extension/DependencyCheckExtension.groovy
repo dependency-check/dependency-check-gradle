@@ -18,19 +18,19 @@
 
 package com.tools.security.extension
 
-class DependencyCheckConfigurationExtension {
+class DependencyCheckExtension {
     String proxyServer
     Integer proxyPort
-    String proxyUsername = ""
-    String proxyPassword = ""
+    String proxyUsername
+    String proxyPassword
 
-    String cveUrl12Modified = "https://nvd.nist.gov/download/nvdcve-Modified.xml.gz"
-    String cveUrl20Modified = "https://nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-Modified.xml.gz"
-    Integer cveStartYear = 2002
-    String cveUrl12Base = "https://nvd.nist.gov/download/nvdcve-%d.xml.gz"
-    String cveUrl20Base = "https://nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-%d.xml.gz"
+    String cveUrl20Modified
+    String cveUrl12Modified
+    Integer cveStartYear
+    String cveUrl20Base
+    String cveUrl12Base
 
     String outputDirectory = "./reports"
 
-    Boolean quickQueryTimestamp = true;
+    Boolean quickQueryTimestamp;
 }

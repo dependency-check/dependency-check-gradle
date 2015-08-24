@@ -28,27 +28,23 @@ import org.owasp.dependencycheck.dependency.Dependency
 import org.owasp.dependencycheck.reporting.ReportGenerator
 import org.owasp.dependencycheck.utils.Settings
 
+import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_MODIFIED_12_URL
+import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_MODIFIED_20_URL
+import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_SCHEMA_1_2
+import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_SCHEMA_2_0
+import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_START_YEAR
+import static org.owasp.dependencycheck.utils.Settings.KEYS.DOWNLOADER_QUICK_QUERY_TIMESTAMP
+import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_PASSWORD
+import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_PORT
+import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_SERVER
+import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_USERNAME
 import static org.owasp.dependencycheck.utils.Settings.setBoolean
 import static org.owasp.dependencycheck.utils.Settings.setString
 
 class DependencyCheckTask extends DefaultTask {
 
     def currentProjectName = project.getName()
-
-    String proxyServer
-    Integer proxyPort
-    String proxyUsername = ""
-    String proxyPassword = ""
-
-    String cveUrl12Modified = "https://nvd.nist.gov/download/nvdcve-Modified.xml.gz"
-    String cveUrl20Modified = "https://nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-Modified.xml.gz"
-    Integer cveStartYear = 2002
-    String cveUrl12Base = "https://nvd.nist.gov/download/nvdcve-%d.xml.gz"
-    String cveUrl20Base = "https://nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-%d.xml.gz"
-
-    String outputDirectory = "./reports"
-
-    Boolean quickQueryTimestamp = true;
+    def config = project.dependencyCheck
 
     DependencyCheckTask() {
         group = 'Dependency Check'
@@ -111,22 +107,22 @@ class DependencyCheckTask extends DefaultTask {
     }
 
     def generateReportDirectory(String currentProjectName) {
-        "${getOutputDirectory()}/${currentProjectName}"
+        "${config.outputDirectory}/${currentProjectName}"
     }
 
     def overrideProxySetting() {
         if (isProxySettingExist()) {
-            logger.lifecycle("Using proxy ${getProxyServer()}:${getProxyPort()}")
+            logger.lifecycle("Using proxy ${config.proxyServer}:${config.proxyPort}")
 
-            setString(Settings.KEYS.PROXY_SERVER, getProxyServer())
-            setString(Settings.KEYS.PROXY_PORT, "${getProxyPort()}")
-            setString(Settings.KEYS.PROXY_USERNAME, getProxyUsername())
-            setString(Settings.KEYS.PROXY_PASSWORD, getProxyPassword())
+            overrideStringBasedSettingWhenProvided(PROXY_SERVER, config.proxyServer)
+            overrideStringBasedSettingWhenProvided(PROXY_PORT, "${config.proxyPort}")
+            overrideStringBasedSettingWhenProvided(PROXY_USERNAME, config.proxyUsername)
+            overrideStringBasedSettingWhenProvided(PROXY_PASSWORD, config.proxyPassword)
         }
     }
 
     def isProxySettingExist() {
-        getProxyServer() != null && getProxyPort() != null
+        config.proxyServer != null && config.proxyPort != null
     }
 
     def getAllDependencies(project) {
@@ -138,14 +134,35 @@ class DependencyCheckTask extends DefaultTask {
     }
 
     def overrideCveUrlSetting() {
-        setString(Settings.KEYS.CVE_MODIFIED_20_URL, getCveUrl20Modified())
-        setString(Settings.KEYS.CVE_MODIFIED_12_URL, getCveUrl12Modified())
-        setString(Settings.KEYS.CVE_START_YEAR, "${getCveStartYear()}")
-        setString(Settings.KEYS.CVE_SCHEMA_2_0, getCveUrl20Base())
-        setString(Settings.KEYS.CVE_SCHEMA_1_2, getCveUrl12Base())
+        overrideStringBasedSettingWhenProvided(CVE_MODIFIED_20_URL, config.cveUrl20Modified)
+        overrideStringBasedSettingWhenProvided(CVE_MODIFIED_12_URL, config.cveUrl12Modified)
+        overrideIntegerBasedSettingWhenProvided(CVE_START_YEAR, config.cveStartYear)
+        overrideStringBasedSettingWhenProvided(CVE_SCHEMA_2_0, config.cveUrl20Base)
+        overrideStringBasedSettingWhenProvided(CVE_SCHEMA_1_2, config.cveUrl12Base)
     }
 
     def overrideDownloaderSetting() {
-        setBoolean(Settings.KEYS.DOWNLOADER_QUICK_QUERY_TIMESTAMP, getQuickQueryTimestamp())
+        overrideBooleanBasedSettingWhenProvided(DOWNLOADER_QUICK_QUERY_TIMESTAMP, config.quickQueryTimestamp)
+    }
+
+    private overrideStringBasedSettingWhenProvided(String key, String providedValue) {
+        if (providedValue != null) {
+            logger.lifecycle("Setting [${key}] overrided with value [${providedValue}]")
+            setString(key, providedValue)
+        }
+    }
+
+    private overrideIntegerBasedSettingWhenProvided(String key, Integer providedValue) {
+        if (providedValue != null) {
+            logger.lifecycle("Setting [${key}] overrided with value [${providedValue}]")
+            setString(key, "${providedValue}")
+        }
+    }
+
+    private overrideBooleanBasedSettingWhenProvided(String key, Boolean providedValue) {
+        if (providedValue != null) {
+            logger.lifecycle("Setting [${key}] overrided with value [${providedValue}]")
+            setBoolean(key, providedValue)
+        }
     }
 }

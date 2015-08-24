@@ -18,13 +18,14 @@
 
 package com.tools.security.plugin
 
-import com.tools.security.extension.DependencyCheckConfigurationExtension
+import com.tools.security.extension.DependencyCheckExtension
 import com.tools.security.tasks.DependencyCheckTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 class DependencyCheckGradlePlugin implements Plugin<Project> {
-    static final String EXTENSION_NAME = 'dependencyCheck'
+    private static final String EXTENSION_NAME = 'dependencyCheck'
+    private static final String TASK_NAME = 'dependencyCheck'
 
     @Override
     void apply(Project project) {
@@ -33,23 +34,10 @@ class DependencyCheckGradlePlugin implements Plugin<Project> {
     }
 
     def initializeConfigurations(Project project) {
-        project.extensions.create(EXTENSION_NAME, DependencyCheckConfigurationExtension)
+        project.extensions.create(EXTENSION_NAME, DependencyCheckExtension)
     }
 
     def registerTasks(Project project) {
-        project.task('dependencyCheck', type: DependencyCheckTask) {
-            def extension = project.extensions.findByName(EXTENSION_NAME)
-            conventionMapping.proxyServer = { extension.proxyServer }
-            conventionMapping.proxyPort = { extension.proxyPort }
-            conventionMapping.proxyUsername = { extension.proxyUsername }
-            conventionMapping.proxyPassword = { extension.proxyPassword }
-            conventionMapping.cveUrl12Modified = { extension.cveUrl12Modified }
-            conventionMapping.cveUrl20Modified = { extension.cveUrl20Modified }
-            conventionMapping.cveStartYear = { extension.cveStartYear }
-            conventionMapping.cveUrl12Base = { extension.cveUrl12Base }
-            conventionMapping.cveUrl20Base = { extension.cveUrl20Base }
-            conventionMapping.outputDirectory = { extension.outputDirectory }
-            conventionMapping.quickQueryTimestamp = { extension.quickQueryTimestamp }
-        }
+        project.task(TASK_NAME, type: DependencyCheckTask)
     }
 }
