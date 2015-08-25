@@ -75,6 +75,8 @@ task integTest(type: Test) {
 group = 'com.thoughtworks.tools'
 version = '0.0.6'
 
+targetCompatibility = 1.7
+
 apply from: 'conf/publish/local.gradle'
 //apply from: 'conf/publish/maven.gradle'
 apply from: 'conf/publish/gradlePluginsPortal.gradle'
