@@ -19,13 +19,15 @@
 package com.tools.security.plugin
 
 import com.tools.security.extension.DependencyCheckExtension
+import com.tools.security.extension.ProxyExtension
 import com.tools.security.tasks.DependencyCheckTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 class DependencyCheckGradlePlugin implements Plugin<Project> {
-    private static final String EXTENSION_NAME = 'dependencyCheck'
+    private static final String ROOT_EXTENSION_NAME = 'dependencyCheck'
     private static final String TASK_NAME = 'dependencyCheck'
+    private static final String PROXY_EXTENSION_NAME = "proxy"
 
     @Override
     void apply(Project project) {
@@ -34,7 +36,8 @@ class DependencyCheckGradlePlugin implements Plugin<Project> {
     }
 
     def initializeConfigurations(Project project) {
-        project.extensions.create(EXTENSION_NAME, DependencyCheckExtension)
+        project.extensions.create(ROOT_EXTENSION_NAME, DependencyCheckExtension)
+        project.dependencyCheck.extensions.create(PROXY_EXTENSION_NAME, ProxyExtension)
     }
 
     def registerTasks(Project project) {

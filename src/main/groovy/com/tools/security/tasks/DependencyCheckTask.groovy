@@ -112,17 +112,17 @@ class DependencyCheckTask extends DefaultTask {
 
     def overrideProxySetting() {
         if (isProxySettingExist()) {
-            logger.lifecycle("Using proxy ${config.proxyServer}:${config.proxyPort}")
+            logger.lifecycle("Using proxy ${config.proxy.server}:${config.proxy.port}")
 
-            overrideStringBasedSettingWhenProvided(PROXY_SERVER, config.proxyServer)
-            overrideStringBasedSettingWhenProvided(PROXY_PORT, "${config.proxyPort}")
-            overrideStringBasedSettingWhenProvided(PROXY_USERNAME, config.proxyUsername)
-            overrideStringBasedSettingWhenProvided(PROXY_PASSWORD, config.proxyPassword)
+            overrideStringBasedSettingWhenProvided(PROXY_SERVER, config.proxy.server)
+            overrideStringBasedSettingWhenProvided(PROXY_PORT, "${config.proxy.port}")
+            overrideStringBasedSettingWhenProvided(PROXY_USERNAME, config.proxy.username)
+            overrideStringBasedSettingWhenProvided(PROXY_PASSWORD, config.proxy.password)
         }
     }
 
     def isProxySettingExist() {
-        config.proxyServer != null && config.proxyPort != null
+        config.proxy.server != null && config.proxy.port != null
     }
 
     def getAllDependencies(project) {
