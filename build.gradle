@@ -73,7 +73,7 @@ task integTest(type: Test) {
 }
 
 group = 'com.thoughtworks.tools'
-version = '0.0.6'
+version = '0.0.7'
 
 apply from: 'conf/publish/local.gradle'
 //apply from: 'conf/publish/maven.gradle'
