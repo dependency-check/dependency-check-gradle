@@ -114,10 +114,10 @@ class DependencyCheckTask extends DefaultTask {
         if (isProxySettingExist()) {
             logger.lifecycle("Using proxy ${config.proxy.server}:${config.proxy.port}")
 
-            overrideStringBasedSettingWhenProvided(PROXY_SERVER, config.proxy.server)
-            overrideStringBasedSettingWhenProvided(PROXY_PORT, "${config.proxy.port}")
-            overrideStringBasedSettingWhenProvided(PROXY_USERNAME, config.proxy.username)
-            overrideStringBasedSettingWhenProvided(PROXY_PASSWORD, config.proxy.password)
+            overrideStringSetting(PROXY_SERVER, config.proxy.server)
+            overrideStringSetting(PROXY_PORT, "${config.proxy.port}")
+            overrideStringSetting(PROXY_USERNAME, config.proxy.username)
+            overrideStringSetting(PROXY_PASSWORD, config.proxy.password)
         }
     }
 
@@ -134,32 +134,32 @@ class DependencyCheckTask extends DefaultTask {
     }
 
     def overrideCveUrlSetting() {
-        overrideStringBasedSettingWhenProvided(CVE_MODIFIED_20_URL, config.cve.url20Modified)
-        overrideStringBasedSettingWhenProvided(CVE_MODIFIED_12_URL, config.cve.url12Modified)
-        overrideIntegerBasedSettingWhenProvided(CVE_START_YEAR, config.cve.startYear)
-        overrideStringBasedSettingWhenProvided(CVE_SCHEMA_2_0, config.cve.url20Base)
-        overrideStringBasedSettingWhenProvided(CVE_SCHEMA_1_2, config.cve.url12Base)
+        overrideStringSetting(CVE_MODIFIED_20_URL, config.cve.url20Modified)
+        overrideStringSetting(CVE_MODIFIED_12_URL, config.cve.url12Modified)
+        overrideIntegerSetting(CVE_START_YEAR, config.cve.startYear)
+        overrideStringSetting(CVE_SCHEMA_2_0, config.cve.url20Base)
+        overrideStringSetting(CVE_SCHEMA_1_2, config.cve.url12Base)
     }
 
     def overrideDownloaderSetting() {
-        overrideBooleanBasedSettingWhenProvided(DOWNLOADER_QUICK_QUERY_TIMESTAMP, config.quickQueryTimestamp)
+        overrideBooleanSetting(DOWNLOADER_QUICK_QUERY_TIMESTAMP, config.quickQueryTimestamp)
     }
 
-    private overrideStringBasedSettingWhenProvided(String key, String providedValue) {
+    private overrideStringSetting(String key, String providedValue) {
         if (providedValue != null) {
             logger.lifecycle("Setting [${key}] overrided with value [${providedValue}]")
             setString(key, providedValue)
         }
     }
 
-    private overrideIntegerBasedSettingWhenProvided(String key, Integer providedValue) {
+    private overrideIntegerSetting(String key, Integer providedValue) {
         if (providedValue != null) {
             logger.lifecycle("Setting [${key}] overrided with value [${providedValue}]")
             setString(key, "${providedValue}")
         }
     }
 
-    private overrideBooleanBasedSettingWhenProvided(String key, Boolean providedValue) {
+    private overrideBooleanSetting(String key, Boolean providedValue) {
         if (providedValue != null) {
             logger.lifecycle("Setting [${key}] overrided with value [${providedValue}]")
             setBoolean(key, providedValue)
