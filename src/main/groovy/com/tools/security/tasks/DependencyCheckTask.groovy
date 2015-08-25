@@ -134,11 +134,11 @@ class DependencyCheckTask extends DefaultTask {
     }
 
     def overrideCveUrlSetting() {
-        overrideStringBasedSettingWhenProvided(CVE_MODIFIED_20_URL, config.cveUrl20Modified)
-        overrideStringBasedSettingWhenProvided(CVE_MODIFIED_12_URL, config.cveUrl12Modified)
-        overrideIntegerBasedSettingWhenProvided(CVE_START_YEAR, config.cveStartYear)
-        overrideStringBasedSettingWhenProvided(CVE_SCHEMA_2_0, config.cveUrl20Base)
-        overrideStringBasedSettingWhenProvided(CVE_SCHEMA_1_2, config.cveUrl12Base)
+        overrideStringBasedSettingWhenProvided(CVE_MODIFIED_20_URL, config.cve.url20Modified)
+        overrideStringBasedSettingWhenProvided(CVE_MODIFIED_12_URL, config.cve.url12Modified)
+        overrideIntegerBasedSettingWhenProvided(CVE_START_YEAR, config.cve.startYear)
+        overrideStringBasedSettingWhenProvided(CVE_SCHEMA_2_0, config.cve.url20Base)
+        overrideStringBasedSettingWhenProvided(CVE_SCHEMA_1_2, config.cve.url12Base)
     }
 
     def overrideDownloaderSetting() {

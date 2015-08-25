@@ -18,10 +18,10 @@
 
 package com.tools.security.extension
 
-class DependencyCheckExtension {
-    ProxyExtension proxyExtension
-    CveExtension cveExtension
-
-    String outputDirectory = "./reports"
-    Boolean quickQueryTimestamp;
+class CveExtension {
+    String url20Modified
+    String url12Modified
+    Integer startYear
+    String url20Base
+    String url12Base
 }
