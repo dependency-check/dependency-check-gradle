@@ -7,9 +7,12 @@ This is a DependencyCheck gradle plugin designed for project which use Gradle as
 
 Dependency-Check is a utility that attempts to detect publicly disclosed vulnerabilities contained within project dependencies. It does this by determining if there is a Common Platform Enumeration (CPE) identifier for a given dependency. If found, it will generate a report linking to the associated CVE entries.
 
-Current latest version is `0.0.6`
-
 =========
+
+## What's New
+Current latest version is `0.0.7`
+- Implement nested configuration for proxy settings
+- Bug fix: Remove duplicated configuration items
 
 ## Usage
 
@@ -25,7 +28,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.thoughtworks.tools:dependency-check:0.0.6'
+        classpath 'com.thoughtworks.tools:dependency-check:0.0.7'
     }
 }
 ```
@@ -40,7 +43,7 @@ apply plugin: 'dependency.check'
 
 ```groovy
 plugins {
-    id "dependency.check" version "0.0.6"
+    id "dependency.check" version "0.0.7"
 }
 ```
 
@@ -54,7 +57,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.6"
+    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.7"
   }
 }
 
@@ -75,7 +78,7 @@ buildscript {
     }
     dependencies {
         classpath(
-                'com.tools.security:dependency-check:0.0.6'
+                'com.tools.security:dependency-check:0.0.7'
         )
     }
 }
@@ -106,14 +109,16 @@ Maybe you have to use proxy to access internet, in this case, you could configur
 
 ```groovy
 dependencyCheck {
-    proxyServer = "127.0.0.1"      // required, the server name or IP address of the proxy
-    proxyPort = 3128               // required, the port number of the proxy
-
-    // optional, the proxy server might require username
-    // proxyUsername = "username"
-
-    // optional, the proxy server might require password
-    // proxyPassword = "password"
+    proxy {
+        server = "127.0.0.1"      // required, the server name or IP address of the proxy
+        port = 3128               // required, the port number of the proxy
+        
+        // optional, the proxy server might require username
+        // username = "username"
+    
+        // optional, the proxy server might require password
+        // password = "password"
+    }
 }
 ```
 
@@ -123,9 +128,6 @@ In addition, if the proxy only allow HTTP `GET` or `POST` methods, you will find
 
 ```groovy
 dependencyCheck {
-    proxyServer = "127.0.0.1"      // required, the server name or IP address of the proxy
-    proxyPort = 3128               // required, the port number of the proxy
-
     quickQueryTimestamp = false    // when set to false, it means use HTTP GET method to query timestamp. (default value is true)
 }
 ```
@@ -142,7 +144,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.6"
+    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.7"
   }
 }
 
@@ -159,7 +161,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.6"
+    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.7"
   }
 }
 
