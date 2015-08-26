@@ -18,10 +18,9 @@
 
 package com.tools.security.extension
 
-class DependencyCheckExtension {
-    ProxyExtension proxyExtension
-    CveExtension cveExtension
-
-    String outputDirectory = "./reports"
-    Boolean quickQueryTimestamp;
+class ProxyExtension {
+    String server
+    Integer port
+    String username
+    String password
 }
