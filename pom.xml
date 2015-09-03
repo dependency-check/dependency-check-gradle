@@ -58,7 +58,7 @@ Copyright (c) 2015 Wei Ma. All Rights Reserved.
                     <dependency>
                         <groupId>org.apache.maven.doxia</groupId>
                         <artifactId>doxia-module-markdown</artifactId>
-                        <version>1.4</version>
+                        <version>1.6</version>
                     </dependency>
                 </dependencies>
                 <configuration>
