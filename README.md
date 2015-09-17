@@ -30,7 +30,7 @@ buildscript {
     }
 }
 
-apply plugin: 'dependency.check'
+apply plugin: 'dependency-check'
 ```
 
 ### Step 2, Run gradle task
