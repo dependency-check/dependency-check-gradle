@@ -38,7 +38,7 @@ apply plugin: 'dependency-check'
 Once gradle plugin applied, run following gradle task to check dependencies:
 
 ```
-gradle dependencyCheck
+gradle dependencyCheck --info
 ```
 
 The reports will be generated automatically under `./reports` folder.
