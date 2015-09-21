@@ -10,9 +10,7 @@ Dependency-Check is a utility that attempts to detect publicly disclosed vulnera
 =========
 
 ## What's New
-Current latest version is `0.0.7`
-- Implement nested configuration for proxy settings
-- Bug fix: Remove duplicated configuration items
+Current latest version is `0.0.8`
 
 ## Usage
 
@@ -26,7 +24,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.thoughtworks.tools:dependency-check:0.0.7'
+        classpath 'com.thoughtworks.tools:dependency-check:0.0.8'
     }
 }
 
@@ -93,7 +91,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.7"
+    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.8"
   }
 }
 
@@ -110,7 +108,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.7"
+    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.8"
   }
 }
 
