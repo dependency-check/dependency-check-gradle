@@ -38,6 +38,7 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_PASSWORD
 import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_PORT
 import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_SERVER
 import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_USERNAME
+import static org.owasp.dependencycheck.utils.Settings.KEYS.SUPPRESSION_FILE
 import static org.owasp.dependencycheck.utils.Settings.setBoolean
 import static org.owasp.dependencycheck.utils.Settings.setString
 
@@ -73,6 +74,7 @@ class DependencyCheckTask extends DefaultTask {
         overrideProxySetting()
         overrideCveUrlSetting()
         overrideDownloaderSetting()
+        overrideSuppressionFile()
     }
 
     def cleanup(engine) {
@@ -143,6 +145,12 @@ class DependencyCheckTask extends DefaultTask {
 
     def overrideDownloaderSetting() {
         overrideBooleanSetting(DOWNLOADER_QUICK_QUERY_TIMESTAMP, config.quickQueryTimestamp)
+    }
+
+    def overrideSuppressionFile() {
+        if (config.suppressionFile) {
+            overrideStringSetting(SUPPRESSION_FILE, config.suppressionFile);
+        }
     }
 
     private overrideStringSetting(String key, String providedValue) {
