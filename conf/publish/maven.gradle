@@ -51,6 +51,11 @@ uploadArchives {
 
                 developers {
                     developer {
+                        id 'jeremylong'
+                        name 'Jeremy Long'
+                        email 'jeremy.long@owasp.org'
+                    }
+                    developer {
                         id 'wmaintw'
                         name 'Wei Ma'
                         email 'wma@thoughtworks.com'

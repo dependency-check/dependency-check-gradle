@@ -10,7 +10,7 @@ class DependencyCheckGradlePluginIntegSpec extends IntegrationSpec {
     def "I can add the plugin to a build with no errors"() {
         setup:
         buildFile << '''
-            apply plugin: 'dependency-check'
+            apply plugin: 'dependencyCheck'
         '''.stripIndent()
 
         when:

@@ -18,11 +18,16 @@
 
 package com.tools.security.extension
 
-class DependencyCheckExtension {
+class UpdateExtension extends PurgeExtension {
     ProxyExtension proxyExtension
     CveExtension cveExtension
-
-    String outputDirectory = "./reports"
-    String suppressionFile;
-    Boolean quickQueryTimestamp;
+    DataExtension dataExtension
+    /**
+     * Set to false if the proxy does not support HEAD requests. The default is true.
+     */
+    Boolean quickQueryTimestamp
+    /**
+     * The number of hours to wait before checking for additional updates from the NVD.
+     */
+    Integer cveValidForHours
 }

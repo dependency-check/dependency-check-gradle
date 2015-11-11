@@ -18,10 +18,25 @@
 
 package com.tools.security.extension
 
-class CveExtension {
+public class CveExtension {
+    /**
+     * URL for the modified CVE 1.2:
+     *    https://nvd.nist.gov/download/nvdcve-Modified.xml.gz
+     **/
     String url20Modified
+    /**
+     * URL for the modified CVE 1.2:
+     *    https://nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-Modified.xml.gz
+     **/
     String url12Modified
-    Integer startYear
+    /**
+     * URL for the modified CVE 1.2:
+     *    https://nvd.nist.gov/download/nvdcve-%d.xml.gz
+     **/
     String url20Base
+    /**
+     * Base URL for each year's CVE 2.0, the %d will be replaced with the year.
+     *    https://nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-%d.xml.gz
+     **/
     String url12Base
 }

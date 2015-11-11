@@ -22,7 +22,7 @@ import nebula.test.PluginProjectSpec
 import org.gradle.api.Task
 
 class DependencyCheckGradlePluginSpec extends PluginProjectSpec {
-    static final String PLUGIN_ID = 'dependency-check'
+    static final String PLUGIN_ID = 'dependency-check-gradle'
 
     @Override
     String getPluginName() {

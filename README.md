@@ -24,11 +24,11 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.thoughtworks.tools:dependency-check:0.0.8'
+        classpath 'org.owasp:dependency-check-gradle:1.3.2'
     }
 }
 
-apply plugin: 'dependency-check'
+apply plugin: 'dependency-check-gradle'
 ```
 
 ### Step 2, Run gradle task
@@ -59,10 +59,10 @@ dependencyCheck {
     proxy {
         server = "127.0.0.1"      // required, the server name or IP address of the proxy
         port = 3128               // required, the port number of the proxy
-        
+
         // optional, the proxy server might require username
         // username = "username"
-    
+
         // optional, the proxy server might require password
         // password = "password"
     }

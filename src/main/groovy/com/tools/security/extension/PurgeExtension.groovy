@@ -16,4 +16,8 @@
  * Copyright (c) 2015 Wei Ma. All Rights Reserved.
  */
 
-rootProject.name = 'dependency-check-gradle'
+package com.tools.security.extension
+
+class PurgeExtension {
+    PurgeDataExtension dataExtension
+}

@@ -13,17 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Copyright (c) 2015 Wei Ma. All Rights Reserved.
+ * Copyright (c) 2015 Jeremy Long. All Rights Reserved.
  */
 
 package com.tools.security.extension
+
 /**
- * TODO - this should not be needed, instead rely on the configured HTTP or HTTPS proxies
- * https://docs.gradle.org/current/userguide/build_environment.html
+ * The update data configuration extension. Any value not configured will use the dependency-check-core defaults.
  */
-class ProxyExtension {
-    String server
-    Integer port
+class DataExtension extends PurgeDataExtension {
+    /**
+     * The connection string to the database.
+     */
+    String connectionString
+    /**
+     * The user name to use when connecting to the database.
+     */
     String username
+    /**
+     * The password to use when connecting to the database.
+     */
     String password
+    /**
+     * The database dirver name (e.g. org.h2.Driver).
+     */
+    String driver
+    /**
+     * The path to the driver (JAR) in case it is not already in the classpath.
+     */
+    String driverPath
 }
