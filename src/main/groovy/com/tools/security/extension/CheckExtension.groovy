@@ -40,14 +40,14 @@ class CheckExtension extends UpdateExtension {
      * Sets whether auto-updating of the NVD CVE/CPE data is enabled.
      */
     Boolean autoUpdate
-    /**
-     * When set to true dependency groups that start with 'test' will not be included in the analysis.
-     */
-    Boolean skipTestGroups
 
     //The following properties are not used via the settings object, instead
     // they are directly used by the check task.
-
+    /**
+     * When set to true dependency groups that start with 'test' will not be included in the analysis.
+     * The default value is true.
+     */
+    Boolean skipTestGroups = true
     /**
      * The report format to be generated (HTML, XML, VULN, ALL). This configuration option has
      * no affect if using this within the Site plugin unless the externalReport is set to true.

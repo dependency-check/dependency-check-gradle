@@ -1,0 +1,60 @@
+Usage
+==============================
+The OWASP dependency-check-gradle plugin provides monitoring of the projects dependent
+libraries; creating a report of known vulnerable components that are included in the build.
+
+It is important to understand that the first time this task is executed it may
+take 5-20 minutes as it downloads and processes the data from the National
+Vulnerability Database (NVD) hosted by NIST: https://nvd.nist.gov
+
+After the first batch download, as long as the plugin is executed at least once every
+seven days the update will only take a few seconds.
+
+#set( $H = '#' )
+
+$H$H$H Step 1, Apply dependency-check-gradle plugin
+Install from Maven central repo
+
+```groovy
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.owasp:dependency-check-gradle:${project.version}'
+    }
+}
+
+apply plugin: 'dependencyCheck'
+```
+
+$H$H$H Step 2, Run the dependencyCheck task
+
+Once gradle plugin applied, run following gradle task to check dependencies:
+
+```
+gradle dependencyCheck --info
+```
+
+The reports will be generated automatically under `buildDir/reports` folder.
+
+
+Mailing List
+------------
+
+Subscribe: [dependency-check+subscribe@googlegroups.com] [subscribe]
+
+Post: [dependency-check@googlegroups.com] [post]
+
+License
+-------------------
+
+Permission to modify and redistribute is granted under the terms of the Apache 2.0 license. See the [LICENSE.txt] [license] file for the full license.
+
+Dependency-Check makes use of several other open source libraries. Please see the [NOTICE.txt] [notices] file for more information.
+
+
+  [subscribe]: mailto:dependency-check+subscribe@googlegroups.com
+  [post]: mailto:dependency-check@googlegroups.com
+  [license]: https://github.com/jeremylong/DependencyCheck/blob/master/dependency-check-gradle/LICENSE.txt
+  [notices]: https://github.com/jeremylong/DependencyCheck/blob/master/dependency-check-gradle/NOTICE.txt
