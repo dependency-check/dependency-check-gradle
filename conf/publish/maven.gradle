@@ -34,12 +34,12 @@ uploadArchives {
                 name 'Dependency Check Gradle Plugin'
                 packaging 'jar'
                 description 'Dependency-Check is a utility that attempts to detect publicly disclosed vulnerabilities contained within project dependencies.'
-                url 'https://github.com/wmaintw/DependencyCheck/tree/master/dependency-check-gradle'
+                url 'https://github.com/jeremylong/dependency-check-gradle'
 
                 scm {
-                    connection 'git@github.com:wmaintw/DependencyCheck.git'
-                    developerConnection 'git@github.com:wmaintw/DependencyCheck.git'
-                    url 'https://github.com/wmaintw/DependencyCheck'
+                    connection 'git@github.com:jeremylong/dependency-check-gradle.git'
+                    developerConnection 'git@github.com:jeremylong/dependency-check-gradle.git'
+                    url 'https://github.com/jeremylong/dependency-check-gradle'
                 }
 
                 licenses {

@@ -11,3 +11,4 @@ build/
 
 gradle-app.setting
 gradle.properties
+/.nb-gradle/

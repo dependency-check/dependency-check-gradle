@@ -18,7 +18,7 @@
 
 
 group = 'org.owasp'
-version = '1.3.2-SNAPSHOT'
+version = '1.3.2'
 
 buildscript {
     repositories {
@@ -33,7 +33,7 @@ buildscript {
 }
 /*
 plugins {
-    id 'nu.studer.plugindev' version '1.0.3'
+id 'nu.studer.plugindev' version '1.0.3'
 }*/
 
 apply plugin: 'idea'
@@ -52,10 +52,10 @@ repositories {
 
 dependencies {
     compile(
-            localGroovy(),
-            gradleApi(),
-            'org.owasp:dependency-check-core:1.3.2-SNAPSHOT',
-            'org.owasp:dependency-check-utils:1.3.2-SNAPSHOT'
+        localGroovy(),
+        gradleApi(),
+            'org.owasp:dependency-check-core:1.3.2',
+            'org.owasp:dependency-check-utils:1.3.2'
     )
 
     testCompile ('com.netflix.nebula:nebula-test:2.2.2'){
