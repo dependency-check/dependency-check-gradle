@@ -1,4 +1,4 @@
-package com.tools.security.plugin
+package org.owasp.dependencycheck.gradle
 
 import nebula.test.IntegrationSpec
 import nebula.test.functional.ExecutionResult

@@ -31,9 +31,9 @@ uploadArchives {
             }
 
             pom.project {
-                name 'Dependency Check Gradle Plugin'
+                name 'dependency-check-gradle'
                 packaging 'jar'
-                description 'Dependency-Check is a utility that attempts to detect publicly disclosed vulnerabilities contained within project dependencies.'
+                description 'OWASP dependency-check is a utility that attempts to detect publicly disclosed vulnerabilities contained within project dependencies.'
                 url 'https://github.com/jeremylong/dependency-check-gradle'
 
                 scm {

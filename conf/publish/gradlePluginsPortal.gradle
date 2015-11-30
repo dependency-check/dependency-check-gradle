@@ -18,15 +18,15 @@
 
 // publish to gradle plugin portal
 pluginBundle {
-    website = 'https://github.com/wmaintw/DependencyCheck'
-    vcsUrl = 'git@github.com:wmaintw/DependencyCheck.git'
-    description = 'This is dependency check gradle plugin.'
-    tags = ['dependency check', 'security']
+    website = 'git@github.com:jeremylong/dependency-check-gradle.git'
+    vcsUrl = 'git@github.com:jeremylong/dependency-check-gradle.git'
+    description = 'OWASP dependency-check-gradle plugin.'
+    tags = ['OWASP', 'dependency-check', 'security']
 
     plugins {
-        dependencyCheckPlugin {
-            id = 'dependency.check'
-            displayName = 'dependency-check'
+        dependencyCheck {
+            id = 'org.owasp.dependencycheck'
+            displayName = 'OWASP dependency-check-gradle plugin'
         }
     }
 }

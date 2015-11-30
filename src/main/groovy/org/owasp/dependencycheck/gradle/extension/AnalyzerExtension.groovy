@@ -16,7 +16,7 @@
  * Copyright (c) 2015 Jeremy Long. All Rights Reserved.
  */
 
-package com.tools.security.extension
+package org.owasp.dependencycheck.gradle.extension
 
 /**
  * The analyzer configuration extension. Any value not configured will use the dependency-check-core defaults.

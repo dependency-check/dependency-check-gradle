@@ -16,8 +16,18 @@
  * Copyright (c) 2015 Wei Ma. All Rights Reserved.
  */
 
-package com.tools.security.extension
+package org.owasp.dependencycheck.gradle.extension
 
-class PurgeExtension {
-    PurgeDataExtension dataExtension
+class UpdateExtension extends PurgeExtension {
+    ProxyExtension proxyExtension
+    CveExtension cveExtension
+    DataExtension dataExtension
+    /**
+     * Set to false if the proxy does not support HEAD requests. The default is true.
+     */
+    Boolean quickQueryTimestamp
+    /**
+     * The number of hours to wait before checking for additional updates from the NVD.
+     */
+    Integer cveValidForHours
 }

@@ -16,7 +16,7 @@
  * Copyright (c) 2015 Wei Ma. All Rights Reserved.
  */
 
-package com.tools.security.extension
+package org.owasp.dependencycheck.gradle.extension
 
 import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
 

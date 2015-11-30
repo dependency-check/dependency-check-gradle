@@ -13,21 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Copyright (c) 2015 Wei Ma. All Rights Reserved.
+ * Copyright (c) 2015 Jeremy Long. All Rights Reserved.
  */
 
-package com.tools.security.extension
+package org.owasp.dependencycheck.gradle.extension
 
-class UpdateExtension extends PurgeExtension {
-    ProxyExtension proxyExtension
-    CveExtension cveExtension
-    DataExtension dataExtension
+/**
+ * The data configuration extension. Any value not configured will use the dependency-check-core defaults.
+ */
+class PurgeDataExtension {
     /**
-     * Set to false if the proxy does not support HEAD requests. The default is true.
+     * The directory to store the H2 database that contains the cache of the NVD CVE data.
      */
-    Boolean quickQueryTimestamp
-    /**
-     * The number of hours to wait before checking for additional updates from the NVD.
-     */
-    Integer cveValidForHours
+    String directory="[JAR]/../../dependency-check-data"
 }

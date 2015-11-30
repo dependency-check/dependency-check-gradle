@@ -16,7 +16,7 @@
  * Copyright (c) 2015 Sion Williams. All Rights Reserved.
  */
 
-package com.tools.security.plugin
+package org.owasp.dependencycheck.gradle
 
 import nebula.test.PluginProjectSpec
 import org.gradle.api.Task

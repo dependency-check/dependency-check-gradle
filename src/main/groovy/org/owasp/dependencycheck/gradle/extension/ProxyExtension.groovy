@@ -16,7 +16,7 @@
  * Copyright (c) 2015 Wei Ma. All Rights Reserved.
  */
 
-package com.tools.security.extension
+package org.owasp.dependencycheck.gradle.extension
 /**
  * TODO - this should not be needed, instead rely on the configured HTTP or HTTPS proxies
  * https://docs.gradle.org/current/userguide/build_environment.html
