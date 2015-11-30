@@ -7,9 +7,12 @@ known, published vulnerabilities.
 =========
 
 ## What's New
-Current latest version is `0.0.8`
+Current latest version is `1.3.2.1`. This version should now be feature complete with
+the other OWASP [dependency-check](http://jeremylong.github.io/DependencyCheck/) tools.
 
 ## Usage
+Below are the quick start instructions. Please see the [documentation site](http://jeremylong.github.io/DependencyCheck/dependency-check-gradle/index.html)
+for more detailed information on configuration and usage.
 
 ### Step 1, Apply dependency check gradle plugin
 
@@ -21,11 +24,11 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'org.owasp:dependency-check-gradle:1.3.2'
+        classpath 'org.owasp:dependency-check-gradle:1.3.2.1'
     }
 }
 
-apply plugin: 'dependency-check-gradle'
+apply plugin: 'org.owasp.dependencycheck'
 ```
 
 ### Step 2, Run gradle task
@@ -88,12 +91,12 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.8"
+    classpath 'org.owasp:dependency-check-gradle:1.3.2.1'
   }
 }
 
 allprojects {
-    apply plugin: "dependency-check"
+    apply plugin: 'org.owasp.dependencycheck'
 }
 ```
 
@@ -105,12 +108,12 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath "gradle.plugin.com.tools.security:dependency-check:0.0.8"
+    classpath 'org.owasp:dependency-check-gradle:1.3.2.1'
   }
 }
 
 subprojects {
-    apply plugin: "dependency-check"
+    apply plugin: 'org.owasp.dependencycheck'
 }
 ```
 
@@ -118,14 +121,14 @@ In this way, the dependency check will be executed for all projects (including r
 
 ### How to customize the report directory?
 
-By default, all reports will be placed under `./reports` folder, to change the default directory, just modify it in the configuration section like this:
+By default, all reports will be placed under `build/reports` folder, to change the default reporting folder name modify the configuration section like this:
 
 ```groovy
 subprojects {
-    apply plugin: "dependency-check"
+    apply plugin: 'org.owasp.dependencycheck'
 
     dependencyCheck {
-        outputDirectory = "./customized-path/security-report"
+        reportsDirName = "security-report"
     }
 }
 ```
