@@ -25,5 +25,5 @@ class PurgeDataExtension {
     /**
      * The directory to store the H2 database that contains the cache of the NVD CVE data.
      */
-    String directory="[JAR]/../../dependency-check-data"
+    String directory="[JAR]/../../dependency-check-data/3.0"
 }
