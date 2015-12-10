@@ -22,7 +22,7 @@ import nebula.test.PluginProjectSpec
 import org.gradle.api.Task
 
 class DependencyCheckGradlePluginSpec extends PluginProjectSpec {
-    static final String PLUGIN_ID = 'dependency-check-gradle'
+    static final String PLUGIN_ID = 'org.owasp.dependencycheck'
 
     @Override
     String getPluginName() {
@@ -46,18 +46,17 @@ class DependencyCheckGradlePluginSpec extends PluginProjectSpec {
         Task task = project.tasks.findByName( 'dependencyCheck' )
 
         expect:
-        task.group == 'Dependency Check'
-        task.description == 'Produce dependency security report.'
+        task.group == 'OWASP dependency-check'
+        task.description == 'Identifies and reports known vulnerabilities (CVEs) in project dependencies.'
         project.dependencyCheck.proxy.server == null
         project.dependencyCheck.proxy.port == null
         project.dependencyCheck.proxy.username == null
         project.dependencyCheck.proxy.password == null
         project.dependencyCheck.cve.url12Modified == null
         project.dependencyCheck.cve.url20Modified == null
-        project.dependencyCheck.cve.startYear == null
         project.dependencyCheck.cve.url12Base == null
         project.dependencyCheck.cve.url20Base == null
-        project.dependencyCheck.outputDirectory == './reports'
+        project.dependencyCheck.outputDirectory == 'build/reports'
         project.dependencyCheck.quickQueryTimestamp == null
     }
 
@@ -72,7 +71,6 @@ class DependencyCheckGradlePluginSpec extends PluginProjectSpec {
             }
 
             cve {
-                startYear = 2002
                 url12Base = 'cveUrl12Base'
                 url20Base = 'cveUrl20Base'
                 url12Modified = 'cveUrl12Modified'
@@ -90,7 +88,6 @@ class DependencyCheckGradlePluginSpec extends PluginProjectSpec {
         project.dependencyCheck.proxy.password == 'proxyPassword'
         project.dependencyCheck.cve.url12Modified == 'cveUrl12Modified'
         project.dependencyCheck.cve.url20Modified == 'cveUrl20Modified'
-        project.dependencyCheck.cve.startYear == 2002
         project.dependencyCheck.cve.url12Base == 'cveUrl12Base'
         project.dependencyCheck.cve.url20Base == 'cveUrl20Base'
         project.dependencyCheck.outputDirectory == 'outputDirectory'

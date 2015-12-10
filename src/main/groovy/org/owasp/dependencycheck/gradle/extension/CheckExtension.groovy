@@ -57,7 +57,7 @@ class CheckExtension extends UpdateExtension {
     /**
      * The name of the directory where reports will be written. Defaults to 'reports'.
      */
-    String reportsDirName = "reports"
+    String outputDirectory = "build/reports"
     /**
      * Specifies if the build should be failed if a CVSS score above a specified level is identified. The default is
      * 11 which means since the CVSS scores are 0-10, by default the build will never fail.
