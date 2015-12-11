@@ -55,7 +55,7 @@ class CheckExtension extends UpdateExtension {
      */
     Format format = Format.HTML
     /**
-     * The name of the directory where reports will be written. Defaults to 'reports'.
+     * The directory where the reports will be written. Defaults to 'build/reports'.
      */
     String outputDirectory = "build/reports"
     /**
