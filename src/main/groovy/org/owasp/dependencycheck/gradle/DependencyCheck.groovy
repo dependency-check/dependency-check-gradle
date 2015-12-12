@@ -18,21 +18,12 @@
 
 package org.owasp.dependencycheck.gradle
 
-import org.owasp.dependencycheck.gradle.extension.CveExtension
-import org.owasp.dependencycheck.gradle.extension.CheckExtension
-import org.owasp.dependencycheck.gradle.extension.ProxyExtension
-import org.owasp.dependencycheck.gradle.extension.DataExtension
-import org.owasp.dependencycheck.gradle.extension.AnalyzerExtension
-import org.owasp.dependencycheck.gradle.extension.UpdateExtension
-import org.owasp.dependencycheck.gradle.extension.PurgeExtension
-import org.owasp.dependencycheck.gradle.extension.PurgeDataExtension
-import org.owasp.dependencycheck.gradle.tasks.Check
-import org.owasp.dependencycheck.gradle.tasks.Update
-import org.owasp.dependencycheck.gradle.tasks.Purge
-
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-//import org.gradle.api.plugins.ReportingBasePlugin
+import org.owasp.dependencycheck.gradle.extension.*
+import org.owasp.dependencycheck.gradle.tasks.Check
+import org.owasp.dependencycheck.gradle.tasks.Purge
+import org.owasp.dependencycheck.gradle.tasks.Update
 
 class DependencyCheck implements Plugin<Project> {
     private static final String CHECK_TASK = 'dependencyCheck'
@@ -46,29 +37,27 @@ class DependencyCheck implements Plugin<Project> {
     private static final String ANALYZERS_EXTENSION_NAME = "analyzers"
 
     def void apply(Project project) {
-        //TODO figure out how to get the reporting API to work
-        //project.plugins.apply(ReportingBasePlugin)
         initializeConfigurations(project)
         registerTasks(project)
     }
 
-    def initializeConfigurations(Project project) {
+    def void initializeConfigurations(Project project) {
         def ext = project.extensions.create(CHECK_TASK, CheckExtension)
         ext.extensions.create(PROXY_EXTENSION_NAME, ProxyExtension)
         ext.extensions.create(CVE_EXTENSION_NAME, CveExtension)
         ext.extensions.create(DATA_EXTENSION_NAME, DataExtension)
         ext.extensions.create(ANALYZERS_EXTENSION_NAME, AnalyzerExtension)
 
-        def extu = project.extensions.create(UPDATE_TASK, UpdateExtension)
-        extu.extensions.create(CVE_EXTENSION_NAME, CveExtension)
-        extu.extensions.create(DATA_EXTENSION_NAME, DataExtension)
-        extu.extensions.create(PROXY_EXTENSION_NAME, ProxyExtension)
+        def update = project.extensions.create(UPDATE_TASK, UpdateExtension)
+        update.extensions.create(CVE_EXTENSION_NAME, CveExtension)
+        update.extensions.create(DATA_EXTENSION_NAME, DataExtension)
+        update.extensions.create(PROXY_EXTENSION_NAME, ProxyExtension)
 
-        def extp = project.extensions.create(PURGE_TASK, PurgeExtension)
-        extp.extensions.create(DATA_EXTENSION_NAME, PurgeDataExtension)
+        def purge = project.extensions.create(PURGE_TASK, PurgeExtension)
+        purge.extensions.create(DATA_EXTENSION_NAME, PurgeDataExtension)
     }
 
-    def registerTasks(Project project) {
+    def void registerTasks(Project project) {
         project.task(PURGE_TASK, type: Purge)
         project.task(UPDATE_TASK, type: Update)
         project.task(CHECK_TASK, type: Check)
