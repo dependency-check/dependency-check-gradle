@@ -232,17 +232,6 @@ class Check extends DefaultTask {
                 new CveDB().databaseProperties)
 
         reportGenerator.generateReports(config.outputDirectory, config.format.toString())
-
-//
-//        if (config.reports.vuln.enabled) {
-//            reportGenerator.generateReports(config.reports.vuln.destination.toString(), Format.VULN)
-//        }
-//        if (config.reports.xml.enabled) {
-//            reportGenerator.generateReports(config.reports.xml.destination.toString(), Format.XML)
-//        }
-//        if (config.reports.html.enabled) {
-//            reportGenerator.generateReports(config.reports.html.destination.toString(), Format.HTML)
-//        }
     }
 
     /**
