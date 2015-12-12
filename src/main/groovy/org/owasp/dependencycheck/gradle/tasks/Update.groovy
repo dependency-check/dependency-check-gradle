@@ -98,6 +98,9 @@ class Update extends DefaultTask {
         Settings.setStringIfNotEmpty(CVE_SCHEMA_1_2, config.cve.url12Base)
         Settings.setStringIfNotEmpty(CVE_SCHEMA_2_0, config.cve.url20Base)
 
+        Settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
+        Settings.setBooleanIfNotNull(DOWNLOADER_QUICK_QUERY_TIMESTAMP, config.quickQueryTimestamp)
+
         if (config.cveValidForHours != null) {
             if (config.cveValidForHours >= 0) {
                 Settings.setInt(CVE_CHECK_VALID_FOR_HOURS, config.cveValidForHours);
