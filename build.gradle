@@ -41,9 +41,6 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: 'com.gradle.plugin-publish'
 
-sourceCompatibility = 1.6
-targetCompatibility = 1.6
-
 repositories {
     mavenCentral()
     mavenLocal()
