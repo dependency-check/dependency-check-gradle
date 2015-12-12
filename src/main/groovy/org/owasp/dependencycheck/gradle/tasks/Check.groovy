@@ -19,100 +19,24 @@
 package org.owasp.dependencycheck.gradle.tasks
 
 import org.gradle.api.DefaultTask
-import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.ResolvedArtifact
-import org.gradle.api.tasks.TaskAction
 import org.gradle.api.GradleException
 import org.gradle.api.InvalidUserDataException
-
-import org.gradle.api.reporting.Reporting
-import org.gradle.api.tasks.Nested
-import org.gradle.internal.reflect.Instantiator
-import javax.inject.Inject
-
+import org.gradle.api.artifacts.ResolvedArtifact
+import org.gradle.api.tasks.TaskAction
 import org.owasp.dependencycheck.Engine
 import org.owasp.dependencycheck.data.nvdcve.CveDB
 import org.owasp.dependencycheck.dependency.Dependency
+import org.owasp.dependencycheck.dependency.Identifier
+import org.owasp.dependencycheck.dependency.Vulnerability
 import org.owasp.dependencycheck.reporting.ReportGenerator
 import org.owasp.dependencycheck.utils.Settings
-import org.owasp.dependencycheck.dependency.Identifier;
-import org.owasp.dependencycheck.dependency.Vulnerability;
 
-import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_MODIFIED_12_URL
-import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_MODIFIED_20_URL
-import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_SCHEMA_1_2
-import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_SCHEMA_2_0
-import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_START_YEAR
-import static org.owasp.dependencycheck.utils.Settings.KEYS.DOWNLOADER_QUICK_QUERY_TIMESTAMP
-import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_PASSWORD
-import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_PORT
-import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_SERVER
-import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_USERNAME
-import static org.owasp.dependencycheck.utils.Settings.KEYS.AUTO_UPDATE
-import static org.owasp.dependencycheck.utils.Settings.KEYS.DATA_DIRECTORY
-import static org.owasp.dependencycheck.utils.Settings.KEYS.SUPPRESSION_FILE
-
-import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_DRIVER_NAME
-import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_DRIVER_PATH
-import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_CONNECTION_STRING
-import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_USER
-import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_PASSWORD
-
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_JAR_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_NUSPEC_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_CENTRAL_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_NEXUS_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_NEXUS_URL
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_NEXUS_USES_PROXY
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_ARCHIVE_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ADDITIONAL_ZIP_EXTENSIONS
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_ASSEMBLY_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_ASSEMBLY_MONO_PATH
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_PYTHON_DISTRIBUTION_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_PYTHON_PACKAGE_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_RUBY_GEMSPEC_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_OPENSSL_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_CMAKE_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_AUTOCONF_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_COMPOSER_LOCK_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_NODE_PACKAGE_ENABLED
-
-import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
+import static org.owasp.dependencycheck.utils.Settings.KEYS.*
 
 /**
  * Checks the projects dependencies for known vulnerabilities.
  */
 class Check extends DefaultTask {
-
-    /*
-     * TODO - this implementation of the reporting api failed - make it work.
-     * Used https://github.com/stevesaliman/gradle-cobertura-plugin/blob/master/src/main/groovy/net/saliman/gradle/plugin/cobertura/GenerateReportTask.groovy
-     * as an example of how to setup reporting; some of the code was a direct copy, past, tweak to get reporting working. I'm
-     * not a fan of using the internal packages.
-     */
-    //    implements Reporting<CheckReports>
-    //
-    //    @Nested
-    //    private final CheckReports reports
-    //    /**
-    //     * Initializes the check task.
-    //     */
-    //    @Inject
-    //    Check(Instantiator instantiator) {
-    //        group = 'OWASP dependency-check'
-    //        description = 'Identifies and reports known vulnerabilities (CVEs) in project dependencies.'
-    //        reports = instantiator.newInstance(CheckReports, this)
-    //        outputs.upToDateWhen { false }
-    //    }
-    //
-    //    CheckReports getReports() {
-    //        reports
-    //    }
-    //
-    //    CheckReports reports(Closure closure) {
-    //        reports.configure(closure)
-    //    }
-
 
     Check() {
         group = 'OWASP dependency-check'
@@ -165,6 +89,7 @@ class Check extends DefaultTask {
         Settings.setStringIfNotEmpty(CVE_MODIFIED_20_URL, config.cve.url20Modified)
         Settings.setStringIfNotEmpty(CVE_SCHEMA_1_2, config.cve.url12Base)
         Settings.setStringIfNotEmpty(CVE_SCHEMA_2_0, config.cve.url20Base)
+        Settings.setBooleanIfNotNull(DOWNLOADER_QUICK_QUERY_TIMESTAMP, config.quickQueryTimestamp)
 
         if (config.cveValidForHours != null) {
             if (config.cveValidForHours >= 0) {
