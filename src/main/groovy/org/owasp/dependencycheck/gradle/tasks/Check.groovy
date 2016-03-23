@@ -241,12 +241,20 @@ class Check extends DefaultTask {
      */
     def getAllDependencies(project) {
         return project.getConfigurations().findAll {
-            !config.skipTestGroups || (config.skipTestGroups && !it.getName().startsWith("test"))
+            !config.skipTestGroups || (config.skipTestGroups && !isTestConfiguration(it))
         }.collect {
             it.getResolvedConfiguration().getResolvedArtifacts().collect { ResolvedArtifact artifact ->
                 artifact.getFile()
             }
         }.flatten().unique();
+    }
+
+    /**
+     * Checks whether a configuration is considered to be a test configuration in order to skip it.
+     */
+    def isTestConfiguration(configuration) {
+        final String name = configuration.getName().toLowerCase();
+        return name.startsWith("test") || name.endsWith("testcompile") || name.endsWith("testruntime")
     }
 }
 
