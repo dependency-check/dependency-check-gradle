@@ -41,6 +41,7 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_SERVER
 import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_USERNAME
 import static org.owasp.dependencycheck.utils.Settings.KEYS.DATA_DIRECTORY
 import static org.owasp.dependencycheck.utils.Settings.KEYS.SUPPRESSION_FILE
+import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_CHECK_VALID_FOR_HOURS
 
 import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_DRIVER_NAME
 import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_DRIVER_PATH
