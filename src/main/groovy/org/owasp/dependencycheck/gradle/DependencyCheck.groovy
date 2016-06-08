@@ -42,7 +42,7 @@ class DependencyCheck implements Plugin<Project> {
     }
 
     def void initializeConfigurations(Project project) {
-        def ext = project.extensions.create(CHECK_TASK, CheckExtension)
+        def ext = project.extensions.create(CHECK_TASK, CheckExtension, project)
         ext.extensions.create(PROXY_EXTENSION_NAME, ProxyExtension)
         ext.extensions.create(CVE_EXTENSION_NAME, CveExtension)
         ext.extensions.create(DATA_EXTENSION_NAME, DataExtension)

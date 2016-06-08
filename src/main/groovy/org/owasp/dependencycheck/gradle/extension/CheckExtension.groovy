@@ -19,6 +19,7 @@
 package org.owasp.dependencycheck.gradle.extension
 
 import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
+import org.gradle.api.Project
 
 /*
  * Configuration extension for the dependencyCheck plugin.
@@ -27,6 +28,15 @@ import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
  * @author Jeremy Long
  */
 class CheckExtension extends UpdateExtension {
+
+    CheckExtension(Project project) {
+        outputDirectory = "${project.buildDir}/reports"
+    }
+    /**
+     * The directory where the reports will be written. Defaults to 'build/reports'.
+     */
+    String outputDirectory
+
     /**
      * Configuration for the analyzers.
      */
@@ -54,10 +64,6 @@ class CheckExtension extends UpdateExtension {
      * The default is HTML.
      */
     Format format = Format.HTML
-    /**
-     * The directory where the reports will be written. Defaults to 'build/reports'.
-     */
-    String outputDirectory = "build/reports"
     /**
      * Specifies if the build should be failed if a CVSS score above a specified level is identified. The default is
      * 11 which means since the CVSS scores are 0-10, by default the build will never fail.
