@@ -56,7 +56,7 @@ class DependencyCheckGradlePluginSpec extends PluginProjectSpec {
         project.dependencyCheck.cve.url20Modified == null
         project.dependencyCheck.cve.url12Base == null
         project.dependencyCheck.cve.url20Base == null
-        project.dependencyCheck.outputDirectory == 'build/reports'
+        project.dependencyCheck.outputDirectory == "${project.buildDir}/reports"
         project.dependencyCheck.quickQueryTimestamp == null
     }
 

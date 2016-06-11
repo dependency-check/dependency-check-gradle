@@ -3,7 +3,7 @@
  * @author Sion Williams
  */
 apply plugin: 'java'
-apply plugin: 'dependencyCheck'
+apply plugin: 'org.owasp.dependencycheck'
 
 sourceCompatibility = 1.5
 version = '1.0'
@@ -17,5 +17,5 @@ dependencies {
 }
 
 dependencyCheck {
-    reportsDirName = "reports"
+    outputDirectory = "${project.buildDir}/dependency-reports"
 }
