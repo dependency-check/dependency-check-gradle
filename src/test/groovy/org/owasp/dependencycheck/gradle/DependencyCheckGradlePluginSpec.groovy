@@ -58,6 +58,8 @@ class DependencyCheckGradlePluginSpec extends PluginProjectSpec {
         project.dependencyCheck.cve.url20Base == null
         project.dependencyCheck.outputDirectory == 'build/reports'
         project.dependencyCheck.quickQueryTimestamp == null
+        project.dependencyCheck.scanConfigurations == []
+        project.dependencyCheck.skipConfigurations == []
     }
 
     def 'tasks use correct values when extension is used'() {
@@ -79,6 +81,9 @@ class DependencyCheckGradlePluginSpec extends PluginProjectSpec {
 
             outputDirectory = 'outputDirectory'
             quickQueryTimestamp = false
+
+            scanConfigurations = ['a']
+            skipConfigurations = ['b']
         }
 
         then:
@@ -92,5 +97,19 @@ class DependencyCheckGradlePluginSpec extends PluginProjectSpec {
         project.dependencyCheck.cve.url20Base == 'cveUrl20Base'
         project.dependencyCheck.outputDirectory == 'outputDirectory'
         project.dependencyCheck.quickQueryTimestamp == false
+        project.dependencyCheck.scanConfigurations == ['a']
+        project.dependencyCheck.skipConfigurations == ['b']
+    }
+
+    def 'scanConfigurations and skipConfigurations are mutually exclusive'() {
+        when:
+        project.dependencyCheck {
+            scanConfigurations = ['a']
+            skipConfigurations = ['b']
+        }
+        task = project.tasks.findByName('dependencyCheck').check()
+
+        then:
+        thrown(IllegalArgumentException)
     }
 }

@@ -73,4 +73,18 @@ class CheckExtension extends UpdateExtension {
      * Displays a summary of the findings. Defaults to true.
      */
     Boolean showSummary = true
+
+    /**
+     * Names of the configurations to scan.
+     *
+     * This is mutually exclusive with the skipConfigurations property.
+     */
+    List<String> scanConfigurations = []
+
+    /**
+     * Names of the configurations to skip when scanning.
+     *
+     * This is mutually exclusive with the scanConfigurations property.
+     */
+    List<String> skipConfigurations = []
 }
