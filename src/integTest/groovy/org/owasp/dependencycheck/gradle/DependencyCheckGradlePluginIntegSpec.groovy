@@ -10,14 +10,14 @@ class DependencyCheckGradlePluginIntegSpec extends IntegrationSpec {
     def "I can add the plugin to a build with no errors"() {
         setup:
         buildFile << '''
-            apply plugin: 'dependencyCheck'
+            apply plugin: 'org.owasp.dependencycheck'
         '''.stripIndent()
 
         when:
         ExecutionResult result = runTasksSuccessfully('tasks')
 
         then:
-        result.standardOutput.contains('dependencyCheck - Produce dependency security report.')
+        result.standardOutput.contains('dependencyCheck - Identifies and reports known vulnerabilities (CVEs) in project dependencies.')
     }
 
     def "I can override outputDir with extension"() {
@@ -29,6 +29,6 @@ class DependencyCheckGradlePluginIntegSpec extends IntegrationSpec {
         runTasksSuccessfully('dependencyCheck')
 
         then:
-        fileExists('build/dependencyCheckReport')
+        fileExists('build/dependency-reports/dependency-check-report.html')
     }
 }
