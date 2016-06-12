@@ -68,7 +68,7 @@ class Check extends DefaultTask {
 
     def verifySettings() {
         if (config.scanConfigurations && config.skipConfigurations) {
-            throw new IllegalArgumentException("you can onl yspecify one of scanConfigurations or skipConfigurations");
+            throw new IllegalArgumentException("you can only specify one of scanConfigurations or skipConfigurations");
         }
     }
 
