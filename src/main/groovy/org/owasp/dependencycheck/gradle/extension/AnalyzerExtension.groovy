@@ -24,6 +24,10 @@ package org.owasp.dependencycheck.gradle.extension
 class AnalyzerExtension {
 
     /**
+     * Sets whether the experimental analyzers will be used.
+     */
+    Boolean experimentalEnabled
+    /**
      * Sets whether the Archive Analyzer will be used.
      */
     Boolean archiveEnabled
