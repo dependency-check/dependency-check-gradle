@@ -1,0 +1,18 @@
+apply plugin: 'java'
+apply plugin: 'org.owasp.dependencycheck'
+
+sourceCompatibility = 1.5
+version = '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'commons-collections', name: 'commons-collections', version: '3.2'
+}
+
+dependencyCheck {
+    failBuildOnCVSS = 0
+    skipTestGroups = false
+}

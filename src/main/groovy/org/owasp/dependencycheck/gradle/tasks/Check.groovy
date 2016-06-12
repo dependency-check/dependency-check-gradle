@@ -54,6 +54,7 @@ class Check extends DefaultTask {
      */
     @TaskAction
     def check() {
+        verifySettings()
         initializeSettings()
         def engine = new Engine()
 
@@ -63,6 +64,12 @@ class Check extends DefaultTask {
         showSummary(engine)
         checkForFailure(engine)
         cleanup(engine)
+    }
+
+    def verifySettings() {
+        if (config.scanConfigurations && config.skipConfigurations) {
+            throw new IllegalArgumentException("you can onl yspecify one of scanConfigurations or skipConfigurations");
+        }
     }
 
     /**
@@ -241,12 +248,37 @@ class Check extends DefaultTask {
      */
     def getAllDependencies(project) {
         return project.getConfigurations().findAll {
-            !config.skipTestGroups || (config.skipTestGroups && !isTestConfiguration(it))
+            shouldBeScanned(it) && !(shouldBeSkipped(it) || shouldBeSkippedAsTest(it))
         }.collect {
             it.getResolvedConfiguration().getResolvedArtifacts().collect { ResolvedArtifact artifact ->
                 artifact.getFile()
             }
         }.flatten().unique();
+    }
+
+    /**
+     * Checks whether the given configuration should be scanned
+     * because either scanConfigurations is empty or it contains the
+     * configuration's name.
+     */
+    def shouldBeScanned(configuration) {
+        !config.scanConfigurations || config.scanConfigurations.contains(configuration.name)
+    }
+
+    /**
+     * Checks whether the given configuration should be skipped
+     * because skipConfigurations contains the configuration's name.
+     */
+    def shouldBeSkipped(configuration) {
+        config.skipConfigurations.contains(configuration.name)
+    }
+
+    /**
+     * Checks whether the given configuration should be skipped
+     * because it is a test configuration and skipTestGroups is true.
+     */
+    def shouldBeSkippedAsTest(configuration) {
+        config.skipTestGroups && isTestConfiguration(configuration)
     }
 
     /**
