@@ -7,7 +7,7 @@ known, published vulnerabilities.
 =========
 
 ## What's New
-Current latest version is `1.3.6`. This version should be feature complete with
+Current latest version is `1.4.0`. This version should be feature complete with
 the other OWASP [dependency-check](http://jeremylong.github.io/DependencyCheck/) tools.
 
 ## Usage
@@ -24,7 +24,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'org.owasp:dependency-check-gradle:1.3.6'
+        classpath 'org.owasp:dependency-check-gradle:1.4.0'
     }
 }
 
@@ -52,7 +52,8 @@ If your project includes multiple sub-projects, the report will be generated for
 
 ### What if I'm behind a proxy?
 
-Maybe you have to use proxy to access internet, in this case, you could configure proxy settings for this plugin:
+Maybe you have to use proxy to access internet, in this case, you could configure proxy settings for this plugin (in addition
+you should read the [proxy configuration](http://jeremylong.github.io/DependencyCheck/data/proxy.html) page):
 
 ```groovy
 dependencyCheck {
@@ -91,7 +92,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'org.owasp:dependency-check-gradle:1.3.6'
+    classpath 'org.owasp:dependency-check-gradle:1.4.0'
   }
 }
 
@@ -108,7 +109,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'org.owasp:dependency-check-gradle:1.3.6'
+    classpath 'org.owasp:dependency-check-gradle:1.4.0'
   }
 }
 
