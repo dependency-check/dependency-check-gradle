@@ -249,7 +249,7 @@ class Check extends DefaultTask {
      */
     def getAllDependencies(project) {
         return project.getConfigurations().findAll {
-            shouldBeScanned(it) && !(shouldBeSkipped(it) || shouldBeSkippedAsTest(it))
+            shouldBeScanned(it) && !(shouldBeSkipped(it) || shouldBeSkippedAsTest(it) || shouldBeSkippedAsBuild(it))
         }.collect {
             it.getResolvedConfiguration().getResolvedArtifacts().collect { ResolvedArtifact artifact ->
                 artifact.getFile()
@@ -289,5 +289,21 @@ class Check extends DefaultTask {
         final String name = configuration.getName().toLowerCase();
         return name.startsWith("test") || name.endsWith("testcompile") || name.endsWith("testruntime")
     }
-}
 
+    /**
+     * Checks whether the given configuration should be skipped
+     * because it is a build configuration and skipBuildGroups is true.
+     */
+    def shouldBeSkippedAsBuild(configuration) {
+        config.skipBuildGroups && isBuildConfiguration(configuration)
+    }
+
+    /**
+     * Checks whether a configuration is considered to be a build configuration in order to skip it.
+     */
+    def isBuildConfiguration(configuration) {
+        final String name = configuration.getName().toLowerCase();
+        return name.startsWith("classpath")
+    }
+
+}
