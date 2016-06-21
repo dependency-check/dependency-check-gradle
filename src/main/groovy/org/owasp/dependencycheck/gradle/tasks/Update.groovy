@@ -111,7 +111,7 @@ class Update extends DefaultTask {
         }
     }
     /**
-     * Relases resources and removes temporary files used.
+     * Releases resources and removes temporary files used.
      */
     def cleanup(engine) {
         Settings.cleanup(true)

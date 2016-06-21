@@ -35,7 +35,7 @@ class DataExtension extends PurgeDataExtension {
      */
     String password
     /**
-     * The database dirver name (e.g. org.h2.Driver).
+     * The database driver name (e.g. org.h2.Driver).
      */
     String driver
     /**
