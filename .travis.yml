@@ -1,3 +1,7 @@
 language: groovy
 
-gradle check
+before_install:
+  - chmod +x gradlew
+
+after_success:
+  - ./gradlew integTest
