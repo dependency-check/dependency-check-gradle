@@ -22,6 +22,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Task
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.tasks.TaskAction
 import org.owasp.dependencycheck.Engine
@@ -130,7 +131,7 @@ class Check extends DefaultTask {
         Settings.setBooleanIfNotNull(ANALYZER_NODE_PACKAGE_ENABLED, config.analyzers.nodeEnabled)
     }
     /**
-     * Relases resources and removes temporary files used.
+     * Releases resources and removes temporary files used.
      */
     def cleanup(engine) {
         Settings.cleanup(true)
@@ -142,8 +143,16 @@ class Check extends DefaultTask {
      */
     def scanDependencies(engine) {
         logger.lifecycle("Verifying dependencies for project ${currentProjectName}")
-        getAllDependencies(project).each {
-            engine.scan(it)
+        project.getConfigurations().findAll {
+            shouldBeScanned(it) && !(shouldBeSkipped(it) || shouldBeSkippedAsTest(it))
+        }.each { Configuration configuration ->
+            configuration.getResolvedConfiguration().getResolvedArtifacts().collect { ResolvedArtifact artifact ->
+                def deps = engine.scan(artifact.getFile())
+                if (deps != null && deps.size()==1) {
+                    def d = deps.get(0)
+                    d.addProjectReference(configuration.name)
+                }
+            }
         }
     }
 
@@ -243,19 +252,6 @@ class Check extends DefaultTask {
         reportGenerator.generateReports(config.outputDirectory, config.format.toString())
     }
 
-    /**
-     * Returns all dependencies associated wtihin the configured dependency groups. Test
-     * groups can be excluded by setting the skipTestGroups configuration to true.
-     */
-    def getAllDependencies(project) {
-        return project.getConfigurations().findAll {
-            shouldBeScanned(it) && !(shouldBeSkipped(it) || shouldBeSkippedAsTest(it))
-        }.collect {
-            it.getResolvedConfiguration().getResolvedArtifacts().collect { ResolvedArtifact artifact ->
-                artifact.getFile()
-            }
-        }.flatten().unique();
-    }
 
     /**
      * Checks whether the given configuration should be scanned
