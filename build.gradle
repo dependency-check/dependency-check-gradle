@@ -25,21 +25,21 @@ buildscript {
             url "https://plugins.gradle.org/m2/"
         }
     }
-
     dependencies {
         classpath "com.gradle.publish:plugin-publish-plugin:0.9.3"
     }
 }
-/*
-plugins {
-id 'nu.studer.plugindev' version '1.0.3'
-}*/
 
 apply plugin: 'idea'
 apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: 'com.gradle.plugin-publish'
+
+tasks.withType(GroovyCompile) {
+    sourceCompatibility = '1.7'
+    targetCompatibility = '1.7'
+}
 
 repositories {
     mavenCentral()
