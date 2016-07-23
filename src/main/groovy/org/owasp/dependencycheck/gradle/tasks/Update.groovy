@@ -19,30 +19,25 @@
 package org.owasp.dependencycheck.gradle.tasks
 
 import org.gradle.api.DefaultTask
-import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.ResolvedArtifact
+import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.InvalidUserDataException
 import org.owasp.dependencycheck.Engine
-import org.owasp.dependencycheck.data.nvdcve.CveDB
-import org.owasp.dependencycheck.dependency.Dependency
-import org.owasp.dependencycheck.reporting.ReportGenerator
+import org.owasp.dependencycheck.data.update.exception.UpdateException
+import org.owasp.dependencycheck.data.nvdcve.DatabaseException
 import org.owasp.dependencycheck.utils.Settings
 
 import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_MODIFIED_12_URL
 import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_MODIFIED_20_URL
 import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_SCHEMA_1_2
 import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_SCHEMA_2_0
-import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_START_YEAR
 import static org.owasp.dependencycheck.utils.Settings.KEYS.DOWNLOADER_QUICK_QUERY_TIMESTAMP
 import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_PASSWORD
 import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_PORT
 import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_SERVER
 import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_USERNAME
 import static org.owasp.dependencycheck.utils.Settings.KEYS.DATA_DIRECTORY
-import static org.owasp.dependencycheck.utils.Settings.KEYS.SUPPRESSION_FILE
 import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_CHECK_VALID_FOR_HOURS
-
 import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_DRIVER_NAME
 import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_DRIVER_PATH
 import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_CONNECTION_STRING
@@ -72,10 +67,30 @@ class Update extends DefaultTask {
     @TaskAction
     def update() {
         initializeSettings()
-        def engine = new Engine()
-        engine.doUpdates()
-        cleanup(engine)
+        def engine = null
+        try {
+            engine = new Engine()
+            engine.doUpdates()
+        } catch (DatabaseException ex) {
+            String msg = "Unable to connect to the dependency-check database"
+            if (config.failOnError) {
+                throw new GradleException(msg, ex)
+            } else {
+                logger.error(msg)
+            }
+        } catch (UpdateException ex) {
+            String msg = "Unable to connect to the dependency-check database"
+            if (config.failOnError) {
+                throw new GradleException(msg, ex)
+            } else {
+                logger.error(msg)
+            }
+        }
+        if (engine != null) {
+            cleanup(engine)
+        }
     }
+
 
     /**
      * Initializes the settings; if the setting is not configured

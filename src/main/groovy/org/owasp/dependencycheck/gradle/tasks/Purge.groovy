@@ -19,14 +19,9 @@
 package org.owasp.dependencycheck.gradle.tasks
 
 import org.gradle.api.DefaultTask
-import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.ResolvedArtifact
+import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 import java.io.File
-import org.owasp.dependencycheck.Engine
-import org.owasp.dependencycheck.data.nvdcve.CveDB
-import org.owasp.dependencycheck.dependency.Dependency
-import org.owasp.dependencycheck.reporting.ReportGenerator
 import org.owasp.dependencycheck.utils.Settings
 
 import static org.owasp.dependencycheck.utils.Settings.KEYS.DATA_DIRECTORY
@@ -57,10 +52,20 @@ class Purge extends DefaultTask {
             if (db.delete()) {
                 logger.info("Database file purged; local copy of the NVD has been removed")
             } else {
-                logger.warn("Unable to delete '${db.getAbsolutePath()}'; please delete the file manually")
+                String msg = "Unable to delete '${db.getAbsolutePath()}'; please delete the file manually"
+                if (config.failOnError) {
+                    throw new GradleException(msg)
+                } else {
+                    logger.error(msg)
+                }
             }
         } else {
-            logger.warn("Unable to purge database; the database file does not exists: ${db.getAbsolutePath()}")
+            String msg = "Unable to purge database; the database file does not exists: ${db.getAbsolutePath()}"
+            if (config.failOnError) {
+                throw new GradleException(msg)
+            } else {
+                logger.error(msg)
+            }
         }
         cleanup()
     }

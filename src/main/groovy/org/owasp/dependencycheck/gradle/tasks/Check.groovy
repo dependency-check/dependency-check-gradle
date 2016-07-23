@@ -27,6 +27,9 @@ import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.tasks.TaskAction
 import org.owasp.dependencycheck.Engine
 import org.owasp.dependencycheck.data.nvdcve.CveDB
+import org.owasp.dependencycheck.data.nvdcve.DatabaseException
+import org.owasp.dependencycheck.exception.ExceptionCollection
+import org.owasp.dependencycheck.exception.ReportException
 import org.owasp.dependencycheck.dependency.Dependency
 import org.owasp.dependencycheck.dependency.Identifier
 import org.owasp.dependencycheck.dependency.Vulnerability
@@ -57,14 +60,50 @@ class Check extends DefaultTask {
     def check() {
         verifySettings()
         initializeSettings()
-        def engine = new Engine()
+        def engine = null
+        try {
+            engine = new Engine()
+        } catch (DatabaseException ex) {
+            String msg = "Unable to connect to the dependency-check database"
+            if (config.failOnError) {
+                throw new GradleException(msg, ex)
+            } else {
+                logger.error(msg)
+            }
+        }
+        if (engine != null) {
+            scanDependencies(engine)
+            ExceptionCollection exCol = null
+            logger.lifecycle("Checking for updates and analyzing vulnerabilities for dependencies")
+            try {
+                engine.analyzeDependencies();
+            } catch (ExceptionCollection ex) {
+                if (config.failOnError) {
+                    throw new GradleException(ex);
+                }
+                exCol = ex
+            }
 
-        scanDependencies(engine)
-        analyzeDependencies(engine)
-        generateReport(engine)
-        showSummary(engine)
-        checkForFailure(engine)
-        cleanup(engine)
+            logger.lifecycle("Generating report for project ${currentProjectName}")
+            def reportGenerator = new ReportGenerator(currentProjectName, engine.dependencies, engine.analyzers, new CveDB().databaseProperties)
+            try {
+                reportGenerator.generateReports(config.outputDirectory, config.format.toString())
+            } catch (ReportException ex) {
+                if (config.failOnError) {
+                    if (exCol != null) {
+                        exCol.addException(ex)
+                        throw new GradleException(exCol)
+                    } else {
+                        throw new GradleException("Error generating the report", ex)
+                    }
+                } else {
+                    logger.error("Error generating the report", ex);
+                }
+            }
+            showSummary(engine)
+            checkForFailure(engine)
+            cleanup(engine)
+        }
     }
 
     def verifySettings() {
@@ -157,14 +196,6 @@ class Check extends DefaultTask {
     }
 
     /**
-     * Performs the dependency-check analysis.
-     */
-    def analyzeDependencies(Engine engine) {
-        logger.lifecycle("Checking for updates and analyzing vulnerabilities for dependencies")
-        engine.analyzeDependencies()
-    }
-
-    /**
      * Displays a summary of the dependency-check results to the build console.
      */
     def showSummary(Engine engine) {
@@ -240,16 +271,6 @@ class Check extends DefaultTask {
             throw new GradleException(msg);
         }
 
-    }
-    /**
-     * Writes the report(s) to the configured output directory.
-     */
-    def generateReport(Engine engine) {
-        logger.lifecycle("Generating report for project ${currentProjectName}")
-        def reportGenerator = new ReportGenerator(currentProjectName, engine.dependencies, engine.analyzers,
-                new CveDB().databaseProperties)
-
-        reportGenerator.generateReports(config.outputDirectory, config.format.toString())
     }
 
 

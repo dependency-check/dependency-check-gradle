@@ -20,4 +20,5 @@ package org.owasp.dependencycheck.gradle.extension
 
 class PurgeExtension {
     PurgeDataExtension dataExtension
+    Boolean failOnError = true
 }
