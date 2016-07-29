@@ -78,7 +78,7 @@ class Check extends DefaultTask {
             try {
                 engine.analyzeDependencies();
             } catch (ExceptionCollection ex) {
-                if (config.failOnError) {
+                if (config.failOnError && ex.isFatal()) {
                     throw new GradleException(ex);
                 }
                 exCol = ex
@@ -97,12 +97,17 @@ class Check extends DefaultTask {
                         throw new GradleException("Error generating the report", ex)
                     }
                 } else {
-                    logger.error("Error generating the report", ex);
+                    logger.error("Error generating the report", ex)
                 }
+            } finally {
+                cleanup(engine)
             }
             showSummary(engine)
             checkForFailure(engine)
             cleanup(engine)
+            if (config.failOnError && exCol != null && exCol.getExceptions().size()>0) {
+                throw new GradleException("One or more exceptions occurred during analysis", exCol)
+            }
         }
     }
 
