@@ -17,7 +17,7 @@
  */
 
 group = 'org.owasp'
-version = '1.4.1'
+version = '1.4.2'
 
 buildscript {
     repositories {
@@ -54,8 +54,8 @@ dependencies {
     compile(
         localGroovy(),
         gradleApi(),
-            'org.owasp:dependency-check-core:1.4.1',
-            'org.owasp:dependency-check-utils:1.4.1'
+            'org.owasp:dependency-check-core:1.4.2',
+            'org.owasp:dependency-check-utils:1.4.2'
     )
 
     testCompile ('com.netflix.nebula:nebula-test:4.2.2'){
