@@ -306,10 +306,14 @@ class Check extends DefaultTask {
 
     /**
      * Checks whether a configuration is considered to be a test configuration in order to skip it.
+     * This boils down to check whether a configuration extends (transitively) from {@code testCompile}.
      */
     def isTestConfiguration(configuration) {
-        final String name = configuration.getName().toLowerCase();
-        return name.startsWith("test") || name.endsWith("testcompile") || name.endsWith("testruntime")
+        def isTestConfiguration = false
+        configuration.hierarchy.each {
+            isTestConfiguration |= it.name.equals("testCompile")
+        }
+        logger.debug("'${configuration.name}' is a test configuration: ${isTestConfiguration}")
+        isTestConfiguration
     }
 }
-

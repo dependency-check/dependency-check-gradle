@@ -54,7 +54,8 @@ class CheckExtension extends UpdateExtension {
     //The following properties are not used via the settings object, instead
     // they are directly used by the check task.
     /**
-     * When set to true dependency groups that start with 'test' will not be included in the analysis.
+     * When set to true configurations that are considered a test configuration will not be included in the analysis.
+     * A configuration is considered a test configuration if and only if extends (transitively) from testCompile.
      * The default value is true.
      */
     Boolean skipTestGroups = true
