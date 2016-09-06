@@ -17,7 +17,7 @@
  */
 
 group = 'org.owasp'
-version = '1.4.2'
+version = '1.4.3'
 
 buildscript {
     repositories {
@@ -54,8 +54,8 @@ dependencies {
     compile(
         localGroovy(),
         gradleApi(),
-            'org.owasp:dependency-check-core:1.4.2',
-            'org.owasp:dependency-check-utils:1.4.2'
+            'org.owasp:dependency-check-core:1.4.3',
+            'org.owasp:dependency-check-utils:1.4.3'
     )
 
     testCompile ('com.netflix.nebula:nebula-test:4.2.2'){
@@ -80,9 +80,9 @@ task integTest(type: Test) {
     jvmArgs '-XX:MaxPermSize=256m'
 }
 
-apply from: 'conf/publish/local.gradle'
+//apply from: 'conf/publish/local.gradle'
 //// gradle uploadArchives
 //apply from: 'conf/publish/maven.gradle'
 //// gradle publishPlugins
-//apply from: 'conf/publish/gradlePluginsPortal.gradle'
+apply from: 'conf/publish/gradlePluginsPortal.gradle'
 //apply from: 'conf/publish/bintray.gradle'        // according to the documentation of plugindev, this line has to be placed and the very end of the build file
