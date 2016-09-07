@@ -46,7 +46,7 @@ repositories {
     mavenLocal()
     jcenter()
     maven {
-        url "http://repository-dependency-check.forge.cloudbees.com/snapshot/"
+        url "https://repository-dependency-check.forge.cloudbees.com/snapshot/"
     }
 }
 
