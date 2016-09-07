@@ -7,7 +7,7 @@ known, published vulnerabilities.
 =========
 
 ## What's New
-Current latest version is `1.4.0`. This version should be feature complete with
+Current latest version is `1.4.3`. This version should be feature complete with
 the other OWASP [dependency-check](http://jeremylong.github.io/DependencyCheck/) tools.
 
 ## Usage
@@ -24,7 +24,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'org.owasp:dependency-check-gradle:1.4.0'
+        classpath 'org.owasp:dependency-check-gradle:1.4.3'
     }
 }
 
@@ -92,7 +92,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'org.owasp:dependency-check-gradle:1.4.0'
+    classpath 'org.owasp:dependency-check-gradle:1.4.3'
   }
 }
 
@@ -109,7 +109,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'org.owasp:dependency-check-gradle:1.4.0'
+    classpath 'org.owasp:dependency-check-gradle:1.4.3'
   }
 }
 
