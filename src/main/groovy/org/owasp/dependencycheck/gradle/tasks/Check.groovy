@@ -304,6 +304,15 @@ class Check extends DefaultTask {
         config.skipTestGroups && isTestConfiguration(configuration)
     }
 
+    def isTestConfiguration(configuration) {
+        def isTestConfiguration = isTestConfigurationCheck(configuration)
+
+        def hierarchy = configuration.hierarchy.collect({ it.name }).join(" --> ")
+        logger.info("'{}' is considered a test configuration: {}", hierarchy, isTestConfiguration)
+
+        isTestConfiguration
+    }
+
     /**
      * Checks whether a configuration is considered to be a test configuration in order to skip it.
      * A configuration is considered a test configuration if and only if any of the following conditions holds:
@@ -314,12 +323,11 @@ class Check extends DefaultTask {
      *     <li>the configuration name starts with 'androidTest'</li>
      * </ul>
      */
-    def isTestConfiguration(configuration) {
+    def static isTestConfigurationCheck(configuration) {
         def isTestConfiguration = configuration.name.startsWith("test") || configuration.name.startsWith("androidTest")
         configuration.hierarchy.each {
             isTestConfiguration |= (it.name == "testCompile" || it.name == "androidTestCompile")
         }
-        logger.info("'${configuration.name}' is considered a test configuration: ${isTestConfiguration}")
         isTestConfiguration
     }
 }
