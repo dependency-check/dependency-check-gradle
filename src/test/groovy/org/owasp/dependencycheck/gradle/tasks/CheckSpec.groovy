@@ -7,36 +7,9 @@ import spock.lang.Unroll
 class CheckSpec extends Specification {
 
     @Unroll
-    def "Configuration '#configurationName' (extends no other configuration) is considered a test configuration"() {
+    def "IS considered a test Configuration: '#configurationHierarchy'"() {
         given:
-        def configuration = stubConfiguration(configurationName)
-        configuration.hierarchy >> []
-
-        expect:
-        Check.isTestConfigurationCheck(configuration)
-
-        where:
-        configurationName << ["test", "testApk", "androidTest", "androidTestApk"]
-    }
-
-    @Unroll
-    def "Configuration '#configurationName' (extends no other configuration) is NOT considered a test configuration"() {
-        given:
-        def configuration = stubConfiguration(configurationName)
-        configuration.hierarchy >> []
-
-        expect:
-        !Check.isTestConfigurationCheck(configuration)
-
-        where:
-        configurationName << ["teStart", "androIdTest"]
-    }
-
-    @Unroll
-    def "Configuration '#configurationHierarchy' is considered a test configuration"() {
-        given:
-        def configurationName = configurationHierarchy.remove(0)
-        def configuration = stubConfiguration(configurationName)
+        def configuration = stubConfiguration(configurationHierarchy[0])
         configuration.hierarchy >> configurationHierarchy.collect { stubConfiguration(it) }
 
         expect:
@@ -44,16 +17,19 @@ class CheckSpec extends Specification {
 
         where:
         configurationHierarchy << [
+                ["test"],
+                ["testApk"],
+                ["androidTest"],
+                ["androidTestApk"],
                 ["teStart", "testRuntime", "testCompile"],
                 ["teStart", "androIdTest", "androidTestCompile"]
         ]
     }
 
     @Unroll
-    def "Configuration '#configurationHierarchy' is NOT considered a test configuration"() {
+    def "Is NOT considered a test configuration: '#configurationHierarchy'"() {
         given:
-        def configurationName = configurationHierarchy.remove(0)
-        def configuration = stubConfiguration(configurationName)
+        def configuration = stubConfiguration(configurationHierarchy[0])
         configuration.hierarchy >> configurationHierarchy.collect { stubConfiguration(it) }
 
         expect:
@@ -61,6 +37,8 @@ class CheckSpec extends Specification {
 
         where:
         configurationHierarchy << [
+                ["teStart"],
+                ["androIdTest"],
                 ["teStart", "test"],
                 ["teStart", "androidTest"],
                 ["teStart", "runtime", "compile"],
