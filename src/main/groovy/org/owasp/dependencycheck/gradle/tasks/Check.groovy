@@ -21,18 +21,16 @@ package org.owasp.dependencycheck.gradle.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.InvalidUserDataException
-import org.gradle.api.Task
-import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.tasks.TaskAction
 import org.owasp.dependencycheck.Engine
 import org.owasp.dependencycheck.data.nvdcve.CveDB
 import org.owasp.dependencycheck.data.nvdcve.DatabaseException
-import org.owasp.dependencycheck.exception.ExceptionCollection
-import org.owasp.dependencycheck.exception.ReportException
 import org.owasp.dependencycheck.dependency.Dependency
 import org.owasp.dependencycheck.dependency.Identifier
 import org.owasp.dependencycheck.dependency.Vulnerability
+import org.owasp.dependencycheck.exception.ExceptionCollection
+import org.owasp.dependencycheck.exception.ReportException
 import org.owasp.dependencycheck.reporting.ReportGenerator
 import org.owasp.dependencycheck.utils.Settings
 
@@ -187,16 +185,27 @@ class Check extends DefaultTask {
      */
     def scanDependencies(engine) {
         logger.lifecycle("Verifying dependencies for project ${currentProjectName}")
+
+        // determine artifacts to be scanned (and the configurations they belong to)
+        def Map<File, Set<String>> artifactsWithTheirConfigurations = [:]
         project.getConfigurations().findAll {
             shouldBeScanned(it) && !(shouldBeSkipped(it) || shouldBeSkippedAsTest(it))
-        }.each { Configuration configuration ->
+        }.each { configuration ->
             configuration.getResolvedConfiguration().getResolvedArtifacts().collect { ResolvedArtifact artifact ->
-                def deps = engine.scan(artifact.getFile())
-                if (deps != null && deps.size()==1) {
-                    def d = deps.get(0)
-                    d.addProjectReference(configuration.name)
-                }
+                def file = artifact.file
+                artifactsWithTheirConfigurations.putIfAbsent(file, new TreeSet<String>())
+                artifactsWithTheirConfigurations.get(file).add(configuration.name)
             }
+        }
+
+        // register artifacts to be scannend
+        artifactsWithTheirConfigurations.each { file, configurations ->
+            def deps = engine.scan(file)
+            if (deps != null && deps.size() == 1) {
+                def Dependency d = deps.get(0)
+                d.addAllProjectReferences(configurations)
+            }
+            logger.info("Registered '{}' for scanning ({}).", file, configurations)
         }
     }
 
