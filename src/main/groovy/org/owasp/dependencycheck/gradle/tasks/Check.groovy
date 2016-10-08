@@ -79,7 +79,7 @@ class Check extends DefaultTask {
                 engine.analyzeDependencies();
             } catch (ExceptionCollection ex) {
                 if (config.failOnError && ex.isFatal()) {
-                    throw new GradleException(ex);
+                    throw new GradleException("Analysis failed.", ex);
                 }
                 exCol = ex
             }
