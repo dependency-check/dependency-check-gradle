@@ -126,6 +126,7 @@ class Check extends DefaultTask {
 
         Settings.setBooleanIfNotNull(AUTO_UPDATE, config.autoUpdate)
         Settings.setStringIfNotEmpty(SUPPRESSION_FILE, config.suppressionFile)
+        Settings.setStringIfNotEmpty(HINTS_FILE, config.hintsFile)
 
         Settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
         Settings.setStringIfNotEmpty(PROXY_PORT, "${config.proxy.port}")

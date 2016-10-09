@@ -46,6 +46,12 @@ class CheckExtension extends UpdateExtension {
      * The path to the suppression file.
      */
     String suppressionFile
+
+    /**
+     * The path to the hints file.
+     */
+    String hintsFile
+
     /**
      * Sets whether auto-updating of the NVD CVE/CPE data is enabled.
      */
