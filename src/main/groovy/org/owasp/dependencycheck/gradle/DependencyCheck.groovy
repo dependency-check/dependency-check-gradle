@@ -20,6 +20,7 @@ package org.owasp.dependencycheck.gradle
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.JavaPlugin
 import org.owasp.dependencycheck.gradle.extension.*
 import org.owasp.dependencycheck.gradle.tasks.Check
 import org.owasp.dependencycheck.gradle.tasks.Purge
@@ -61,5 +62,10 @@ class DependencyCheck implements Plugin<Project> {
         project.task(PURGE_TASK, type: Purge)
         project.task(UPDATE_TASK, type: Update)
         project.task(CHECK_TASK, type: Check)
+
+        // this add the dependencyCheck task to the check
+        project.plugins.withType(JavaPlugin) {
+            project.tasks.check.dependsOn project.tasks.getByName(CHECK_TASK)
+        }
     }
 }
