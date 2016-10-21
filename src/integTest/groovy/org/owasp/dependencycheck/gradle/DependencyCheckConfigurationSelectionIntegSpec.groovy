@@ -30,6 +30,9 @@ class DependencyCheckConfigurationSelectionIntegSpec extends IntegrationSpec {
         then:
         false == result.success
         true == result.standardOutput.contains('CVE-2015-6420')
+        true == result.standardOutput.contains('CVE-2014-0114')
+        true == result.standardOutput.contains('CVE-2016-3092')
+        true == result.standardOutput.contains('CVE-2015-5262')
     }
 
     def "custom configurations are scanned by default"() {

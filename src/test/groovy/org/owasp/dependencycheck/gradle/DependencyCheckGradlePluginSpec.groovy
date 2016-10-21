@@ -60,6 +60,7 @@ class DependencyCheckGradlePluginSpec extends PluginProjectSpec {
         project.dependencyCheck.quickQueryTimestamp == null
         project.dependencyCheck.scanConfigurations == []
         project.dependencyCheck.skipConfigurations == []
+        project.dependencyCheck.skipTestGroups == true
     }
 
     def 'tasks use correct values when extension is used'() {
@@ -84,6 +85,7 @@ class DependencyCheckGradlePluginSpec extends PluginProjectSpec {
 
             scanConfigurations = ['a']
             skipConfigurations = ['b']
+            skipTestGroups = false
         }
 
         then:
@@ -99,6 +101,7 @@ class DependencyCheckGradlePluginSpec extends PluginProjectSpec {
         project.dependencyCheck.quickQueryTimestamp == false
         project.dependencyCheck.scanConfigurations == ['a']
         project.dependencyCheck.skipConfigurations == ['b']
+        project.dependencyCheck.skipTestGroups == false
     }
 
     def 'scanConfigurations and skipConfigurations are mutually exclusive'() {
