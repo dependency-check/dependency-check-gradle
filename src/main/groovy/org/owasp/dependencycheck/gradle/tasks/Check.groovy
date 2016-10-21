@@ -24,6 +24,10 @@ import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolvedArtifact
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.OutputDirectories
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.owasp.dependencycheck.Engine
 import org.owasp.dependencycheck.data.nvdcve.CveDB
@@ -42,6 +46,9 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.*
  * Checks the projects dependencies for known vulnerabilities.
  */
 class Check extends DefaultTask {
+
+    //@OutputDirectory
+    //File outputDir
 
     Check() {
         group = 'OWASP dependency-check'

@@ -3,6 +3,8 @@ package org.owasp.dependencycheck.gradle
 import nebula.test.IntegrationSpec
 import nebula.test.functional.ExecutionResult
 
+//todo   change this to use testKit
+
 class DependencyCheckConfigurationSelectionIntegSpec extends IntegrationSpec {
 
     def "test dependencies are ignored by default"() {
