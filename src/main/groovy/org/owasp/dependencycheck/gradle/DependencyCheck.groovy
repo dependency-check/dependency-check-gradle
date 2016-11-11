@@ -63,9 +63,10 @@ class DependencyCheck implements Plugin<Project> {
         project.task(UPDATE_TASK, type: Update)
         project.task(CHECK_TASK, type: Check)
 
-        // this add the dependencyCheck task to the check
-        project.plugins.withType(JavaPlugin) {
-            project.tasks.check.dependsOn project.tasks.getByName(CHECK_TASK)
-        }
+        // this add the dependencyCheck task to the check; however it turns out users don't want this as they would
+        // rather configure this themselves.
+        //project.plugins.withType(JavaPlugin) {
+        //    project.tasks.check.dependsOn project.tasks.getByName(CHECK_TASK)
+        //}
     }
 }
