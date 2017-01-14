@@ -39,7 +39,6 @@ import org.owasp.dependencycheck.dependency.Identifier
 import org.owasp.dependencycheck.dependency.Vulnerability
 import org.owasp.dependencycheck.reporting.ReportGenerator
 import org.owasp.dependencycheck.utils.Settings
-
 import static org.owasp.dependencycheck.utils.Settings.KEYS.*
 
 /**
@@ -172,6 +171,11 @@ class Check extends DefaultTask {
         Settings.setStringIfNotEmpty(ADDITIONAL_ZIP_EXTENSIONS, config.analyzers.zipExtensions)
         Settings.setBooleanIfNotNull(ANALYZER_ASSEMBLY_ENABLED, config.analyzers.assemblyEnabled)
         Settings.setStringIfNotEmpty(ANALYZER_ASSEMBLY_MONO_PATH, config.analyzers.pathToMono)
+
+        Settings.setBooleanIfNotNull(ANALYZER_COCOAPODS_ENABLED, config.analyzers.cocoapodsEnabled)
+        Settings.setBooleanIfNotNull(ANALYZER_SWIFT_PACKAGE_MANAGER_ENABLED, config.analyzers.swiftEnabled)
+        Settings.setBooleanIfNotNull(ANALYZER_BUNDLE_AUDIT_ENABLED, config.analyzers.bundleAuditEnabled)
+        Settings.setStringIfNotEmpty(ANALYZER_BUNDLE_AUDIT_PATH, config.analyzers.pathToBundleAudit)
 
         Settings.setBooleanIfNotNull(ANALYZER_PYTHON_DISTRIBUTION_ENABLED, config.analyzers.pyDistributionEnabled)
         Settings.setBooleanIfNotNull(ANALYZER_PYTHON_PACKAGE_ENABLED, config.analyzers.pyPackageEnabled)

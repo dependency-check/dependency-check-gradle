@@ -67,7 +67,23 @@ class AnalyzerExtension {
      * The path to Mono for .NET assembly analysis on non-windows systems.
      */
     String pathToMono
+    /**
+     * Sets whether or not the cocoapods analyzer is enabled.
+     */
+    Boolean cocoapodsEnabled
+    /**
+     * Sets whether or not the swift package manager is enabled.
+     */
+    Boolean swiftEnabled
 
+    /**
+     * Sets whether or not the Ruby Bundle Audit analyzer is enabled; requires running bundle audit.
+     */
+    Boolean bundleAuditEnabled
+    /**
+     * The path to Ruby's bundle audit.
+     */
+    String pathToBundleAudit
 
     /**
      * Sets whether the Python Distribution Analyzer will be used.
