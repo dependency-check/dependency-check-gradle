@@ -39,9 +39,9 @@ Once gradle plugin applied, run following gradle task to check dependencies:
 gradle dependencyCheck --info
 ```
 
-The reports will be generated automatically under `./reports` folder.
+The reports will be generated automatically under `build/reports` directory.
 
-If your project includes multiple sub-projects, the report will be generated for each sub-project in different sub-directory.
+If your project includes multiple sub-projects, the report will be generated for each sub-project in their own `build/reports`.
 
 ## FAQ
 
@@ -129,7 +129,7 @@ subprojects {
     apply plugin: 'org.owasp.dependencycheck'
 
     dependencyCheck {
-        reportsDirName = "security-report"
+        outputDirectory = "security-report"
     }
 }
 ```
