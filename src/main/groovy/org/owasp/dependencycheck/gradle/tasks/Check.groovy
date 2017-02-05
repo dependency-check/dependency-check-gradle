@@ -195,7 +195,7 @@ class Check extends DefaultTask {
     def scanDependencies(engine) {
         logger.lifecycle("Verifying dependencies for project ${currentProjectName}")
         project.getConfigurations().findAll {
-            shouldBeScanned(it) && !(shouldBeSkipped(it) || shouldBeSkippedAsTest(it)) && it.isCanBeResolved()
+            shouldBeScanned(it) && !(shouldBeSkipped(it) || shouldBeSkippedAsTest(it)) && canBeResolved(it)
         }.each { Configuration configuration ->
             configuration.getResolvedConfiguration().getResolvedArtifacts().collect { ResolvedArtifact artifact ->
                 def deps = engine.scan(artifact.getFile())
@@ -336,5 +336,12 @@ class Check extends DefaultTask {
             isTestConfiguration |= (it.name == "testCompile" || it.name == "androidTestCompile")
         }
         isTestConfiguration
+    }
+
+    def canBeResolved(configuration) {
+        // Configuration.isCanBeResolved() has been introduced with Gradle 3.3,
+        // thus we need to check for the method's existence first
+        configuration.metaClass.respondsTo(configuration, "isCanBeResolved") ?
+                configuration.isCanBeResolved() : true
     }
 }
