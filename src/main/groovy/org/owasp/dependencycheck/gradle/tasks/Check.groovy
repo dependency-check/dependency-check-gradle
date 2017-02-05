@@ -21,13 +21,8 @@ package org.owasp.dependencycheck.gradle.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.InvalidUserDataException
-import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolvedArtifact
-import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.OutputDirectories
-import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.owasp.dependencycheck.Engine
 import org.owasp.dependencycheck.data.nvdcve.CveDB
@@ -200,7 +195,7 @@ class Check extends DefaultTask {
     def scanDependencies(engine) {
         logger.lifecycle("Verifying dependencies for project ${currentProjectName}")
         project.getConfigurations().findAll {
-            shouldBeScanned(it) && !(shouldBeSkipped(it) || shouldBeSkippedAsTest(it))
+            shouldBeScanned(it) && !(shouldBeSkipped(it) || shouldBeSkippedAsTest(it)) && it.isCanBeResolved()
         }.each { Configuration configuration ->
             configuration.getResolvedConfiguration().getResolvedArtifacts().collect { ResolvedArtifact artifact ->
                 def deps = engine.scan(artifact.getFile())

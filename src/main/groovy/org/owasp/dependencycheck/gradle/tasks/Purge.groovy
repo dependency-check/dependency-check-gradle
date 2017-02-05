@@ -21,7 +21,6 @@ package org.owasp.dependencycheck.gradle.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
-import java.io.File
 import org.owasp.dependencycheck.utils.Settings
 
 import static org.owasp.dependencycheck.utils.Settings.KEYS.DATA_DIRECTORY
