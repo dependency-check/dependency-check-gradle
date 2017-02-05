@@ -200,7 +200,7 @@ class Check extends DefaultTask {
     def scanDependencies(engine) {
         logger.lifecycle("Verifying dependencies for project ${currentProjectName}")
         project.getConfigurations().findAll {
-            shouldBeScanned(it) && !(shouldBeSkipped(it) || shouldBeSkippedAsTest(it))
+            shouldBeScanned(it) && !(shouldBeSkipped(it) || shouldBeSkippedAsTest(it)) && it.isCanBeResolved()
         }.each { Configuration configuration ->
             configuration.getResolvedConfiguration().getResolvedArtifacts().collect { ResolvedArtifact artifact ->
                 def deps = engine.scan(artifact.getFile())
