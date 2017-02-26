@@ -7,7 +7,7 @@ import spock.lang.Unroll
 class CheckSpec extends Specification {
 
     @Unroll
-    def "IS considered a test Configuration: '#configurationHierarchy'"() {
+    "IS considered a test Configuration: '#configurationHierarchy'"() {
         given:
         def configuration = stubConfiguration(configurationHierarchy[0])
         configuration.hierarchy >> configurationHierarchy.collect { stubConfiguration(it) }
@@ -27,7 +27,7 @@ class CheckSpec extends Specification {
     }
 
     @Unroll
-    def "Is NOT considered a test configuration: '#configurationHierarchy'"() {
+    "Is NOT considered a test configuration: '#configurationHierarchy'"() {
         given:
         def configuration = stubConfiguration(configurationHierarchy[0])
         configuration.hierarchy >> configurationHierarchy.collect { stubConfiguration(it) }
