@@ -72,6 +72,20 @@ sourceSets {
     }
 }
 
+pluginBundle {
+  website = 'http://jeremylong.github.io/DependencyCheck/dependency-check-gradle/index.html'
+  vcsUrl = 'https://github.com/jeremylong/dependency-check-gradle/'
+  description = 'A software composition analysis plugin that identifies known vulnerable dependencies used by the project.'
+  tags = ['gradle-plugin', 'software-composition-analysis', 'vulnerability-detection', 'security']
+
+  plugins {
+    pluginPlugin {
+      id = 'org.owasp.dependencycheck'
+      displayName = 'dependency-check gradle plugin'
+    }
+  }
+}
+
 task integTest(type: Test) {
     group = 'verification'
     testClassesDir = sourceSets.integTest.output.classesDir
