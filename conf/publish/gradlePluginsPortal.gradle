@@ -18,10 +18,10 @@
 
 // publish to gradle plugin portal
 pluginBundle {
-    website = 'git@github.com:jeremylong/dependency-check-gradle.git'
-    vcsUrl = 'git@github.com:jeremylong/dependency-check-gradle.git'
-    description = 'OWASP dependency-check-gradle plugin.'
-    tags = ['OWASP', 'dependency-check', 'security']
+    website = 'http://jeremylong.github.io/DependencyCheck/dependency-check-gradle/index.html'
+    vcsUrl = 'https://github.com/jeremylong/dependency-check-gradle/'
+    description = 'A software composition analysis plugin that identifies known vulnerable dependencies used by the project.'
+    tags = ['OWASP', 'dependency-check', 'gradle-plugin', 'software-composition-analysis', 'vulnerability-detection', 'security']
 
     plugins {
         dependencyCheck {
@@ -30,3 +30,4 @@ pluginBundle {
         }
     }
 }
+

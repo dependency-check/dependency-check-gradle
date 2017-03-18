@@ -17,7 +17,7 @@
  */
 
 group = 'org.owasp'
-version = '1.4.6-SNAPSHOT'
+version = '1.4.5.1'
 
 buildscript {
     repositories {
@@ -54,8 +54,8 @@ dependencies {
     compile(
         localGroovy(),
         gradleApi(),
-            'org.owasp:dependency-check-core:1.4.6-SNAPSHOT',
-            'org.owasp:dependency-check-utils:1.4.6-SNAPSHOT'
+            'org.owasp:dependency-check-core:1.4.5',
+            'org.owasp:dependency-check-utils:1.4.5'
     )
 
     testCompile ('com.netflix.nebula:nebula-test:4.2.2'){
@@ -70,20 +70,6 @@ sourceSets {
         compileClasspath = sourceSets.main.output + configurations.testRuntime
         runtimeClasspath = output + compileClasspath
     }
-}
-
-pluginBundle {
-  website = 'http://jeremylong.github.io/DependencyCheck/dependency-check-gradle/index.html'
-  vcsUrl = 'https://github.com/jeremylong/dependency-check-gradle/'
-  description = 'A software composition analysis plugin that identifies known vulnerable dependencies used by the project.'
-  tags = ['gradle-plugin', 'software-composition-analysis', 'vulnerability-detection', 'security']
-
-  plugins {
-    pluginPlugin {
-      id = 'org.owasp.dependencycheck'
-      displayName = 'dependency-check gradle plugin'
-    }
-  }
 }
 
 task integTest(type: Test) {
