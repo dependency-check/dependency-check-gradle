@@ -31,6 +31,7 @@ buildscript {
 }
 
 apply plugin: 'idea'
+apply plugin: 'eclipse'
 apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'signing'
@@ -58,7 +59,7 @@ dependencies {
             'org.owasp:dependency-check-utils:1.4.5'
     )
 
-    testCompile ('com.netflix.nebula:nebula-test:4.2.2'){
+    testCompile ('com.netflix.nebula:nebula-test:6.0.1'){
         exclude group: 'org.codehaus.groovy'
     }
 }
@@ -79,6 +80,7 @@ task integTest(type: Test) {
     reports.html.destination = file("$buildDir/reports/integ")
     jvmArgs '-XX:MaxPermSize=256m'
 }
+check.dependsOn integTest
 
 apply from: 'conf/publish/local.gradle'
 //// gradle uploadArchives
@@ -86,3 +88,10 @@ apply from: 'conf/publish/local.gradle'
 //// gradle publishPlugins
 //apply from: 'conf/publish/gradlePluginsPortal.gradle'
 //apply from: 'conf/publish/bintray.gradle'        // according to the documentation of plugindev, this line has to be placed and the very end of the build file
+
+
+defaultTasks 'build'
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '3.5'
+}
