@@ -78,7 +78,8 @@ task integTest(type: Test) {
     testClassesDir = sourceSets.integTest.output.classesDir
     classpath = sourceSets.integTest.runtimeClasspath
     reports.html.destination = file("$buildDir/reports/integ")
-    jvmArgs '-Xmx=640m -XX:MaxPermSize=256m'
+    jvmArgs '-XX:MaxPermSize=256m'
+    jvmArgs '-Xmx1024m'
 }
 check.dependsOn integTest
 
