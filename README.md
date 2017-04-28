@@ -1,6 +1,8 @@
 Dependency-Check-Gradle
 =========
 
+[![Build Status](https://travis-ci.org/jeremylong/dependency-check-gradle.svg?branch=master)](https://travis-ci.org/jeremylong/dependency-check-gradle)
+
 The dependency-check gradle plugin allows projects to monitor dependent libraries for
 known, published vulnerabilities.
 
