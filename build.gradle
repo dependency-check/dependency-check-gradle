@@ -54,8 +54,9 @@ dependencies {
     compile(
         localGroovy(),
         gradleApi(),
-            'org.owasp:dependency-check-core:1.4.5',
-            'org.owasp:dependency-check-utils:1.4.5'
+        'commons-collections:commons-collections:3.2.2',
+        'org.owasp:dependency-check-core:1.4.5',
+        'org.owasp:dependency-check-utils:1.4.5'
     )
 
     testCompile ('com.netflix.nebula:nebula-test:4.2.2'){
@@ -79,6 +80,8 @@ task integTest(type: Test) {
     reports.html.destination = file("$buildDir/reports/integ")
     jvmArgs '-XX:MaxPermSize=256m'
 }
+
+apply plugin: 'project-report'
 
 apply from: 'conf/publish/local.gradle'
 //// gradle uploadArchives
