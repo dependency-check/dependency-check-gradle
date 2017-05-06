@@ -58,7 +58,7 @@ class Check extends DefaultTask {
      * all of the projects dependencies.
      */
     @TaskAction
-    def check() {
+    check() {
         verifySettings()
         initializeSettings()
         def engine = null
@@ -77,10 +77,10 @@ class Check extends DefaultTask {
             ExceptionCollection exCol = null
             logger.lifecycle("Checking for updates and analyzing vulnerabilities for dependencies")
             try {
-                engine.analyzeDependencies();
+                engine.analyzeDependencies()
             } catch (ExceptionCollection ex) {
                 if (config.failOnError && ex.isFatal()) {
-                    throw new GradleException("Analysis failed.", ex);
+                    throw new GradleException("Analysis failed.", ex)
                 }
                 exCol = ex
             }
@@ -114,7 +114,7 @@ class Check extends DefaultTask {
 
     def verifySettings() {
         if (config.scanConfigurations && config.skipConfigurations) {
-            throw new IllegalArgumentException("you can only specify one of scanConfigurations or skipConfigurations");
+            throw new IllegalArgumentException("you can only specify one of scanConfigurations or skipConfigurations")
         }
     }
 
@@ -148,9 +148,9 @@ class Check extends DefaultTask {
 
         if (config.cveValidForHours != null) {
             if (config.cveValidForHours >= 0) {
-                Settings.setInt(CVE_CHECK_VALID_FOR_HOURS, config.cveValidForHours);
+                Settings.setInt(CVE_CHECK_VALID_FOR_HOURS, config.cveValidForHours)
             } else {
-                throw new InvalidUserDataException("Invalid setting: `validForHours` must be 0 or greater");
+                throw new InvalidUserDataException("Invalid setting: `validForHours` must be 0 or greater")
             }
         }
         Settings.setBooleanIfNotNull(ANALYZER_JAR_ENABLED, config.analyzers.jarEnabled)
@@ -186,7 +186,7 @@ class Check extends DefaultTask {
      */
     def cleanup(engine) {
         Settings.cleanup(true)
-        engine.cleanup();
+        engine.cleanup()
     }
 
     /**
@@ -265,22 +265,22 @@ class Check extends DefaultTask {
             dependency.getVulnerabilities()
         }.flatten()
 
-        final StringBuilder ids = new StringBuilder();
+        final StringBuilder ids = new StringBuilder()
 
         vulnerabilities.each {
             if (it.getCvssScore() >= config.failBuildOnCVSS) {
                 if (ids.length() == 0) {
-                    ids.append(it.getName());
+                    ids.append(it.getName())
                 } else {
-                    ids.append(", ").append(it.getName());
+                    ids.append(", ").append(it.getName())
                 }
             }
         }
         if (ids.length() > 0) {
             final String msg = String.format("%n%nDependency-Check Failure:%n"
                     + "One or more dependencies were identified with vulnerabilities that have a CVSS score greater then '%.1f': %s%n"
-                    + "See the dependency-check report for more details.%n%n", config.failBuildOnCVSS, ids.toString());
-            throw new GradleException(msg);
+                    + "See the dependency-check report for more details.%n%n", config.failBuildOnCVSS, ids.toString())
+            throw new GradleException(msg)
         }
 
     }
@@ -330,7 +330,7 @@ class Check extends DefaultTask {
      *     <li>the configuration name starts with 'androidTest'</li>
      * </ul>
      */
-    def static isTestConfigurationCheck(configuration) {
+    static isTestConfigurationCheck(configuration) {
         def isTestConfiguration = configuration.name.startsWith("test") || configuration.name.startsWith("androidTest")
         configuration.hierarchy.each {
             isTestConfiguration |= (it.name == "testCompile" || it.name == "androidTestCompile")

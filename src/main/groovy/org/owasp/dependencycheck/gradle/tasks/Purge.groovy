@@ -44,7 +44,7 @@ class Purge extends DefaultTask {
      * Purges the local cache of the NVD data.
      */
     @TaskAction
-    def purge() {
+    purge() {
         initializeSettings()
         def db = new File(Settings.getDataDirectory(), "dc.h2.db")
         if (db.exists()) {

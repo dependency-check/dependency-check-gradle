@@ -27,7 +27,7 @@ import org.owasp.dependencycheck.gradle.tasks.Purge
 import org.owasp.dependencycheck.gradle.tasks.Update
 
 class DependencyCheck implements Plugin<Project> {
-    private static final String CHECK_TASK = 'dependencyCheck'
+    private static final String CHECK_TASK = 'dependencyCheckAnalyze'
     private static final String UPDATE_TASK = 'dependencyCheckUpdate'
     private static final String PURGE_TASK = 'dependencyCheckPurge'
 
@@ -35,15 +35,16 @@ class DependencyCheck implements Plugin<Project> {
     private static final String PROXY_EXTENSION_NAME = "proxy"
     private static final String CVE_EXTENSION_NAME = "cve"
     private static final String DATA_EXTENSION_NAME = "data"
+    private static final String CHECK_EXTENSION_NAME = "dependencyCheck"
     private static final String ANALYZERS_EXTENSION_NAME = "analyzers"
 
-    def void apply(Project project) {
+    void apply(Project project) {
         initializeConfigurations(project)
         registerTasks(project)
     }
 
-    def void initializeConfigurations(Project project) {
-        def ext = project.extensions.create(CHECK_TASK, CheckExtension, project)
+    void initializeConfigurations(Project project) {
+        def ext = project.extensions.create(CHECK_EXTENSION_NAME, CheckExtension, project)
         ext.extensions.create(PROXY_EXTENSION_NAME, ProxyExtension)
         ext.extensions.create(CVE_EXTENSION_NAME, CveExtension)
         ext.extensions.create(DATA_EXTENSION_NAME, DataExtension)
@@ -58,15 +59,9 @@ class DependencyCheck implements Plugin<Project> {
         purge.extensions.create(DATA_EXTENSION_NAME, PurgeDataExtension)
     }
 
-    def void registerTasks(Project project) {
+    void registerTasks(Project project) {
         project.task(PURGE_TASK, type: Purge)
         project.task(UPDATE_TASK, type: Update)
         project.task(CHECK_TASK, type: Check)
-
-        // this add the dependencyCheck task to the check; however it turns out users don't want this as they would
-        // rather configure this themselves.
-        //project.plugins.withType(JavaPlugin) {
-        //    project.tasks.check.dependsOn project.tasks.getByName(CHECK_TASK)
-        //}
     }
 }

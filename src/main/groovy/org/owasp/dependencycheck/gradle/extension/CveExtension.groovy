@@ -18,7 +18,7 @@
 
 package org.owasp.dependencycheck.gradle.extension
 
-public class CveExtension {
+class CveExtension {
     /**
      * URL for the modified CVE 1.2:
      *    https://nvd.nist.gov/download/nvdcve-Modified.xml.gz
