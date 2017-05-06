@@ -1,5 +1,8 @@
 .idea/
-.gradle
+.gradle/
+.settings/
+.classpath
+.project
 
 *.iml
 *.ipr
@@ -7,6 +10,7 @@
 
 out/
 build/
+bin/
 
 gradle-app.setting
 gradle.properties
