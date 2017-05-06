@@ -27,7 +27,7 @@ import org.owasp.dependencycheck.gradle.tasks.Purge
 import org.owasp.dependencycheck.gradle.tasks.Update
 
 class DependencyCheck implements Plugin<Project> {
-    private static final String CHECK_TASK = 'dependencyCheckAnalyzer'
+    private static final String CHECK_TASK = 'dependencyCheckAnalyze'
     private static final String UPDATE_TASK = 'dependencyCheckUpdate'
     private static final String PURGE_TASK = 'dependencyCheckPurge'
 
