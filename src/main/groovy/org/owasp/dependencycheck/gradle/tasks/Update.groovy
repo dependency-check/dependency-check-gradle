@@ -65,7 +65,7 @@ class Update extends DefaultTask {
      * Executes the update task.
      */
     @TaskAction
-    def update() {
+    update() {
         initializeSettings()
         def engine = null
         try {
@@ -119,9 +119,9 @@ class Update extends DefaultTask {
 
         if (config.cveValidForHours != null) {
             if (config.cveValidForHours >= 0) {
-                Settings.setInt(CVE_CHECK_VALID_FOR_HOURS, config.cveValidForHours);
+                Settings.setInt(CVE_CHECK_VALID_FOR_HOURS, config.cveValidForHours)
             } else {
-                throw new InvalidUserDataException("Invalid setting: `validForHours` must be 0 or greater");
+                throw new InvalidUserDataException("Invalid setting: `validForHours` must be 0 or greater")
             }
         }
     }
@@ -130,6 +130,6 @@ class Update extends DefaultTask {
      */
     def cleanup(engine) {
         Settings.cleanup(true)
-        engine.cleanup();
+        engine.cleanup()
     }
 }
