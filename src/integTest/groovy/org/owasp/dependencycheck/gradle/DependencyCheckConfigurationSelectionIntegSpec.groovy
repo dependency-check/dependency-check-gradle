@@ -13,7 +13,7 @@ class DependencyCheckConfigurationSelectionIntegSpec extends IntegrationSpec {
         copyResources('skipTestGroups.gradle', 'build.gradle')
 
         when:
-        ExecutionResult result = runTasks('dependencyCheckAnalyze')
+        ExecutionResult result = runTasks(DependencyCheck.CHECK_TASK)
 
         then:
         true == result.success
@@ -25,7 +25,7 @@ class DependencyCheckConfigurationSelectionIntegSpec extends IntegrationSpec {
         copyResources('noSkipTestGroups.gradle', 'build.gradle')
 
         when:
-        ExecutionResult result = runTasks('dependencyCheckAnalyze')
+        ExecutionResult result = runTasks(DependencyCheck.CHECK_TASK)
 
         then:
         false == result.success
@@ -41,7 +41,7 @@ class DependencyCheckConfigurationSelectionIntegSpec extends IntegrationSpec {
         copyResources('scanCustomConfiguration.gradle', 'build.gradle')
 
         when:
-        ExecutionResult result = runTasks('dependencyCheckAnalyze')
+        ExecutionResult result = runTasks(DependencyCheck.CHECK_TASK)
 
         then:
         false == result.success
@@ -54,7 +54,7 @@ class DependencyCheckConfigurationSelectionIntegSpec extends IntegrationSpec {
         copyResources('blacklistCustomConfiguration.gradle', 'build.gradle')
 
         when:
-        ExecutionResult result = runTasks('dependencyCheckAnalyze')
+        ExecutionResult result = runTasks(DependencyCheck.CHECK_TASK)
 
         then:
         true == result.success
@@ -66,7 +66,7 @@ class DependencyCheckConfigurationSelectionIntegSpec extends IntegrationSpec {
         copyResources('skipCustomConfigurationViaWhitelist.gradle', 'build.gradle')
 
         when:
-        ExecutionResult result = runTasks('dependencyCheckAnalyze')
+        ExecutionResult result = runTasks(DependencyCheck.CHECK_TASK)
 
         then:
         true == result.success

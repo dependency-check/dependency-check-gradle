@@ -17,7 +17,12 @@ class DependencyCheckGradlePluginIntegSpec extends IntegrationSpec {
         ExecutionResult result = runTasksSuccessfully('tasks')
 
         then:
-        result.standardOutput.contains('dependencyCheckAnalyze - Identifies and reports known vulnerabilities (CVEs) in project dependencies.')
+        result.standardOutput.contains(
+                String.format(
+                        '%s - Identifies and reports known vulnerabilities (CVEs) in project dependencies.',
+                        DependencyCheck.CHECK_TASK
+                )
+        )
     }
 
     def "I can override outputDir with extension"() {
@@ -26,7 +31,7 @@ class DependencyCheckGradlePluginIntegSpec extends IntegrationSpec {
         copyResources('outputDir.gradle', 'build.gradle')
 
         when:
-        runTasksSuccessfully('dependencyCheckAnalyze')
+        runTasksSuccessfully(DependencyCheck.CHECK_TASK)
 
         then:
         fileExists('build/dependency-reports/dependency-check-report.html')

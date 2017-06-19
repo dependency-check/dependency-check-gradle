@@ -30,7 +30,7 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.DATA_DIRECTORY
  */
 class Purge extends DefaultTask {
 
-    def config = project.dependencyCheckPurge
+    def config = project.dependencyCheck
 
     /**
      * Initializes the purge task.

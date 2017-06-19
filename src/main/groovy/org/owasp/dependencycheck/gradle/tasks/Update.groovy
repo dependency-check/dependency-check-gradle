@@ -51,7 +51,7 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_PASSWORD
  */
 class Update extends DefaultTask {
 
-    def config = project.dependencyCheckUpdate
+    def config = project.dependencyCheck
 
     /**
      * Initializes the update task.
