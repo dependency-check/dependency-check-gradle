@@ -37,6 +37,7 @@ class DependencyCheck implements Plugin<Project> {
     private static final String DATA_EXTENSION_NAME = "data"
     private static final String CHECK_EXTENSION_NAME = "dependencyCheck"
     private static final String ANALYZERS_EXTENSION_NAME = "analyzers"
+    private static final String SUPPRESSIONS_EXTENSION_NAME = "suppressions"
 
     void apply(Project project) {
         initializeConfigurations(project)
@@ -49,6 +50,7 @@ class DependencyCheck implements Plugin<Project> {
         ext.extensions.create(CVE_EXTENSION_NAME, CveExtension)
         ext.extensions.create(DATA_EXTENSION_NAME, DataExtension)
         ext.extensions.create(ANALYZERS_EXTENSION_NAME, AnalyzerExtension)
+        ext.extensions.create(SUPPRESSIONS_EXTENSION_NAME, SuppressionFilesExtension)
 
         def update = project.extensions.create(UPDATE_TASK, UpdateExtension)
         update.extensions.create(CVE_EXTENSION_NAME, CveExtension)
