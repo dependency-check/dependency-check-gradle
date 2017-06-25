@@ -48,7 +48,7 @@ class CheckExtension extends UpdateExtension {
     /**
      * The list of paths to suppression files.
      */
-    SuppressionFilesExtension suppressionFiles
+    List<String> suppressionFiles = []
     /**
      * The path to the hints file.
      */

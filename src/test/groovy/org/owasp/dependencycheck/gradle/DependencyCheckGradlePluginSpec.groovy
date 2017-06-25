@@ -88,6 +88,9 @@ class DependencyCheckGradlePluginSpec extends PluginProjectSpec {
             scanConfigurations = ['a']
             skipConfigurations = ['b']
             skipTestGroups = false
+
+            suppressionFile = './src/config/suppression.xml'
+            suppressionFiles = ['./src/config/suppression1.xml', './src/config/suppression2.xml']
         }
 
         then:
@@ -104,6 +107,8 @@ class DependencyCheckGradlePluginSpec extends PluginProjectSpec {
         project.dependencyCheck.scanConfigurations == ['a']
         project.dependencyCheck.skipConfigurations == ['b']
         project.dependencyCheck.skipTestGroups == false
+        project.dependencyCheck.suppressionFile == './src/config/suppression.xml'
+        project.dependencyCheck.suppressionFiles == ['./src/config/suppression1.xml', './src/config/suppression2.xml']
     }
 
     def 'scanConfigurations and skipConfigurations are mutually exclusive'() {
