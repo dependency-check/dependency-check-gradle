@@ -126,7 +126,10 @@ class Check extends DefaultTask {
         Settings.initialize()
 
         Settings.setBooleanIfNotNull(AUTO_UPDATE, config.autoUpdate)
-        Settings.setStringIfNotEmpty(SUPPRESSION_FILE, config.suppressionFile)
+
+        String[] suppressions = determineSuppressions(config.suppressionFiles, config.suppressionFile)
+
+        Settings.setArrayIfNotEmpty(SUPPRESSION_FILE, suppressions)
         Settings.setStringIfNotEmpty(HINTS_FILE, config.hintsFile)
 
         Settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
@@ -180,6 +183,26 @@ class Check extends DefaultTask {
         Settings.setBooleanIfNotNull(ANALYZER_AUTOCONF_ENABLED, config.analyzers.autoconfEnabled)
         Settings.setBooleanIfNotNull(ANALYZER_COMPOSER_LOCK_ENABLED, config.analyzers.composerEnabled)
         Settings.setBooleanIfNotNull(ANALYZER_NODE_PACKAGE_ENABLED, config.analyzers.nodeEnabled)
+    }
+
+    /**
+     * Combines the configured suppressionFile and suppressionFiles into a
+     * single array.
+     *
+     * @return an array of suppression file paths
+     */
+    def determineSuppressions(suppressionFiles, suppressionFile) {
+        String[] suppressions = suppressionFiles
+        if (suppressionFile != null) {
+            if (suppressions == null) {
+                suppressions = new String[1]
+                suppressions[0] = suppressionFile
+            } else {
+                suppressions = Arrays.copyOf(suppressions, suppressions.length + 1)
+                suppressions[suppressions.length - 1] = suppressionFile
+            }
+        }
+        return suppressions;
     }
     /**
      * Releases resources and removes temporary files used.

@@ -17,7 +17,7 @@
  */
 
 group = 'org.owasp'
-version = '1.4.5.1'
+version = '2.0.0-SNAPSHOT'
 
 buildscript {
     repositories {
@@ -26,7 +26,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "com.gradle.publish:plugin-publish-plugin:0.9.3"
+        classpath "com.gradle.publish:plugin-publish-plugin:0.9.7"
     }
 }
 
@@ -56,8 +56,8 @@ dependencies {
         localGroovy(),
         gradleApi(),
         'commons-collections:commons-collections:3.2.2',
-        'org.owasp:dependency-check-core:1.4.5',
-        'org.owasp:dependency-check-utils:1.4.5'
+        'org.owasp:dependency-check-core:2.0.0-SNAPSHOT',
+        'org.owasp:dependency-check-utils:2.0.0-SNAPSHOT'
     )
 
     testCompile ('com.netflix.nebula:nebula-test:6.0.1'){

@@ -41,12 +41,14 @@ class CheckExtension extends UpdateExtension {
      * Configuration for the analyzers.
      */
     AnalyzerExtension analyzerExtension
-
     /**
      * The path to the suppression file.
      */
     String suppressionFile
-
+    /**
+     * The list of paths to suppression files.
+     */
+    SuppressionFilesExtension suppressionFiles
     /**
      * The path to the hints file.
      */
