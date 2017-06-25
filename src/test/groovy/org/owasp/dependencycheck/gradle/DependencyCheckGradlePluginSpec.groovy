@@ -48,6 +48,7 @@ class DependencyCheckGradlePluginSpec extends PluginProjectSpec {
         expect:
         task.group == 'OWASP dependency-check'
         task.description == 'Identifies and reports known vulnerabilities (CVEs) in project dependencies.'
+
         project.dependencyCheck.proxy.server == null
         project.dependencyCheck.proxy.port == null
         project.dependencyCheck.proxy.username == null
@@ -61,6 +62,7 @@ class DependencyCheckGradlePluginSpec extends PluginProjectSpec {
         project.dependencyCheck.scanConfigurations == []
         project.dependencyCheck.skipConfigurations == []
         project.dependencyCheck.skipTestGroups == true
+        project.dependencyCheck.suppressionFile == null
     }
 
     def 'tasks use correct values when extension is used'() {
