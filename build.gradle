@@ -43,12 +43,17 @@ tasks.withType(GroovyCompile) {
 }
 
 repositories {
-    mavenCentral()
     mavenLocal()
-    jcenter()
     maven {
-        url "https://repository-dependency-check.forge.cloudbees.com/snapshot/"
+        name 'OWASP dependency-check snapshot'
+        url "https://dependencycheck.jfrog.io/dependencycheck/libs-snapshot"
     }
+    maven {
+        name 'OWASP dependency-check release'
+        url 'https://dependencycheck.jfrog.io/dependencycheck/libs-release'
+    }
+    mavenCentral()
+    jcenter()
 }
 
 dependencies {
