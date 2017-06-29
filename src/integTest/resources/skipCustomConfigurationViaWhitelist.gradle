@@ -1,5 +1,7 @@
-apply plugin: 'java'
-apply plugin: 'org.owasp.dependencycheck'
+plugins {
+    id 'org.owasp.dependencycheck'
+    id 'java'
+}
 
 sourceCompatibility = 1.5
 version = '1.0'

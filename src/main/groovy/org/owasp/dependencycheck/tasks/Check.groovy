@@ -16,7 +16,7 @@
  * Copyright (c) 2015 Wei Ma. All Rights Reserved.
  */
 
-package org.owasp.dependencycheck.gradle.tasks
+package org.owasp.dependencycheck.tasks
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -24,15 +24,14 @@ import org.gradle.api.InvalidUserDataException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.Internal
 import org.owasp.dependencycheck.Engine
-import org.owasp.dependencycheck.data.nvdcve.CveDB
 import org.owasp.dependencycheck.data.nvdcve.DatabaseException
 import org.owasp.dependencycheck.exception.ExceptionCollection
 import org.owasp.dependencycheck.exception.ReportException
 import org.owasp.dependencycheck.dependency.Dependency
 import org.owasp.dependencycheck.dependency.Identifier
 import org.owasp.dependencycheck.dependency.Vulnerability
-import org.owasp.dependencycheck.reporting.ReportGenerator
 import org.owasp.dependencycheck.utils.Settings
 import static org.owasp.dependencycheck.utils.Settings.KEYS.*
 
@@ -50,8 +49,8 @@ class Check extends DefaultTask {
     }
 
 
-    def currentProjectName = project.getName()
-    def config = project.dependencyCheck
+    @Internal def currentProjectName = project.getName()
+    @Internal def config = project.dependencyCheck
 
     /**
      * Calls dependency-check-core's analysis engine to scan
@@ -86,7 +85,6 @@ class Check extends DefaultTask {
             }
 
             logger.lifecycle("Generating report for project ${currentProjectName}")
-            def reportGenerator = new ReportGenerator(currentProjectName, engine.dependencies, engine.analyzers, new CveDB().databaseProperties)
             try {
                 def displayName = "dependency-check";
                 def name = null

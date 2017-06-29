@@ -16,7 +16,7 @@
  * Copyright (c) 2015 Wei Ma. All Rights Reserved.
  */
 
-package org.owasp.dependencycheck.gradle.extension
+package org.owasp.dependencycheck.extension
 
 class CveExtension {
     /**

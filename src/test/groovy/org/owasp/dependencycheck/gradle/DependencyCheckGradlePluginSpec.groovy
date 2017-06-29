@@ -18,32 +18,43 @@
 
 package org.owasp.dependencycheck.gradle
 
-import nebula.test.PluginProjectSpec
 import org.gradle.api.Task
+import org.gradle.api.Project
+import org.gradle.testfixtures.ProjectBuilder
+import spock.lang.Specification
 
-class DependencyCheckGradlePluginSpec extends PluginProjectSpec {
+class DependencyCheckGradlePluginSpec extends Specification {
     static final String PLUGIN_ID = 'org.owasp.dependencycheck'
-
-    @Override
-    String getPluginName() {
-        return PLUGIN_ID
-    }
+    Project project
 
     def setup() {
-        project.apply plugin: pluginName
+        project = ProjectBuilder.builder().build()
+        project.apply plugin: PLUGIN_ID
     }
 
-    def 'apply creates dependencyCheck extension'() {
-        expect: project.extensions.findByName( 'dependencyCheck' )
+    def 'dependencyCheck extension exists'() {
+        expect:
+        project.extensions.findByName('dependencyCheck')
     }
 
-    def "apply creates dependencyCheck task"() {
-        expect: project.tasks.findByName( 'dependencyCheckAnalyze' )
+    def "dependencyCheckAnalyze task exists"() {
+        expect:
+        project.tasks.findByName('dependencyCheckAnalyze')
+    }
+
+    def "dependencyCheckPurge task exists"() {
+        expect:
+        project.tasks.findByName('dependencyCheckPurge')
+    }
+
+    def "dependencyCheckUpdate task exists"() {
+        expect:
+        project.tasks.findByName('dependencyCheckUpdate')
     }
 
     def 'dependencyCheck task has correct default values'() {
         setup:
-        Task task = project.tasks.findByName( 'dependencyCheckAnalyze' )
+        Task task = project.tasks.findByName('dependencyCheckAnalyze')
 
         expect:
         task.group == 'OWASP dependency-check'
