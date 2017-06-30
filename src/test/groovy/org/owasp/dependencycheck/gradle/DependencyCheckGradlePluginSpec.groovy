@@ -18,36 +18,48 @@
 
 package org.owasp.dependencycheck.gradle
 
-import nebula.test.PluginProjectSpec
 import org.gradle.api.Task
+import org.gradle.api.Project
+import org.gradle.testfixtures.ProjectBuilder
+import spock.lang.Specification
 
-class DependencyCheckGradlePluginSpec extends PluginProjectSpec {
+class DependencyCheckGradlePluginSpec extends Specification {
     static final String PLUGIN_ID = 'org.owasp.dependencycheck'
-
-    @Override
-    String getPluginName() {
-        return PLUGIN_ID
-    }
+    Project project
 
     def setup() {
-        project.apply plugin: pluginName
+        project = ProjectBuilder.builder().build()
+        project.apply plugin: PLUGIN_ID
     }
 
-    def 'apply creates dependencyCheck extension'() {
-        expect: project.extensions.findByName( 'dependencyCheck' )
+    def 'dependencyCheck extension exists'() {
+        expect:
+        project.extensions.findByName('dependencyCheck')
     }
 
-    def "apply creates dependencyCheck task"() {
-        expect: project.tasks.findByName( 'dependencyCheckAnalyze' )
+    def "dependencyCheckAnalyze task exists"() {
+        expect:
+        project.tasks.findByName('dependencyCheckAnalyze')
+    }
+
+    def "dependencyCheckPurge task exists"() {
+        expect:
+        project.tasks.findByName('dependencyCheckPurge')
+    }
+
+    def "dependencyCheckUpdate task exists"() {
+        expect:
+        project.tasks.findByName('dependencyCheckUpdate')
     }
 
     def 'dependencyCheck task has correct default values'() {
         setup:
-        Task task = project.tasks.findByName( 'dependencyCheckAnalyze' )
+        Task task = project.tasks.findByName('dependencyCheckAnalyze')
 
         expect:
         task.group == 'OWASP dependency-check'
         task.description == 'Identifies and reports known vulnerabilities (CVEs) in project dependencies.'
+
         project.dependencyCheck.proxy.server == null
         project.dependencyCheck.proxy.port == null
         project.dependencyCheck.proxy.username == null
@@ -61,6 +73,7 @@ class DependencyCheckGradlePluginSpec extends PluginProjectSpec {
         project.dependencyCheck.scanConfigurations == []
         project.dependencyCheck.skipConfigurations == []
         project.dependencyCheck.skipTestGroups == true
+        project.dependencyCheck.suppressionFile == null
     }
 
     def 'tasks use correct values when extension is used'() {
@@ -86,6 +99,9 @@ class DependencyCheckGradlePluginSpec extends PluginProjectSpec {
             scanConfigurations = ['a']
             skipConfigurations = ['b']
             skipTestGroups = false
+
+            suppressionFile = './src/config/suppression.xml'
+            suppressionFiles = ['./src/config/suppression1.xml', './src/config/suppression2.xml']
         }
 
         then:
@@ -102,6 +118,8 @@ class DependencyCheckGradlePluginSpec extends PluginProjectSpec {
         project.dependencyCheck.scanConfigurations == ['a']
         project.dependencyCheck.skipConfigurations == ['b']
         project.dependencyCheck.skipTestGroups == false
+        project.dependencyCheck.suppressionFile == './src/config/suppression.xml'
+        project.dependencyCheck.suppressionFiles == ['./src/config/suppression1.xml', './src/config/suppression2.xml']
     }
 
     def 'scanConfigurations and skipConfigurations are mutually exclusive'() {

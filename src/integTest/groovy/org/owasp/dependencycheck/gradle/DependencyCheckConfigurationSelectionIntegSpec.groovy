@@ -1,75 +1,103 @@
 package org.owasp.dependencycheck.gradle
 
-import nebula.test.IntegrationSpec
-import nebula.test.functional.ExecutionResult
+import org.gradle.testkit.runner.GradleRunner
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
+import static org.gradle.testkit.runner.TaskOutcome.*
 
-//todo   change this to use testKit
+class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
 
-class DependencyCheckConfigurationSelectionIntegSpec extends IntegrationSpec {
+    @Rule final TemporaryFolder testProjectDir = new TemporaryFolder()
+    File buildFile
 
-    def "test dependencies are ignored by default"() {
-        setup:
-        writeHelloWorld('com.example')
-        copyResources('skipTestGroups.gradle', 'build.gradle')
+    def setup() {
+        buildFile = testProjectDir.newFile('build.gradle')
+    }
+
+    def 'test dependencies are ignored by default'() {
+        given:
+        def resource = new File(getClass().getClassLoader().getResource('skipTestGroups.gradle').toURI())
+        buildFile << resource.text
 
         when:
-        ExecutionResult result = runTasks('dependencyCheckAnalyze')
+        def result = GradleRunner.create()
+                .withProjectDir(testProjectDir.root)
+                .withArguments('dependencyCheckAnalyze')
+                .withPluginClasspath()
+                .withDebug(true)
+                .build()
 
         then:
-        true == result.success
+        result.task(':dependencyCheckAnalyze').outcome == SUCCESS
     }
 
     def "test dependencies are scanned if skipTestGroups flag is false"() {
-        setup:
-        writeHelloWorld('com.example')
-        copyResources('noSkipTestGroups.gradle', 'build.gradle')
+        given:
+        def resource = new File(getClass().getClassLoader().getResource('noSkipTestGroups.gradle').toURI())
+        buildFile << resource.text
 
         when:
-        ExecutionResult result = runTasks('dependencyCheckAnalyze')
+        def result = GradleRunner.create()
+                .withProjectDir(testProjectDir.root)
+                .withArguments('dependencyCheckAnalyze')
+                .withPluginClasspath()
+                .buildAndFail()
 
         then:
-        false == result.success
-        true == result.standardOutput.contains('CVE-2015-6420')
-        true == result.standardOutput.contains('CVE-2014-0114')
-        true == result.standardOutput.contains('CVE-2016-3092')
-        true == result.standardOutput.contains('CVE-2015-5262')
+        result.task(':dependencyCheckAnalyze').outcome == FAILED
+        result.output.contains('CVE-2015-6420')
+        result.output.contains('CVE-2014-0114')
+        result.output.contains('CVE-2016-3092')
+        result.output.contains('CVE-2015-5262')
     }
 
     def "custom configurations are scanned by default"() {
-        setup:
-        writeHelloWorld('com.example')
-        copyResources('scanCustomConfiguration.gradle', 'build.gradle')
+        given:
+        def resource = new File(getClass().getClassLoader().getResource('scanCustomConfiguration.gradle').toURI())
+        buildFile << resource.text
 
         when:
-        ExecutionResult result = runTasks('dependencyCheckAnalyze')
+        def result = GradleRunner.create()
+                .withProjectDir(testProjectDir.root)
+                .withArguments('dependencyCheckAnalyze')
+                .withPluginClasspath()
+                .buildAndFail()
 
         then:
-        false == result.success
-        true == result.standardOutput.contains('CVE-2015-6420')
+        result.task(':dependencyCheckAnalyze').outcome == FAILED
+        result.output.contains('CVE-2015-6420')
     }
 
     def "custom configurations are skipped if blacklisted"() {
-        setup:
-        writeHelloWorld('com.example')
-        copyResources('blacklistCustomConfiguration.gradle', 'build.gradle')
+        given:
+        def resource = new File(getClass().getClassLoader().getResource('blacklistCustomConfiguration.gradle').toURI())
+        buildFile << resource.text
 
         when:
-        ExecutionResult result = runTasks('dependencyCheckAnalyze')
+        def result = GradleRunner.create()
+                .withProjectDir(testProjectDir.root)
+                .withArguments('dependencyCheckAnalyze')
+                .withPluginClasspath()
+                .build()
 
         then:
-        true == result.success
+        result.task(':dependencyCheckAnalyze').outcome == SUCCESS
     }
 
     def "custom configurations are skipped when only scanning whitelisted configurations"() {
-        setup:
-        writeHelloWorld('com.example')
-        copyResources('skipCustomConfigurationViaWhitelist.gradle', 'build.gradle')
+        given:
+        def resource = new File(getClass().getClassLoader().getResource('skipCustomConfigurationViaWhitelist.gradle').toURI())
+        buildFile << resource.text
 
         when:
-        ExecutionResult result = runTasks('dependencyCheckAnalyze')
+        def result = GradleRunner.create()
+                .withProjectDir(testProjectDir.root)
+                .withArguments('dependencyCheckAnalyze')
+                .withPluginClasspath()
+                .build()
 
         then:
-        true == result.success
+        result.task(':dependencyCheckAnalyze').outcome == SUCCESS
     }
-
 }

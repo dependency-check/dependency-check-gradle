@@ -17,8 +17,8 @@
  */
 
 group = 'org.owasp'
-version = '1.4.5.1'
-
+version = '2.0.0-SNAPSHOT'
+ 
 buildscript {
     repositories {
         maven {
@@ -26,15 +26,17 @@ buildscript {
         }
     }
     dependencies {
-        classpath "com.gradle.publish:plugin-publish-plugin:0.9.3"
+        classpath "com.gradle.publish:plugin-publish-plugin:0.9.7"
     }
 }
 
+apply plugin: 'groovy'
+apply plugin: 'java-gradle-plugin'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
-apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'signing'
+apply plugin: 'project-report'
 apply plugin: 'com.gradle.plugin-publish'
 
 tasks.withType(GroovyCompile) {
@@ -43,12 +45,17 @@ tasks.withType(GroovyCompile) {
 }
 
 repositories {
-    mavenCentral()
     mavenLocal()
-    jcenter()
     maven {
-        url "https://repository-dependency-check.forge.cloudbees.com/snapshot/"
+        name 'OWASP dependency-check snapshot'
+        url 'https://dependencycheck.jfrog.io/dependencycheck/libs-snapshot'
     }
+    maven {
+        name 'OWASP dependency-check release'
+        url 'https://dependencycheck.jfrog.io/dependencycheck/libs-release'
+    }
+    mavenCentral()
+    jcenter()
 }
 
 dependencies {
@@ -56,12 +63,13 @@ dependencies {
         localGroovy(),
         gradleApi(),
         'commons-collections:commons-collections:3.2.2',
-        'org.owasp:dependency-check-core:1.4.5',
-        'org.owasp:dependency-check-utils:1.4.5'
+        'org.owasp:dependency-check-core:2.0.0-SNAPSHOT',
+        'org.owasp:dependency-check-utils:2.0.0-SNAPSHOT'
     )
 
-    testCompile ('com.netflix.nebula:nebula-test:6.0.1'){
-        exclude group: 'org.codehaus.groovy'
+    testCompile gradleTestKit()
+    testCompile("org.spockframework:spock-core:1.1-groovy-2.4") {
+        exclude module: "groovy-all"
     }
 }
 
@@ -69,8 +77,8 @@ sourceSets {
     integTest {
         groovy.srcDir file('src/integTest/groovy')
         resources.srcDir file('src/integTest/resources')
-        compileClasspath = sourceSets.main.output + configurations.testRuntime
-        runtimeClasspath = output + compileClasspath
+        compileClasspath += sourceSets.main.output + configurations.testRuntime
+        runtimeClasspath += output + compileClasspath
     }
 }
 
@@ -78,15 +86,19 @@ task integTest(type: Test) {
     group = 'verification'
     testClassesDir = sourceSets.integTest.output.classesDir
     classpath = sourceSets.integTest.runtimeClasspath
-    reports.html.destination = file("$buildDir/reports/integ")
     jvmArgs '-XX:MaxPermSize=256m'
     jvmArgs '-Xmx1024m'
 }
+
 check.dependsOn integTest
 
-apply plugin: 'project-report'
+gradlePlugin {
+    testSourceSets sourceSets.integTest
+}
 
-apply from: 'conf/publish/local.gradle'
+
+
+//apply from: 'conf/publish/local.gradle'
 //// gradle uploadArchives
 //apply from: 'conf/publish/maven.gradle'
 //// gradle publishPlugins

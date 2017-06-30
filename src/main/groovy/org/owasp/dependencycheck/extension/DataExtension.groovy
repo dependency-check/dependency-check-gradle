@@ -16,7 +16,7 @@
  * Copyright (c) 2015 Jeremy Long. All Rights Reserved.
  */
 
-package org.owasp.dependencycheck.gradle.extension
+package org.owasp.dependencycheck.extension
 
 /**
  * The update data configuration extension. Any value not configured will use the dependency-check-core defaults.

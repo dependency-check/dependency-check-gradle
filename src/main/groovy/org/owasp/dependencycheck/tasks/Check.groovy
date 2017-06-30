@@ -16,7 +16,7 @@
  * Copyright (c) 2015 Wei Ma. All Rights Reserved.
  */
 
-package org.owasp.dependencycheck.gradle.tasks
+package org.owasp.dependencycheck.tasks
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -24,15 +24,14 @@ import org.gradle.api.InvalidUserDataException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.Internal
 import org.owasp.dependencycheck.Engine
-import org.owasp.dependencycheck.data.nvdcve.CveDB
 import org.owasp.dependencycheck.data.nvdcve.DatabaseException
 import org.owasp.dependencycheck.exception.ExceptionCollection
 import org.owasp.dependencycheck.exception.ReportException
 import org.owasp.dependencycheck.dependency.Dependency
 import org.owasp.dependencycheck.dependency.Identifier
 import org.owasp.dependencycheck.dependency.Vulnerability
-import org.owasp.dependencycheck.reporting.ReportGenerator
 import org.owasp.dependencycheck.utils.Settings
 import static org.owasp.dependencycheck.utils.Settings.KEYS.*
 
@@ -50,8 +49,8 @@ class Check extends DefaultTask {
     }
 
 
-    def currentProjectName = project.getName()
-    def config = project.dependencyCheck
+    @Internal def currentProjectName = project.getName()
+    @Internal def config = project.dependencyCheck
 
     /**
      * Calls dependency-check-core's analysis engine to scan
@@ -86,9 +85,19 @@ class Check extends DefaultTask {
             }
 
             logger.lifecycle("Generating report for project ${currentProjectName}")
-            def reportGenerator = new ReportGenerator(currentProjectName, engine.dependencies, engine.analyzers, new CveDB().databaseProperties)
             try {
-                reportGenerator.generateReports(config.outputDirectory, config.format.toString())
+                def displayName = "dependency-check";
+                def name = null
+                if (project.getName() != null) {
+                    name = project.getName();
+                    displayName = project.getDisplayName()
+                }
+                def groupId = null
+                if (project.getGroup() != null) {
+                    groupId = project.getGroup()
+                }
+                File output = new File(config.outputDirectory)
+                engine.writeReports(displayName, groupId, name.toString(), project.getVersion().toString(), output, config.format.toString())
             } catch (ReportException ex) {
                 if (config.failOnError) {
                     if (exCol != null) {
@@ -106,7 +115,7 @@ class Check extends DefaultTask {
             showSummary(engine)
             checkForFailure(engine)
             cleanup(engine)
-            if (config.failOnError && exCol != null && exCol.getExceptions().size()>0) {
+            if (config.failOnError && exCol != null && exCol.getExceptions().size() > 0) {
                 throw new GradleException("One or more exceptions occurred during analysis", exCol)
             }
         }
@@ -126,7 +135,10 @@ class Check extends DefaultTask {
         Settings.initialize()
 
         Settings.setBooleanIfNotNull(AUTO_UPDATE, config.autoUpdate)
-        Settings.setStringIfNotEmpty(SUPPRESSION_FILE, config.suppressionFile)
+
+        String[] suppressionLists = determineSuppressions(config.suppressionFiles, config.suppressionFile)
+
+        Settings.setArrayIfNotEmpty(SUPPRESSION_FILE, suppressionLists)
         Settings.setStringIfNotEmpty(HINTS_FILE, config.hintsFile)
 
         Settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
@@ -181,6 +193,19 @@ class Check extends DefaultTask {
         Settings.setBooleanIfNotNull(ANALYZER_COMPOSER_LOCK_ENABLED, config.analyzers.composerEnabled)
         Settings.setBooleanIfNotNull(ANALYZER_NODE_PACKAGE_ENABLED, config.analyzers.nodeEnabled)
     }
+
+    /**
+     * Combines the configured suppressionFile and suppressionFiles into a
+     * single array.
+     *
+     * @return an array of suppression file paths
+     */
+    def determineSuppressions(suppressionFiles, suppressionFile) {
+        if (suppressionFile != null) {
+            suppressionFiles.add(suppressionFile)
+        }
+        return suppressionFiles.toArray(new String[0]);
+    }
     /**
      * Releases resources and removes temporary files used.
      */
@@ -199,7 +224,7 @@ class Check extends DefaultTask {
         }.each { Configuration configuration ->
             configuration.getResolvedConfiguration().getResolvedArtifacts().collect { ResolvedArtifact artifact ->
                 def deps = engine.scan(artifact.getFile())
-                if (deps != null && deps.size()==1) {
+                if (deps != null && deps.size() == 1) {
                     def d = deps.get(0)
                     d.addProjectReference(configuration.name)
                 }
@@ -284,7 +309,6 @@ class Check extends DefaultTask {
         }
 
     }
-
 
     /**
      * Checks whether the given configuration should be scanned

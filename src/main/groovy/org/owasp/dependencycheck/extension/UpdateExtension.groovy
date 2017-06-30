@@ -16,14 +16,18 @@
  * Copyright (c) 2015 Wei Ma. All Rights Reserved.
  */
 
-package org.owasp.dependencycheck.gradle.extension
-/**
- * TODO - this should not be needed, instead rely on the configured HTTP or HTTPS proxies
- * https://docs.gradle.org/current/userguide/build_environment.html
- */
-class ProxyExtension {
-    String server
-    Integer port
-    String username
-    String password
+package org.owasp.dependencycheck.extension
+
+class UpdateExtension extends PurgeExtension {
+    ProxyExtension proxyExtension
+    CveExtension cveExtension
+    DataExtension dataExtension
+    /**
+     * Set to false if the proxy does not support HEAD requests. The default is true.
+     */
+    Boolean quickQueryTimestamp
+    /**
+     * The number of hours to wait before checking for additional updates from the NVD.
+     */
+    Integer cveValidForHours
 }

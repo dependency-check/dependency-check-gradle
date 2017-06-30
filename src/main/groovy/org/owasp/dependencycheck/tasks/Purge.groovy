@@ -16,11 +16,12 @@
  * Copyright (c) 2015 Jeremy Long. All Rights Reserved.
  */
 
-package org.owasp.dependencycheck.gradle.tasks
+package org.owasp.dependencycheck.tasks
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.Internal
 import org.owasp.dependencycheck.utils.Settings
 
 import static org.owasp.dependencycheck.utils.Settings.KEYS.DATA_DIRECTORY
@@ -30,7 +31,7 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.DATA_DIRECTORY
  */
 class Purge extends DefaultTask {
 
-    def config = project.dependencyCheckPurge
+    @Internal def config = project.dependencyCheckPurge
 
     /**
      * Initializes the purge task.

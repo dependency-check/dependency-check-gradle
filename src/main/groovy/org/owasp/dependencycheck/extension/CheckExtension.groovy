@@ -16,7 +16,7 @@
  * Copyright (c) 2015 Wei Ma. All Rights Reserved.
  */
 
-package org.owasp.dependencycheck.gradle.extension
+package org.owasp.dependencycheck.extension
 
 import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
 import org.gradle.api.Project
@@ -41,12 +41,14 @@ class CheckExtension extends UpdateExtension {
      * Configuration for the analyzers.
      */
     AnalyzerExtension analyzerExtension
-
     /**
      * The path to the suppression file.
      */
     String suppressionFile
-
+    /**
+     * The list of paths to suppression files.
+     */
+    List<String> suppressionFiles = []
     /**
      * The path to the hints file.
      */

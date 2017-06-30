@@ -2,13 +2,16 @@
  * Build file to exercise dependency check
  * @author Sion Williams
  */
-apply plugin: 'java'
-apply plugin: 'org.owasp.dependencycheck'
+plugins {
+    id 'org.owasp.dependencycheck'
+    id 'java'
+}
 
 sourceCompatibility = 1.5
 version = '1.0'
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
@@ -17,5 +20,5 @@ dependencies {
 }
 
 dependencyCheck {
-    outputDirectory = "${project.buildDir}/dependency-reports"
+
 }
