@@ -16,7 +16,7 @@
  * Copyright (c) 2015 Wei Ma. All Rights Reserved.
  */
 
-package org.owasp.dependencycheck.tasks
+package org.owasp.dependencycheck.gradle.tasks
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -192,6 +192,7 @@ class Check extends DefaultTask {
         Settings.setBooleanIfNotNull(ANALYZER_AUTOCONF_ENABLED, config.analyzers.autoconfEnabled)
         Settings.setBooleanIfNotNull(ANALYZER_COMPOSER_LOCK_ENABLED, config.analyzers.composerEnabled)
         Settings.setBooleanIfNotNull(ANALYZER_NODE_PACKAGE_ENABLED, config.analyzers.nodeEnabled)
+        Settings.setBooleanIfNotNull(ANALYZER_NSP_PACKAGE_ENABLED, config.analyzers.nspEnabled)
     }
 
     /**

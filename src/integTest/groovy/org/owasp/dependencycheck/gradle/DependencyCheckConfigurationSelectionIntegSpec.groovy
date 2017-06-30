@@ -23,13 +23,13 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         when:
         def result = GradleRunner.create()
                 .withProjectDir(testProjectDir.root)
-                .withArguments('dependencyCheckAnalyze')
+                .withArguments(DependencyCheckPlugin.CHECK_TASK)
                 .withPluginClasspath()
                 .withDebug(true)
                 .build()
 
         then:
-        result.task(':dependencyCheckAnalyze').outcome == SUCCESS
+        result.task(":$DependencyCheckPlugin.CHECK_TASK").outcome == SUCCESS
     }
 
     def "test dependencies are scanned if skipTestGroups flag is false"() {
@@ -40,12 +40,12 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         when:
         def result = GradleRunner.create()
                 .withProjectDir(testProjectDir.root)
-                .withArguments('dependencyCheckAnalyze')
+                .withArguments(DependencyCheckPlugin.CHECK_TASK)
                 .withPluginClasspath()
                 .buildAndFail()
 
         then:
-        result.task(':dependencyCheckAnalyze').outcome == FAILED
+        result.task(":$DependencyCheckPlugin.CHECK_TASK").outcome == FAILED
         result.output.contains('CVE-2015-6420')
         result.output.contains('CVE-2014-0114')
         result.output.contains('CVE-2016-3092')
@@ -60,12 +60,12 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         when:
         def result = GradleRunner.create()
                 .withProjectDir(testProjectDir.root)
-                .withArguments('dependencyCheckAnalyze')
+                .withArguments(DependencyCheckPlugin.CHECK_TASK)
                 .withPluginClasspath()
                 .buildAndFail()
 
         then:
-        result.task(':dependencyCheckAnalyze').outcome == FAILED
+        result.task(":$DependencyCheckPlugin.CHECK_TASK").outcome == FAILED
         result.output.contains('CVE-2015-6420')
     }
 
@@ -77,12 +77,12 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         when:
         def result = GradleRunner.create()
                 .withProjectDir(testProjectDir.root)
-                .withArguments('dependencyCheckAnalyze')
+                .withArguments(DependencyCheckPlugin.CHECK_TASK)
                 .withPluginClasspath()
                 .build()
 
         then:
-        result.task(':dependencyCheckAnalyze').outcome == SUCCESS
+        result.task(":$DependencyCheckPlugin.CHECK_TASK").outcome == SUCCESS
     }
 
     def "custom configurations are skipped when only scanning whitelisted configurations"() {
@@ -93,11 +93,11 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         when:
         def result = GradleRunner.create()
                 .withProjectDir(testProjectDir.root)
-                .withArguments('dependencyCheckAnalyze')
+                .withArguments(DependencyCheckPlugin.CHECK_TASK)
                 .withPluginClasspath()
                 .build()
 
         then:
-        result.task(':dependencyCheckAnalyze').outcome == SUCCESS
+        result.task(":$DependencyCheckPlugin.CHECK_TASK").outcome == SUCCESS
     }
 }
