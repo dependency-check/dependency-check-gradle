@@ -16,7 +16,7 @@
  * Copyright (c) 2015 Jeremy Long. All Rights Reserved.
  */
 
-package org.owasp.dependencycheck.extension
+package org.owasp.dependencycheck.gradle.extension
 
 /**
  * The analyzer configuration extension. Any value not configured will use the dependency-check-core defaults.
@@ -117,4 +117,8 @@ class AnalyzerExtension {
      * Sets whether or not the Node.js Analyzer should be used.
      */
     Boolean nodeEnabled
+    /**
+     * Sets whether or not the NSP Analyzer should be used.
+     */
+    Boolean nspEnabled
 }

@@ -16,12 +16,16 @@
  * Copyright (c) 2015 Jeremy Long. All Rights Reserved.
  */
 
-package org.owasp.dependencycheck.extension
+package org.owasp.dependencycheck.gradle.extension
 
 /**
  * The update data configuration extension. Any value not configured will use the dependency-check-core defaults.
  */
-class DataExtension extends PurgeDataExtension {
+class DataExtension {
+    /**
+     * The directory to store the H2 database that contains the cache of the NVD CVE data.
+     */
+    String directory="[JAR]/../../dependency-check-data/3.0"
     /**
      * The connection string to the database.
      */

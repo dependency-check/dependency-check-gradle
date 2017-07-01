@@ -16,7 +16,7 @@
  * Copyright (c) 2015 Wei Ma. All Rights Reserved.
  */
 
-package org.owasp.dependencycheck.extension
+package org.owasp.dependencycheck.gradle.extension
 
 import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
 import org.gradle.api.Project
@@ -27,11 +27,36 @@ import org.gradle.api.Project
  * @author Wei Ma
  * @author Jeremy Long
  */
-class CheckExtension extends UpdateExtension {
+class DependencyCheckExtension {
 
-    CheckExtension(Project project) {
+    DependencyCheckExtension(Project project) {
         outputDirectory = "${project.buildDir}/reports"
     }
+
+    /**
+     * The configuration extension for proxy settings.
+     */
+    ProxyExtension proxyExtension
+    /**
+     * The configuration extension that defines the location of the NVD CVE data.
+     */
+    CveExtension cveExtension
+    /**
+     * Whether the plugin should fail when errors occur.
+     */
+    Boolean failOnError = true
+    /**
+     * The configuration extension for data related configuration options.
+     */
+    DataExtension dataExtension
+    /**
+     * Set to false if the proxy does not support HEAD requests. The default is true.
+     */
+    Boolean quickQueryTimestamp
+    /**
+     * The number of hours to wait before checking for additional updates from the NVD.
+     */
+    Integer cveValidForHours
     /**
      * The directory where the reports will be written. Defaults to 'build/reports'.
      */
