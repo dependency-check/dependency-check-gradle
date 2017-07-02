@@ -17,7 +17,7 @@
  */
 
 group = 'org.owasp'
-version = '2.0.0-SNAPSHOT'
+version = '2.0.0'
  
 buildscript {
     repositories {
@@ -63,8 +63,8 @@ dependencies {
         localGroovy(),
         gradleApi(),
         'commons-collections:commons-collections:3.2.2',
-        'org.owasp:dependency-check-core:2.0.0-SNAPSHOT',
-        'org.owasp:dependency-check-utils:2.0.0-SNAPSHOT'
+        'org.owasp:dependency-check-core:2.0.0',
+        'org.owasp:dependency-check-utils:2.0.0'
     )
 
     testCompile gradleTestKit()
@@ -100,9 +100,9 @@ gradlePlugin {
 
 //apply from: 'conf/publish/local.gradle'
 //// gradle uploadArchives
-//apply from: 'conf/publish/maven.gradle'
+apply from: 'conf/publish/maven.gradle'
 //// gradle publishPlugins
-//apply from: 'conf/publish/gradlePluginsPortal.gradle'
+apply from: 'conf/publish/gradlePluginsPortal.gradle'
 //apply from: 'conf/publish/bintray.gradle'        // according to the documentation of plugindev, this line has to be placed and the very end of the build file
 
 
