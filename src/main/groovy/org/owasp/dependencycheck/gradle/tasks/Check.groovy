@@ -23,10 +23,12 @@ import org.gradle.api.GradleException
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolvedArtifact
+import org.gradle.api.artifacts.ResolvedDependency
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.Internal
 import org.owasp.dependencycheck.Engine
 import org.owasp.dependencycheck.data.nvdcve.DatabaseException
+import org.owasp.dependencycheck.dependency.Confidence
 import org.owasp.dependencycheck.exception.ExceptionCollection
 import org.owasp.dependencycheck.exception.ReportException
 import org.owasp.dependencycheck.dependency.Dependency
@@ -227,6 +229,15 @@ class Check extends DefaultTask {
                 def deps = engine.scan(artifact.getFile())
                 if (deps != null && deps.size() == 1) {
                     def d = deps.get(0)
+                    if (artifact.moduleVersion.id.group != null) {
+                        d.getVendorEvidence().addEvidence("gradle", "group", artifact.moduleVersion.id.group, Confidence.HIGHEST);
+                    }
+                    if (artifact.moduleVersion.id.name != null) {
+                        d.getProductEvidence().addEvidence("gradle", "name", artifact.moduleVersion.id.name, Confidence.HIGHEST);
+                    }
+                    if (artifact.moduleVersion.id.version != null) {
+                        d.getProductEvidence().addEvidence("gradle", "version", artifact.moduleVersion.id.version, Confidence.HIGHEST);
+                    }
                     d.addProjectReference(configuration.name)
                 }
             }
