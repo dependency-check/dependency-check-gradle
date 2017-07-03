@@ -9,6 +9,8 @@ known, published vulnerabilities.
 ## Current Release
 The latest version is `2.0.0`.
 
+With the release of 2.0.0 the task name was changed from `depdencyCheck` to `dependencyCheckAnalyze`.
+
 ## Usage
 Below are the quick start instructions. Please see the [documentation site](http://jeremylong.github.io/DependencyCheck/dependency-check-gradle/index.html)
 for more detailed information on configuration and usage.
@@ -35,7 +37,7 @@ apply plugin: 'org.owasp.dependencycheck'
 Once gradle plugin applied, run following gradle task to check dependencies:
 
 ```
-gradle dependencyCheck --info
+gradle dependencyCheckAnalyze --info
 ```
 
 The reports will be generated automatically under `build/reports` directory.
