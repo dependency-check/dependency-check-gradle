@@ -37,6 +37,7 @@ apply plugin: 'eclipse'
 apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: 'project-report'
+apply plugin: 'build-dashboard'
 apply plugin: 'com.gradle.plugin-publish'
 
 tasks.withType(GroovyCompile) {
@@ -63,8 +64,8 @@ dependencies {
         localGroovy(),
         gradleApi(),
         'commons-collections:commons-collections:3.2.2',
-        'org.owasp:dependency-check-core:2.0.0',
-        'org.owasp:dependency-check-utils:2.0.0'
+        'org.owasp:dependency-check-core:2.0.1',
+        'org.owasp:dependency-check-utils:2.0.1'
     )
 
     testCompile gradleTestKit()
