@@ -51,8 +51,10 @@ class Check extends DefaultTask {
     }
 
 
-    @Internal def currentProjectName = project.getName()
-    @Internal def config = project.dependencyCheck
+    @Internal
+    def currentProjectName = project.getName()
+    @Internal
+    def config = project.dependencyCheck
 
     /**
      * Calls dependency-check-core's analysis engine to scan
@@ -237,6 +239,11 @@ class Check extends DefaultTask {
                     }
                     if (artifact.moduleVersion.id.version != null) {
                         d.getProductEvidence().addEvidence("gradle", "version", artifact.moduleVersion.id.version, Confidence.HIGHEST);
+                    }
+                    if (artifact.moduleVersion.id.group != null && artifact.moduleVersion.id.name != null && artifact.moduleVersion.id.version != null) {
+                        d.addIdentifier("maven", String.format("%s:%s:%s",
+                                artifact.moduleVersion.id.group, artifact.moduleVersion.id.name, artifact.moduleVersion.id.version),
+                                null, Confidence.HIGHEST)
                     }
                     d.addProjectReference(configuration.name)
                 }
