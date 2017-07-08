@@ -39,7 +39,12 @@ class DependencyCheckGradlePluginSpec extends Specification {
 
     def "dependencyCheckAnalyze task exists"() {
         expect:
-        project.tasks.findByName(DependencyCheckPlugin.CHECK_TASK)
+        project.tasks.findByName(DependencyCheckPlugin.ANALYZE_TASK)
+    }
+
+    def "dependencyCheckAggregate task exists"() {
+        expect:
+        project.tasks.findByName(DependencyCheckPlugin.AGGREGATE_TASK)
     }
 
     def "dependencyCheckPurge task exists"() {
@@ -54,7 +59,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
 
     def 'dependencyCheck task has correct default values'() {
         setup:
-        Task task = project.tasks.findByName(DependencyCheckPlugin.CHECK_TASK)
+        Task task = project.tasks.findByName(DependencyCheckPlugin.ANALYZE_TASK)
 
         expect:
         task.group == 'OWASP dependency-check'
@@ -128,7 +133,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
             scanConfigurations = ['a']
             skipConfigurations = ['b']
         }
-        task = project.tasks.findByName(DependencyCheckPlugin.CHECK_TASK).check()
+        task = project.tasks.findByName(DependencyCheckPlugin.ANALYZE_TASK).analyze()
 
         then:
         thrown(IllegalArgumentException)

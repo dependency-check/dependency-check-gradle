@@ -1,0 +1,4 @@
+dependencies {
+    testCompile 'junit:junit:4.11'
+    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.7.0'
+}

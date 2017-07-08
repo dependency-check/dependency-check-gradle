@@ -26,11 +26,13 @@ import org.owasp.dependencycheck.gradle.extension.CveExtension
 import org.owasp.dependencycheck.gradle.extension.DataExtension
 import org.owasp.dependencycheck.gradle.extension.ProxyExtension
 import org.owasp.dependencycheck.gradle.tasks.Update
-import org.owasp.dependencycheck.gradle.tasks.Check
+import org.owasp.dependencycheck.gradle.tasks.Analyze
+import org.owasp.dependencycheck.gradle.tasks.Aggregate
 import org.owasp.dependencycheck.gradle.tasks.Purge
 
 class DependencyCheckPlugin implements Plugin<Project> {
-    public static final String CHECK_TASK = 'dependencyCheckAnalyze'
+    public static final String ANALYZE_TASK = 'dependencyCheckAnalyze'
+    public static final String AGGREGATE_TASK = 'dependencyCheckAggregate'
     public static final String UPDATE_TASK = 'dependencyCheckUpdate'
     public static final String PURGE_TASK = 'dependencyCheckPurge'
 
@@ -57,6 +59,7 @@ class DependencyCheckPlugin implements Plugin<Project> {
     void registerTasks(Project project) {
         project.task(PURGE_TASK, type: Purge)
         project.task(UPDATE_TASK, type: Update)
-        project.task(CHECK_TASK, type: Check)
+        project.task(ANALYZE_TASK, type: Analyze)
+        project.task(AGGREGATE_TASK, type: Aggregate)
     }
 }

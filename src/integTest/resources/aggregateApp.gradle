@@ -1,0 +1,6 @@
+apply plugin: 'application'
+
+dependencies {
+    compile 'log4j:log4j:1.2.17'
+    compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
+}

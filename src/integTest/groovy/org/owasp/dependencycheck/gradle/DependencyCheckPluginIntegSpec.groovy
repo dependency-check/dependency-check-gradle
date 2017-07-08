@@ -32,7 +32,7 @@ class DependencyCheckPluginIntegSpec extends Specification {
             .build()
 
         then:
-        result.output.contains("$DependencyCheckPlugin.CHECK_TASK")
+        result.output.contains("$DependencyCheckPlugin.ANALYZE_TASK")
     }
 
     def "custom configurations are skipped when only scanning whitelisted configurations"() {
@@ -59,11 +59,11 @@ class DependencyCheckPluginIntegSpec extends Specification {
         when:
         def result = GradleRunner.create()
                 .withProjectDir(testProjectDir.root)
-                .withArguments(DependencyCheckPlugin.CHECK_TASK)
+                .withArguments(DependencyCheckPlugin.ANALYZE_TASK)
                 .withPluginClasspath()
                 .build()
 
         then:
-        result.task(":$DependencyCheckPlugin.CHECK_TASK").outcome == SUCCESS
+        result.task(":$DependencyCheckPlugin.ANALYZE_TASK").outcome == SUCCESS
     }
 }
