@@ -105,6 +105,11 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         given:
         def resource = new File(getClass().getClassLoader().getResource('aggregateParent.gradle').toURI())
         buildFile << resource.text
+
+        File settingsFile = testProjectDir.newFile('settings.gradle')
+        def settingsResource = new File(getClass().getClassLoader().getResource('aggregateSettings.gradle').toURI())
+        settingsFile << settingsResource.text
+
         File appDir = testProjectDir.newFolder('app')
         File app = new File(appDir,'build.gradle')
         def appBuild = new File(getClass().getClassLoader().getResource('aggregateApp.gradle').toURI())
