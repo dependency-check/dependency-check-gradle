@@ -23,7 +23,6 @@ import org.gradle.api.GradleException
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolvedArtifact
-import org.gradle.api.artifacts.ResolvedDependency
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.Internal
 import org.owasp.dependencycheck.Engine
@@ -90,16 +89,9 @@ class Check extends DefaultTask {
 
             logger.lifecycle("Generating report for project ${currentProjectName}")
             try {
-                def displayName = "dependency-check";
-                def name = null
-                if (project.getName() != null) {
-                    name = project.getName();
-                    displayName = project.getDisplayName()
-                }
-                def groupId = null
-                if (project.getGroup() != null) {
-                    groupId = project.getGroup()
-                }
+                def name = project.getName()
+                def displayName = determineDisplayName()
+                def groupId = project.getGroup()
                 File output = new File(config.outputDirectory)
                 engine.writeReports(displayName, groupId, name.toString(), project.getVersion().toString(), output, config.format.toString())
             } catch (ReportException ex) {
@@ -123,6 +115,14 @@ class Check extends DefaultTask {
                 throw new GradleException("One or more exceptions occurred during analysis", exCol)
             }
         }
+    }
+
+    def determineDisplayName() {
+        // Project.getDisplayName() has been introduced with Gradle 3.3,
+        // thus we need to check for the method's existence first
+        // fallback: use project NAME
+        project.metaClass.respondsTo(project, "getDisplayName") ?
+                project.getDisplayName() : project.getName()
     }
 
     def verifySettings() {
@@ -209,7 +209,7 @@ class Check extends DefaultTask {
         if (suppressionFile != null) {
             suppressionFiles.add(suppressionFile)
         }
-        return suppressionFiles.toArray(new String[0]);
+        return suppressionFiles.toArray(new String[0])
     }
     /**
      * Releases resources and removes temporary files used.
@@ -232,13 +232,13 @@ class Check extends DefaultTask {
                 if (deps != null && deps.size() == 1) {
                     def d = deps.get(0)
                     if (artifact.moduleVersion.id.group != null) {
-                        d.getVendorEvidence().addEvidence("gradle", "group", artifact.moduleVersion.id.group, Confidence.HIGHEST);
+                        d.getVendorEvidence().addEvidence("gradle", "group", artifact.moduleVersion.id.group, Confidence.HIGHEST)
                     }
                     if (artifact.moduleVersion.id.name != null) {
-                        d.getProductEvidence().addEvidence("gradle", "name", artifact.moduleVersion.id.name, Confidence.HIGHEST);
+                        d.getProductEvidence().addEvidence("gradle", "name", artifact.moduleVersion.id.name, Confidence.HIGHEST)
                     }
                     if (artifact.moduleVersion.id.version != null) {
-                        d.getProductEvidence().addEvidence("gradle", "version", artifact.moduleVersion.id.version, Confidence.HIGHEST);
+                        d.getProductEvidence().addEvidence("gradle", "version", artifact.moduleVersion.id.version, Confidence.HIGHEST)
                     }
                     if (artifact.moduleVersion.id.group != null && artifact.moduleVersion.id.name != null && artifact.moduleVersion.id.version != null) {
                         d.addIdentifier("maven", String.format("%s:%s:%s",
