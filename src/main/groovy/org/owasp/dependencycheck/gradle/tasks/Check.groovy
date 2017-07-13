@@ -94,7 +94,7 @@ class Check extends DefaultTask {
                 def name = null
                 if (project.getName() != null) {
                     name = project.getName();
-                    displayName = project.getDisplayName()
+                    displayName = determineDisplayName()
                 }
                 def groupId = null
                 if (project.getGroup() != null) {
@@ -123,6 +123,14 @@ class Check extends DefaultTask {
                 throw new GradleException("One or more exceptions occurred during analysis", exCol)
             }
         }
+    }
+
+    def determineDisplayName() {
+        // Project.getDisplayName() has been introduced with Gradle 3.3,
+        // thus we need to check for the method's existence first
+        // fallback: use project NAME
+        project.metaClass.respondsTo(project, "getDisplayName") ?
+                project.getDisplayName() : project.getName()
     }
 
     def verifySettings() {
