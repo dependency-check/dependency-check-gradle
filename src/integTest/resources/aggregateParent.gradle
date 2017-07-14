@@ -1,0 +1,17 @@
+plugins {
+    id 'org.owasp.dependencycheck'
+    id 'java'
+}
+
+dependencyCheck {
+    failOnError=true
+    format="ALL"
+}
+
+subprojects {
+    apply plugin: 'java'
+
+    repositories {
+        mavenCentral()
+    }
+}

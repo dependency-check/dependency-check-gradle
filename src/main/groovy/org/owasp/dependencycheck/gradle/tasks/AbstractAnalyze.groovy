@@ -23,33 +23,27 @@ import org.gradle.api.GradleException
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolvedArtifact
-import org.gradle.api.artifacts.ResolvedDependency
-import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.TaskAction
 import org.owasp.dependencycheck.Engine
 import org.owasp.dependencycheck.data.nvdcve.DatabaseException
 import org.owasp.dependencycheck.dependency.Confidence
-import org.owasp.dependencycheck.exception.ExceptionCollection
-import org.owasp.dependencycheck.exception.ReportException
 import org.owasp.dependencycheck.dependency.Dependency
 import org.owasp.dependencycheck.dependency.Identifier
 import org.owasp.dependencycheck.dependency.Vulnerability
+import org.owasp.dependencycheck.exception.ExceptionCollection
+import org.owasp.dependencycheck.exception.ReportException
 import org.owasp.dependencycheck.utils.Settings
+
 import static org.owasp.dependencycheck.utils.Settings.KEYS.*
 
 /**
  * Checks the projects dependencies for known vulnerabilities.
  */
-class Check extends DefaultTask {
+abstract class AbstractAnalyze extends DefaultTask {
 
     //@OutputDirectory
     //File outputDir
-
-    Check() {
-        group = 'OWASP dependency-check'
-        description = 'Identifies and reports known vulnerabilities (CVEs) in project dependencies.'
-    }
-
 
     @Internal
     def currentProjectName = project.getName()
@@ -61,7 +55,7 @@ class Check extends DefaultTask {
      * all of the projects dependencies.
      */
     @TaskAction
-    check() {
+    analyze() {
         verifySettings()
         initializeSettings()
         def engine = null
@@ -222,34 +216,7 @@ class Check extends DefaultTask {
     /**
      * Loads the projects dependencies into the dependency-check analysis engine.
      */
-    def scanDependencies(engine) {
-        logger.lifecycle("Verifying dependencies for project ${currentProjectName}")
-        project.getConfigurations().findAll {
-            shouldBeScanned(it) && !(shouldBeSkipped(it) || shouldBeSkippedAsTest(it)) && canBeResolved(it)
-        }.each { Configuration configuration ->
-            configuration.getResolvedConfiguration().getResolvedArtifacts().collect { ResolvedArtifact artifact ->
-                def deps = engine.scan(artifact.getFile())
-                if (deps != null && deps.size() == 1) {
-                    def d = deps.get(0)
-                    if (artifact.moduleVersion.id.group != null) {
-                        d.getVendorEvidence().addEvidence("gradle", "group", artifact.moduleVersion.id.group, Confidence.HIGHEST);
-                    }
-                    if (artifact.moduleVersion.id.name != null) {
-                        d.getProductEvidence().addEvidence("gradle", "name", artifact.moduleVersion.id.name, Confidence.HIGHEST);
-                    }
-                    if (artifact.moduleVersion.id.version != null) {
-                        d.getProductEvidence().addEvidence("gradle", "version", artifact.moduleVersion.id.version, Confidence.HIGHEST);
-                    }
-                    if (artifact.moduleVersion.id.group != null && artifact.moduleVersion.id.name != null && artifact.moduleVersion.id.version != null) {
-                        d.addIdentifier("maven", String.format("%s:%s:%s",
-                                artifact.moduleVersion.id.group, artifact.moduleVersion.id.name, artifact.moduleVersion.id.version),
-                                null, Confidence.HIGHEST)
-                    }
-                    d.addProjectReference(configuration.name)
-                }
-            }
-        }
-    }
+    abstract scanDependencies(engine);
 
     /**
      * Displays a summary of the dependency-check results to the build console.
@@ -321,7 +288,7 @@ class Check extends DefaultTask {
             }
         }
         if (ids.length() > 0) {
-            final String msg = String.format("%n%nDependency-Check Failure:%n"
+            final String msg = String.format("%n%nDependency-Analyze Failure:%n"
                     + "One or more dependencies were identified with vulnerabilities that have a CVSS score greater then '%.1f': %s%n"
                     + "See the dependency-check report for more details.%n%n", config.failBuildOnCVSS, ids.toString())
             throw new GradleException(msg)
@@ -386,5 +353,34 @@ class Check extends DefaultTask {
         // thus we need to check for the method's existence first
         configuration.metaClass.respondsTo(configuration, "isCanBeResolved") ?
                 configuration.isCanBeResolved() : true
+    }
+
+    /**
+     * Adds
+     * @param deps
+     * @param artifact
+     * @param configurationName
+     */
+    protected void addInfoToDependencies(List<Dependency> deps, ResolvedArtifact artifact, String configurationName) {
+        if (deps != null && deps.size() == 1) {
+            def d = deps.get(0)
+            if (artifact.moduleVersion.id.group != null) {
+                d.getVendorEvidence().addEvidence("gradle", "group", artifact.moduleVersion.id.group, Confidence.HIGHEST);
+            }
+            if (artifact.moduleVersion.id.name != null) {
+                d.getProductEvidence().addEvidence("gradle", "name", artifact.moduleVersion.id.name, Confidence.HIGHEST);
+            }
+            if (artifact.moduleVersion.id.version != null) {
+                d.getProductEvidence().addEvidence("gradle", "version", artifact.moduleVersion.id.version, Confidence.HIGHEST);
+            }
+            if (artifact.moduleVersion.id.group != null && artifact.moduleVersion.id.name != null && artifact.moduleVersion.id.version != null) {
+                d.addIdentifier("maven", String.format("%s:%s:%s",
+                        artifact.moduleVersion.id.group, artifact.moduleVersion.id.name, artifact.moduleVersion.id.version),
+                        null, Confidence.HIGHEST)
+            }
+            d.addProjectReference(configurationName)
+        } else {
+            deps.forEach { it.addProjectReference(configurationName) }
+        }
     }
 }

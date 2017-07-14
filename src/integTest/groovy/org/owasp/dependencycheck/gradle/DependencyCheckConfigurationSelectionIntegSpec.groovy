@@ -23,13 +23,13 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         when:
         def result = GradleRunner.create()
                 .withProjectDir(testProjectDir.root)
-                .withArguments(DependencyCheckPlugin.CHECK_TASK)
+                .withArguments(DependencyCheckPlugin.ANALYZE_TASK)
                 .withPluginClasspath()
                 .withDebug(true)
                 .build()
 
         then:
-        result.task(":$DependencyCheckPlugin.CHECK_TASK").outcome == SUCCESS
+        result.task(":$DependencyCheckPlugin.ANALYZE_TASK").outcome == SUCCESS
     }
 
     def "test dependencies are scanned if skipTestGroups flag is false"() {
@@ -40,12 +40,12 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         when:
         def result = GradleRunner.create()
                 .withProjectDir(testProjectDir.root)
-                .withArguments(DependencyCheckPlugin.CHECK_TASK)
+                .withArguments(DependencyCheckPlugin.ANALYZE_TASK)
                 .withPluginClasspath()
                 .buildAndFail()
 
         then:
-        result.task(":$DependencyCheckPlugin.CHECK_TASK").outcome == FAILED
+        result.task(":$DependencyCheckPlugin.ANALYZE_TASK").outcome == FAILED
         result.output.contains('CVE-2015-6420')
         result.output.contains('CVE-2014-0114')
         result.output.contains('CVE-2016-3092')
@@ -60,12 +60,12 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         when:
         def result = GradleRunner.create()
                 .withProjectDir(testProjectDir.root)
-                .withArguments(DependencyCheckPlugin.CHECK_TASK)
+                .withArguments(DependencyCheckPlugin.ANALYZE_TASK)
                 .withPluginClasspath()
                 .buildAndFail()
 
         then:
-        result.task(":$DependencyCheckPlugin.CHECK_TASK").outcome == FAILED
+        result.task(":$DependencyCheckPlugin.ANALYZE_TASK").outcome == FAILED
         result.output.contains('CVE-2015-6420')
     }
 
@@ -77,12 +77,12 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         when:
         def result = GradleRunner.create()
                 .withProjectDir(testProjectDir.root)
-                .withArguments(DependencyCheckPlugin.CHECK_TASK)
+                .withArguments(DependencyCheckPlugin.ANALYZE_TASK)
                 .withPluginClasspath()
                 .build()
 
         then:
-        result.task(":$DependencyCheckPlugin.CHECK_TASK").outcome == SUCCESS
+        result.task(":$DependencyCheckPlugin.ANALYZE_TASK").outcome == SUCCESS
     }
 
     def "custom configurations are skipped when only scanning whitelisted configurations"() {
@@ -93,11 +93,42 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         when:
         def result = GradleRunner.create()
                 .withProjectDir(testProjectDir.root)
-                .withArguments(DependencyCheckPlugin.CHECK_TASK)
+                .withArguments(DependencyCheckPlugin.ANALYZE_TASK)
                 .withPluginClasspath()
                 .build()
 
         then:
-        result.task(":$DependencyCheckPlugin.CHECK_TASK").outcome == SUCCESS
+        result.task(":$DependencyCheckPlugin.ANALYZE_TASK").outcome == SUCCESS
+    }
+
+    def "aggregate task aggregates"() {
+        given:
+        def resource = new File(getClass().getClassLoader().getResource('aggregateParent.gradle').toURI())
+        buildFile << resource.text
+
+        File settingsFile = testProjectDir.newFile('settings.gradle')
+        def settingsResource = new File(getClass().getClassLoader().getResource('aggregateSettings.gradle').toURI())
+        settingsFile << settingsResource.text
+
+        File appDir = testProjectDir.newFolder('app')
+        File app = new File(appDir,'build.gradle')
+        def appBuild = new File(getClass().getClassLoader().getResource('aggregateApp.gradle').toURI())
+        app << appBuild.text
+        File coreDir = testProjectDir.newFolder('core')
+        File core = new File(coreDir, 'build.gradle')
+        def coreBuild = new File(getClass().getClassLoader().getResource('aggregateCore.gradle').toURI())
+        core << coreBuild.text
+
+        when:
+        def result = GradleRunner.create()
+                .withProjectDir(testProjectDir.root)
+                .withArguments(DependencyCheckPlugin.AGGREGATE_TASK)
+                .withPluginClasspath()
+                .build()
+
+        then:
+        result.task(":$DependencyCheckPlugin.AGGREGATE_TASK").outcome == SUCCESS
+        result.output.contains('CVE-2016-7051') //jackson cve from core
+        result.output.contains('CVE-2015-6420') //commons cve from app
     }
 }
