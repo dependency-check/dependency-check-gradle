@@ -29,5 +29,8 @@ pluginBundle {
             displayName = 'OWASP dependency-check-gradle plugin'
         }
     }
+    mavenCoordinates {
+        groupId = "org.owasp"
+    }
 }
 
