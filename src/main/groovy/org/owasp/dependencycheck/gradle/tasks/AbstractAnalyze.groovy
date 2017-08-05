@@ -360,31 +360,33 @@ abstract class AbstractAnalyze extends DefaultTask {
     }
 
     /**
-     * Adds
-     * @param deps
-     * @param artifact
-     * @param configurationName
+     * Adds additional information and evidence to the dependencies.
+     * @param deps the list of dependencies that will be updated
+     * @param artifact the artifact that was scanned to obtain the dependencies
+     * @param configurationName the configuration name that the artifact was identified in
      */
     protected void addInfoToDependencies(List<Dependency> deps, ResolvedArtifact artifact, String configurationName) {
-        if (deps != null && deps.size() == 1) {
-            def d = deps.get(0)
-            if (artifact.moduleVersion.id.group != null) {
-                d.getVendorEvidence().addEvidence("gradle", "group", artifact.moduleVersion.id.group, Confidence.HIGHEST)
+        if (deps != null) {
+            if (deps.size() == 1) {
+                def d = deps.get(0)
+                if (artifact.moduleVersion.id.group != null) {
+                    d.getVendorEvidence().addEvidence("gradle", "group", artifact.moduleVersion.id.group, Confidence.HIGHEST)
+                }
+                if (artifact.moduleVersion.id.name != null) {
+                    d.getProductEvidence().addEvidence("gradle", "name", artifact.moduleVersion.id.name, Confidence.HIGHEST)
+                }
+                if (artifact.moduleVersion.id.version != null) {
+                    d.getProductEvidence().addEvidence("gradle", "version", artifact.moduleVersion.id.version, Confidence.HIGHEST)
+                }
+                if (artifact.moduleVersion.id.group != null && artifact.moduleVersion.id.name != null && artifact.moduleVersion.id.version != null) {
+                    d.addIdentifier("maven", String.format("%s:%s:%s",
+                            artifact.moduleVersion.id.group, artifact.moduleVersion.id.name, artifact.moduleVersion.id.version),
+                            null, Confidence.HIGHEST)
+                }
+                d.addProjectReference(configurationName)
+            } else {
+                deps.forEach { it.addProjectReference(configurationName) }
             }
-            if (artifact.moduleVersion.id.name != null) {
-                d.getProductEvidence().addEvidence("gradle", "name", artifact.moduleVersion.id.name, Confidence.HIGHEST)
-            }
-            if (artifact.moduleVersion.id.version != null) {
-                d.getProductEvidence().addEvidence("gradle", "version", artifact.moduleVersion.id.version, Confidence.HIGHEST)
-            }
-            if (artifact.moduleVersion.id.group != null && artifact.moduleVersion.id.name != null && artifact.moduleVersion.id.version != null) {
-                d.addIdentifier("maven", String.format("%s:%s:%s",
-                        artifact.moduleVersion.id.group, artifact.moduleVersion.id.name, artifact.moduleVersion.id.version),
-                        null, Confidence.HIGHEST)
-            }
-            d.addProjectReference(configurationName)
-        } else {
-            deps.forEach { it.addProjectReference(configurationName) }
         }
     }
 }

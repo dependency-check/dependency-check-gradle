@@ -57,6 +57,7 @@ class Analyze extends AbstractAnalyze {
         }.each { Configuration configuration ->
             configuration.getResolvedConfiguration().getResolvedArtifacts().collect { ResolvedArtifact artifact ->
                 def deps = engine.scan(artifact.getFile())
+                //TODO determine why deps could be null in some cases.
                 addInfoToDependencies(deps, artifact, configuration.name)
             }
         }
