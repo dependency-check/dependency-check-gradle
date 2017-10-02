@@ -85,6 +85,7 @@ sourceSets {
 
 task integTest(type: Test) {
     group = 'verification'
+    mustRunAfter test
     testClassesDir = sourceSets.integTest.output.classesDir
     classpath = sourceSets.integTest.runtimeClasspath
     jvmArgs '-XX:MaxPermSize=256m'
