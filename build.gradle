@@ -17,7 +17,7 @@
  */
 
 group = 'org.owasp'
-version = '2.1.2-SNAPSHOT'
+version = '3.0.0-SNAPSHOT'
  
 buildscript {
     repositories {
@@ -64,8 +64,8 @@ dependencies {
         localGroovy(),
         gradleApi(),
         'commons-collections:commons-collections:3.2.2',
-        'org.owasp:dependency-check-core:2.1.2-SNAPSHOT',
-        'org.owasp:dependency-check-utils:2.1.2-SNAPSHOT'
+        'org.owasp:dependency-check-core:3.0.0-SNAPSHOT',
+        'org.owasp:dependency-check-utils:3.0.0-SNAPSHOT'
     )
 
     testCompile gradleTestKit()
