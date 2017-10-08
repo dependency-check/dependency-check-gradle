@@ -29,7 +29,7 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         copyBuildFileIntoProjectDir('noSkipTestGroups.gradle')
 
         when:
-        def result = executeTaskAndGetResult(ANbuildALYZE_TASK, false)
+        def result = executeTaskAndGetResult(ANALYZE_TASK, false)
 
         then:
         result.task(":$ANALYZE_TASK").outcome == FAILED
