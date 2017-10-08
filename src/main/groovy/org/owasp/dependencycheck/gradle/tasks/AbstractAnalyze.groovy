@@ -203,11 +203,11 @@ abstract class AbstractAnalyze extends DefaultTask {
      *
      * @return an array of suppression file paths
      */
-    def determineSuppressions(suppressionFiles, suppressionFile) {
+    private String[] determineSuppressions(suppressionFiles, suppressionFile) {
         if (suppressionFile != null) {
-            suppressionFiles.add(suppressionFile)
+            suppressionFiles << suppressionFile
         }
-        return suppressionFiles.toArray(new String[0])
+        suppressionFiles
     }
     /**
      * Releases resources and removes temporary files used.

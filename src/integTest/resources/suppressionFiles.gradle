@@ -1,0 +1,18 @@
+plugins {
+    id 'org.owasp.dependencycheck'
+}
+apply plugin: 'java'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    compile 'commons-collections:commons-collections:3.2'
+}
+
+dependencyCheck {
+    failBuildOnCVSS = 0
+    suppressionFiles = ["${project.rootDir}/suppressions.xml"]
+}

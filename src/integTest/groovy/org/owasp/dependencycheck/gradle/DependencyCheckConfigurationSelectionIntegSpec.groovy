@@ -1,10 +1,12 @@
 package org.owasp.dependencycheck.gradle
 
+import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 import static org.gradle.testkit.runner.TaskOutcome.*
+import static org.owasp.dependencycheck.gradle.DependencyCheckPlugin.*
 
 class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
 
@@ -130,5 +132,39 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         result.task(":$DependencyCheckPlugin.AGGREGATE_TASK").outcome == SUCCESS
         result.output.contains('CVE-2016-7051') //jackson cve from core
         result.output.contains('CVE-2015-6420') //commons cve from app
+    }
+
+    def "suppressionFiles argument can be parsed and files are being respected"() {
+        given:
+        copyBuildFileIntoProjectDir('suppressionFiles.gradle')
+        copyResourceFileIntoProjectDir('suppressions.xml', 'suppressions.xml')
+
+        when:
+        def result = executeTaskAndGetResult(ANALYZE_TASK, true)
+
+        then:
+        result.task(":$ANALYZE_TASK").outcome == SUCCESS
+    }
+
+
+    private void copyBuildFileIntoProjectDir(String buildFileName) {
+        copyResourceFileIntoProjectDir(buildFileName, 'build.gradle')
+    }
+
+    private void copyResourceFileIntoProjectDir(String resourceFileName, String targetFileName) {
+        def resourceFileContent = new File(getClass().getClassLoader().getResource(resourceFileName).toURI()).text
+        def targetDirectory = new File(testProjectDir.root, targetFileName).parentFile
+        targetDirectory.mkdirs()
+        def targetFile = testProjectDir.newFile(targetFileName)
+        targetFile << resourceFileContent
+    }
+
+    private BuildResult executeTaskAndGetResult(String taskName, boolean isBuildExpectedToPass) {
+        def build = GradleRunner.create()
+                .withProjectDir(testProjectDir.root)
+                .withArguments(taskName)
+                .withPluginClasspath()
+
+        isBuildExpectedToPass ? build.build() : build.buildAndFail()
     }
 }
