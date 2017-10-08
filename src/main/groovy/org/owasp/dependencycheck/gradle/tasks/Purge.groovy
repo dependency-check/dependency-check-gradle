@@ -60,7 +60,7 @@ class Purge extends DefaultTask {
                 }
             }
         } else {
-            String msg = "Unable to purge database; the database file does not exists: ${db.getAbsolutePath()}"
+            String msg = "Unable to purge database; the database file does not exist: ${db.getAbsolutePath()}"
             if (config.failOnError) {
                 throw new GradleException(msg)
             } else {

@@ -9,7 +9,7 @@ known, published vulnerabilities.
 ## Current Release
 The latest version is `2.1.1`.
 
-With the release of 2.1.1 the task name was changed from `depdencyCheck` to `dependencyCheckAnalyze`.
+With the release of 2.1.1 the task name was changed from `dependencyCheck` to `dependencyCheckAnalyze`.
 
 ## Usage
 Below are the quick start instructions. Please see the [documentation site](http://jeremylong.github.io/DependencyCheck/dependency-check-gradle/index.html)
