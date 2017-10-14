@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
+    <suppress>
+        <notes><![CDATA[
+   file name: commons-collections-3.2.jar
+   ]]></notes>
+        <gav regex="true">^commons-collections:commons-collections:.*$</gav>
+        <cpe>cpe:/a:apache:commons_collections</cpe>
+    </suppress>
+</suppressions>

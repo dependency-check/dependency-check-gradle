@@ -7,9 +7,9 @@ The dependency-check gradle plugin allows projects to monitor dependent librarie
 known, published vulnerabilities.
 
 ## Current Release
-The latest version is `2.0.0`.
+The latest version is `2.1.1`.
 
-With the release of 2.0.0 the task name was changed from `depdencyCheck` to `dependencyCheckAnalyze`.
+With the release of 2.1.1 the task name was changed from `dependencyCheck` to `dependencyCheckAnalyze`.
 
 ## Usage
 Below are the quick start instructions. Please see the [documentation site](http://jeremylong.github.io/DependencyCheck/dependency-check-gradle/index.html)
@@ -25,7 +25,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'org.owasp:dependency-check-gradle:2.0.0'
+        classpath 'org.owasp:dependency-check-gradle:2.1.1'
     }
 }
 
@@ -93,7 +93,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'org.owasp:dependency-check-gradle:2.0.0'
+    classpath 'org.owasp:dependency-check-gradle:2.1.1'
   }
 }
 
@@ -110,7 +110,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'org.owasp:dependency-check-gradle:2.0.0'
+    classpath 'org.owasp:dependency-check-gradle:2.1.1'
   }
 }
 
