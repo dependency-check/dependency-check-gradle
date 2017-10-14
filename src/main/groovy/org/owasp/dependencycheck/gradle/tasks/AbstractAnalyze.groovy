@@ -21,11 +21,11 @@ package org.owasp.dependencycheck.gradle.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.InvalidUserDataException
-import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.owasp.dependencycheck.Engine
+import org.owasp.dependencycheck.data.nexus.MavenArtifact
 import org.owasp.dependencycheck.data.nvdcve.DatabaseException
 import org.owasp.dependencycheck.dependency.Confidence
 import org.owasp.dependencycheck.dependency.Dependency
@@ -42,13 +42,12 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.*
  */
 abstract class AbstractAnalyze extends DefaultTask {
 
-    //@OutputDirectory
-    //File outputDir
-
     @Internal
     def currentProjectName = project.getName()
     @Internal
     def config = project.dependencyCheck
+    @Internal
+    def settings
 
     /**
      * Calls dependency-check-core's analysis engine to scan
@@ -60,7 +59,7 @@ abstract class AbstractAnalyze extends DefaultTask {
         initializeSettings()
         def engine = null
         try {
-            engine = new Engine()
+            engine = new Engine(settings)
         } catch (DatabaseException ex) {
             String msg = "Unable to connect to the dependency-check database"
             if (config.failOnError) {
@@ -134,67 +133,67 @@ abstract class AbstractAnalyze extends DefaultTask {
      * default from dependency-check-core is used.
      */
     def initializeSettings() {
-        Settings.initialize()
+        settings = new Settings()
 
-        Settings.setBooleanIfNotNull(AUTO_UPDATE, config.autoUpdate)
+        settings.setBooleanIfNotNull(AUTO_UPDATE, config.autoUpdate)
 
         String[] suppressionLists = determineSuppressions(config.suppressionFiles, config.suppressionFile)
 
-        Settings.setArrayIfNotEmpty(SUPPRESSION_FILE, suppressionLists)
-        Settings.setStringIfNotEmpty(HINTS_FILE, config.hintsFile)
+        settings.setArrayIfNotEmpty(SUPPRESSION_FILE, suppressionLists)
+        settings.setStringIfNotEmpty(HINTS_FILE, config.hintsFile)
 
-        Settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
-        Settings.setStringIfNotEmpty(PROXY_PORT, "${config.proxy.port}")
-        Settings.setStringIfNotEmpty(PROXY_USERNAME, config.proxy.username)
-        Settings.setStringIfNotEmpty(PROXY_PASSWORD, config.proxy.password)
-        //Settings.setStringIfNotEmpty(CONNECTION_TIMEOUT, connectionTimeout)
-        Settings.setStringIfNotNull(DATA_DIRECTORY, config.data.directory)
-        Settings.setStringIfNotEmpty(DB_DRIVER_NAME, config.data.driver)
-        Settings.setStringIfNotEmpty(DB_DRIVER_PATH, config.data.driverPath)
-        Settings.setStringIfNotEmpty(DB_CONNECTION_STRING, config.data.connectionString)
-        Settings.setStringIfNotEmpty(DB_USER, config.data.username)
-        Settings.setStringIfNotEmpty(DB_PASSWORD, config.data.password)
-        Settings.setStringIfNotEmpty(CVE_MODIFIED_12_URL, config.cve.url12Modified)
-        Settings.setStringIfNotEmpty(CVE_MODIFIED_20_URL, config.cve.url20Modified)
-        Settings.setStringIfNotEmpty(CVE_SCHEMA_1_2, config.cve.url12Base)
-        Settings.setStringIfNotEmpty(CVE_SCHEMA_2_0, config.cve.url20Base)
-        Settings.setBooleanIfNotNull(DOWNLOADER_QUICK_QUERY_TIMESTAMP, config.quickQueryTimestamp)
+        settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
+        settings.setStringIfNotEmpty(PROXY_PORT, "${config.proxy.port}")
+        settings.setStringIfNotEmpty(PROXY_USERNAME, config.proxy.username)
+        settings.setStringIfNotEmpty(PROXY_PASSWORD, config.proxy.password)
+        //settings.setStringIfNotEmpty(CONNECTION_TIMEOUT, connectionTimeout)
+        settings.setStringIfNotNull(DATA_DIRECTORY, config.data.directory)
+        settings.setStringIfNotEmpty(DB_DRIVER_NAME, config.data.driver)
+        settings.setStringIfNotEmpty(DB_DRIVER_PATH, config.data.driverPath)
+        settings.setStringIfNotEmpty(DB_CONNECTION_STRING, config.data.connectionString)
+        settings.setStringIfNotEmpty(DB_USER, config.data.username)
+        settings.setStringIfNotEmpty(DB_PASSWORD, config.data.password)
+        settings.setStringIfNotEmpty(CVE_MODIFIED_12_URL, config.cve.url12Modified)
+        settings.setStringIfNotEmpty(CVE_MODIFIED_20_URL, config.cve.url20Modified)
+        settings.setStringIfNotEmpty(CVE_SCHEMA_1_2, config.cve.url12Base)
+        settings.setStringIfNotEmpty(CVE_SCHEMA_2_0, config.cve.url20Base)
+        settings.setBooleanIfNotNull(DOWNLOADER_QUICK_QUERY_TIMESTAMP, config.quickQueryTimestamp)
 
         if (config.cveValidForHours != null) {
             if (config.cveValidForHours >= 0) {
-                Settings.setInt(CVE_CHECK_VALID_FOR_HOURS, config.cveValidForHours)
+                settings.setInt(CVE_CHECK_VALID_FOR_HOURS, config.cveValidForHours)
             } else {
                 throw new InvalidUserDataException("Invalid setting: `validForHours` must be 0 or greater")
             }
         }
-        Settings.setBooleanIfNotNull(ANALYZER_JAR_ENABLED, config.analyzers.jarEnabled)
-        Settings.setBooleanIfNotNull(ANALYZER_NUSPEC_ENABLED, config.analyzers.nuspecEnabled)
-        Settings.setBooleanIfNotNull(ANALYZER_CENTRAL_ENABLED, config.analyzers.centralEnabled)
+        settings.setBooleanIfNotNull(ANALYZER_JAR_ENABLED, config.analyzers.jarEnabled)
+        settings.setBooleanIfNotNull(ANALYZER_NUSPEC_ENABLED, config.analyzers.nuspecEnabled)
+        settings.setBooleanIfNotNull(ANALYZER_CENTRAL_ENABLED, config.analyzers.centralEnabled)
 
-        Settings.setBooleanIfNotNull(ANALYZER_NEXUS_ENABLED, config.analyzers.nexusEnabled)
-        Settings.setStringIfNotEmpty(ANALYZER_NEXUS_URL, config.analyzers.nexusUrl)
-        Settings.setBooleanIfNotNull(ANALYZER_NEXUS_USES_PROXY, config.analyzers.nexusUsesProxy)
+        settings.setBooleanIfNotNull(ANALYZER_NEXUS_ENABLED, config.analyzers.nexusEnabled)
+        settings.setStringIfNotEmpty(ANALYZER_NEXUS_URL, config.analyzers.nexusUrl)
+        settings.setBooleanIfNotNull(ANALYZER_NEXUS_USES_PROXY, config.analyzers.nexusUsesProxy)
 
-        Settings.setBooleanIfNotNull(ANALYZER_EXPERIMENTAL_ENABLED, config.analyzers.experimentalEnabled)
-        Settings.setBooleanIfNotNull(ANALYZER_ARCHIVE_ENABLED, config.analyzers.archiveEnabled)
-        Settings.setStringIfNotEmpty(ADDITIONAL_ZIP_EXTENSIONS, config.analyzers.zipExtensions)
-        Settings.setBooleanIfNotNull(ANALYZER_ASSEMBLY_ENABLED, config.analyzers.assemblyEnabled)
-        Settings.setStringIfNotEmpty(ANALYZER_ASSEMBLY_MONO_PATH, config.analyzers.pathToMono)
+        settings.setBooleanIfNotNull(ANALYZER_EXPERIMENTAL_ENABLED, config.analyzers.experimentalEnabled)
+        settings.setBooleanIfNotNull(ANALYZER_ARCHIVE_ENABLED, config.analyzers.archiveEnabled)
+        settings.setStringIfNotEmpty(ADDITIONAL_ZIP_EXTENSIONS, config.analyzers.zipExtensions)
+        settings.setBooleanIfNotNull(ANALYZER_ASSEMBLY_ENABLED, config.analyzers.assemblyEnabled)
+        settings.setStringIfNotEmpty(ANALYZER_ASSEMBLY_MONO_PATH, config.analyzers.pathToMono)
 
-        Settings.setBooleanIfNotNull(ANALYZER_COCOAPODS_ENABLED, config.analyzers.cocoapodsEnabled)
-        Settings.setBooleanIfNotNull(ANALYZER_SWIFT_PACKAGE_MANAGER_ENABLED, config.analyzers.swiftEnabled)
-        Settings.setBooleanIfNotNull(ANALYZER_BUNDLE_AUDIT_ENABLED, config.analyzers.bundleAuditEnabled)
-        Settings.setStringIfNotEmpty(ANALYZER_BUNDLE_AUDIT_PATH, config.analyzers.pathToBundleAudit)
+        settings.setBooleanIfNotNull(ANALYZER_COCOAPODS_ENABLED, config.analyzers.cocoapodsEnabled)
+        settings.setBooleanIfNotNull(ANALYZER_SWIFT_PACKAGE_MANAGER_ENABLED, config.analyzers.swiftEnabled)
+        settings.setBooleanIfNotNull(ANALYZER_BUNDLE_AUDIT_ENABLED, config.analyzers.bundleAuditEnabled)
+        settings.setStringIfNotEmpty(ANALYZER_BUNDLE_AUDIT_PATH, config.analyzers.pathToBundleAudit)
 
-        Settings.setBooleanIfNotNull(ANALYZER_PYTHON_DISTRIBUTION_ENABLED, config.analyzers.pyDistributionEnabled)
-        Settings.setBooleanIfNotNull(ANALYZER_PYTHON_PACKAGE_ENABLED, config.analyzers.pyPackageEnabled)
-        Settings.setBooleanIfNotNull(ANALYZER_RUBY_GEMSPEC_ENABLED, config.analyzers.rubygemsEnabled)
-        Settings.setBooleanIfNotNull(ANALYZER_OPENSSL_ENABLED, config.analyzers.opensslEnabled)
-        Settings.setBooleanIfNotNull(ANALYZER_CMAKE_ENABLED, config.analyzers.cmakeEnabled)
-        Settings.setBooleanIfNotNull(ANALYZER_AUTOCONF_ENABLED, config.analyzers.autoconfEnabled)
-        Settings.setBooleanIfNotNull(ANALYZER_COMPOSER_LOCK_ENABLED, config.analyzers.composerEnabled)
-        Settings.setBooleanIfNotNull(ANALYZER_NODE_PACKAGE_ENABLED, config.analyzers.nodeEnabled)
-        Settings.setBooleanIfNotNull(ANALYZER_NSP_PACKAGE_ENABLED, config.analyzers.nspEnabled)
+        settings.setBooleanIfNotNull(ANALYZER_PYTHON_DISTRIBUTION_ENABLED, config.analyzers.pyDistributionEnabled)
+        settings.setBooleanIfNotNull(ANALYZER_PYTHON_PACKAGE_ENABLED, config.analyzers.pyPackageEnabled)
+        settings.setBooleanIfNotNull(ANALYZER_RUBY_GEMSPEC_ENABLED, config.analyzers.rubygemsEnabled)
+        settings.setBooleanIfNotNull(ANALYZER_OPENSSL_ENABLED, config.analyzers.opensslEnabled)
+        settings.setBooleanIfNotNull(ANALYZER_CMAKE_ENABLED, config.analyzers.cmakeEnabled)
+        settings.setBooleanIfNotNull(ANALYZER_AUTOCONF_ENABLED, config.analyzers.autoconfEnabled)
+        settings.setBooleanIfNotNull(ANALYZER_COMPOSER_LOCK_ENABLED, config.analyzers.composerEnabled)
+        settings.setBooleanIfNotNull(ANALYZER_NODE_PACKAGE_ENABLED, config.analyzers.nodeEnabled)
+        settings.setBooleanIfNotNull(ANALYZER_NSP_PACKAGE_ENABLED, config.analyzers.nspEnabled)
     }
 
     /**
@@ -213,8 +212,8 @@ abstract class AbstractAnalyze extends DefaultTask {
      * Releases resources and removes temporary files used.
      */
     def cleanup(engine) {
-        Settings.cleanup(true)
-        engine.cleanup()
+        settings.cleanup(true)
+        engine.close()
     }
 
     /**
@@ -369,15 +368,8 @@ abstract class AbstractAnalyze extends DefaultTask {
         if (deps != null) {
             if (deps.size() == 1) {
                 def d = deps.get(0)
-                if (artifact.moduleVersion.id.group != null) {
-                    d.getVendorEvidence().addEvidence("gradle", "group", artifact.moduleVersion.id.group, Confidence.HIGHEST)
-                }
-                if (artifact.moduleVersion.id.name != null) {
-                    d.getProductEvidence().addEvidence("gradle", "name", artifact.moduleVersion.id.name, Confidence.HIGHEST)
-                }
-                if (artifact.moduleVersion.id.version != null) {
-                    d.getProductEvidence().addEvidence("gradle", "version", artifact.moduleVersion.id.version, Confidence.HIGHEST)
-                }
+                MavenArtifact mavenArtifact = createMavenArtifact(artifact)
+                d.addAsEvidence("gradle", mavenArtifact, Confidence.HIGHEST)
                 if (artifact.moduleVersion.id.group != null && artifact.moduleVersion.id.name != null && artifact.moduleVersion.id.version != null) {
                     d.addIdentifier("maven", String.format("%s:%s:%s",
                             artifact.moduleVersion.id.group, artifact.moduleVersion.id.name, artifact.moduleVersion.id.version),
@@ -388,5 +380,15 @@ abstract class AbstractAnalyze extends DefaultTask {
                 deps.forEach { it.addProjectReference(configurationName) }
             }
         }
+    }
+
+    /**
+     * Creates a MavenArtifact from the Gradle artifact.
+     * @param artifact the Gradle artifact
+     * @return the MavenArtifact
+     */
+    private MavenArtifact createMavenArtifact(ResolvedArtifact artifact) {
+        def id = artifact.moduleVersion.id
+        new MavenArtifact(id.group, id.name, id.version)
     }
 }

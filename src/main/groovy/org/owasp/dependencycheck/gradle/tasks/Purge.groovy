@@ -32,6 +32,7 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.DATA_DIRECTORY
 class Purge extends DefaultTask {
 
     @Internal def config = project.dependencyCheck
+    @Internal def settings
 
     /**
      * Initializes the purge task.
@@ -47,7 +48,7 @@ class Purge extends DefaultTask {
     @TaskAction
     purge() {
         initializeSettings()
-        def db = new File(Settings.getDataDirectory(), "dc.h2.db")
+        def db = new File(settings.getDataDirectory(), "dc.h2.db")
         if (db.exists()) {
             if (db.delete()) {
                 logger.info("Database file purged; local copy of the NVD has been removed")
@@ -74,14 +75,14 @@ class Purge extends DefaultTask {
      * Initializes the configuration.
      */
     def initializeSettings() {
-        Settings.initialize()
-        Settings.setStringIfNotNull(DATA_DIRECTORY, config.data.directory)
+        settings = new Settings()
+        settings.setStringIfNotNull(DATA_DIRECTORY, config.data.directory)
     }
 
     /**
      * Releases resources and removes temporary files used.
      */
     def cleanup() {
-        Settings.cleanup(true)
+        settings.cleanup(true)
     }
 }

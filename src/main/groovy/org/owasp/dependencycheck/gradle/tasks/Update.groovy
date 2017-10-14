@@ -53,6 +53,7 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_PASSWORD
 class Update extends DefaultTask {
 
     @Internal def config = project.dependencyCheck
+    @Internal def settings
 
     /**
      * Initializes the update task.
@@ -70,7 +71,7 @@ class Update extends DefaultTask {
         initializeSettings()
         def engine = null
         try {
-            engine = new Engine()
+            engine = new Engine(settings)
             engine.doUpdates()
         } catch (DatabaseException ex) {
             String msg = "Unable to connect to the dependency-check database"
@@ -98,29 +99,29 @@ class Update extends DefaultTask {
      * then the default value from dependency-check-core is used.
      */
     def initializeSettings() {
-        Settings.initialize()
-        Settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
-        Settings.setStringIfNotEmpty(PROXY_PORT, "${config.proxy.port}")
-        Settings.setStringIfNotEmpty(PROXY_USERNAME, config.proxy.username)
-        Settings.setStringIfNotEmpty(PROXY_PASSWORD, config.proxy.password)
-        //Settings.setStringIfNotEmpty(CONNECTION_TIMEOUT, connectionTimeout)
-        Settings.setStringIfNotNull(DATA_DIRECTORY, config.data.directory)
-        Settings.setStringIfNotEmpty(DB_DRIVER_NAME, config.data.driver)
-        Settings.setStringIfNotEmpty(DB_DRIVER_PATH, config.data.driverPath)
-        Settings.setStringIfNotEmpty(DB_CONNECTION_STRING, config.data.connectionString)
-        Settings.setStringIfNotEmpty(DB_USER, config.data.username)
-        Settings.setStringIfNotEmpty(DB_PASSWORD, config.data.password)
-        Settings.setStringIfNotEmpty(CVE_MODIFIED_12_URL, config.cve.url12Modified)
-        Settings.setStringIfNotEmpty(CVE_MODIFIED_20_URL, config.cve.url20Modified)
-        Settings.setStringIfNotEmpty(CVE_SCHEMA_1_2, config.cve.url12Base)
-        Settings.setStringIfNotEmpty(CVE_SCHEMA_2_0, config.cve.url20Base)
+        settings = new Settings()
+        settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
+        settings.setStringIfNotEmpty(PROXY_PORT, "${config.proxy.port}")
+        settings.setStringIfNotEmpty(PROXY_USERNAME, config.proxy.username)
+        settings.setStringIfNotEmpty(PROXY_PASSWORD, config.proxy.password)
+        //settings.setStringIfNotEmpty(CONNECTION_TIMEOUT, connectionTimeout)
+        settings.setStringIfNotNull(DATA_DIRECTORY, config.data.directory)
+        settings.setStringIfNotEmpty(DB_DRIVER_NAME, config.data.driver)
+        settings.setStringIfNotEmpty(DB_DRIVER_PATH, config.data.driverPath)
+        settings.setStringIfNotEmpty(DB_CONNECTION_STRING, config.data.connectionString)
+        settings.setStringIfNotEmpty(DB_USER, config.data.username)
+        settings.setStringIfNotEmpty(DB_PASSWORD, config.data.password)
+        settings.setStringIfNotEmpty(CVE_MODIFIED_12_URL, config.cve.url12Modified)
+        settings.setStringIfNotEmpty(CVE_MODIFIED_20_URL, config.cve.url20Modified)
+        settings.setStringIfNotEmpty(CVE_SCHEMA_1_2, config.cve.url12Base)
+        settings.setStringIfNotEmpty(CVE_SCHEMA_2_0, config.cve.url20Base)
 
-        Settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
-        Settings.setBooleanIfNotNull(DOWNLOADER_QUICK_QUERY_TIMESTAMP, config.quickQueryTimestamp)
+        settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
+        settings.setBooleanIfNotNull(DOWNLOADER_QUICK_QUERY_TIMESTAMP, config.quickQueryTimestamp)
 
         if (config.cveValidForHours != null) {
             if (config.cveValidForHours >= 0) {
-                Settings.setInt(CVE_CHECK_VALID_FOR_HOURS, config.cveValidForHours)
+                settings.setInt(CVE_CHECK_VALID_FOR_HOURS, config.cveValidForHours)
             } else {
                 throw new InvalidUserDataException("Invalid setting: `validForHours` must be 0 or greater")
             }
@@ -130,7 +131,7 @@ class Update extends DefaultTask {
      * Releases resources and removes temporary files used.
      */
     def cleanup(engine) {
-        Settings.cleanup(true)
-        engine.cleanup()
+        settings.cleanup(true)
+        engine.close()
     }
 }
