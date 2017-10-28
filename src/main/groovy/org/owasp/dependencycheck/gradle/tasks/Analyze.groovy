@@ -55,7 +55,9 @@ class Analyze extends AbstractAnalyze {
         project.getConfigurations().findAll {
             shouldBeScanned(it) && !(shouldBeSkipped(it) || shouldBeSkippedAsTest(it)) && canBeResolved(it)
         }.each { Configuration configuration ->
-            configuration.getResolvedConfiguration().getResolvedArtifacts().collect { ResolvedArtifact artifact ->
+            configuration.getResolvedConfiguration().getResolvedArtifacts().findAll{ResolvedArtifact artifact ->
+				! "java-classes-directory".equals(artifact.getType())
+			}.collect { ResolvedArtifact artifact ->
                 def deps = engine.scan(artifact.getFile())
                 //TODO determine why deps could be null in some cases.
                 addInfoToDependencies(deps, artifact, configuration.name)
