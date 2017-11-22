@@ -7,7 +7,7 @@ The dependency-check gradle plugin allows projects to monitor dependent librarie
 known, published vulnerabilities.
 
 ## Current Release
-The latest version is `3.0.1`.
+The latest version is `3.0.2`.
 
 With the release of 2.1.1 the task name was changed from `dependencyCheck` to `dependencyCheckAnalyze`.
 
