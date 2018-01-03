@@ -48,6 +48,8 @@ abstract class AbstractAnalyze extends DefaultTask {
     def config = project.dependencyCheck
     @Internal
     def settings
+    @Internal
+    def PROPERTIES_FILE = "task.properties"
 
     /**
      * Calls dependency-check-core's analysis engine to scan
@@ -134,6 +136,25 @@ abstract class AbstractAnalyze extends DefaultTask {
      */
     def initializeSettings() {
         settings = new Settings()
+
+
+        InputStream taskProperties = null;
+        try {
+            taskProperties = this.getClass().getClassLoader().getResourceAsStream(PROPERTIES_FILE);
+            settings.mergeProperties(taskProperties);
+        } catch (IOException ex) {
+            logger.warn("Unable to load the dependency-check gradle task.properties file.");
+            logger.debug("", ex);
+        } finally {
+            if (taskProperties != null) {
+                try {
+                    taskProperties.close();
+                } catch (IOException ex) {
+                    logger.debug("", ex);
+                }
+            }
+        }
+
 
         settings.setBooleanIfNotNull(AUTO_UPDATE, config.autoUpdate)
 
