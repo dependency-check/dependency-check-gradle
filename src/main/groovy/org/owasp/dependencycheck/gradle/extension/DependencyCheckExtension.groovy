@@ -61,7 +61,6 @@ class DependencyCheckExtension {
      * The directory where the reports will be written. Defaults to 'build/reports'.
      */
     String outputDirectory
-
     /**
      * Configuration for the analyzers.
      */
@@ -78,7 +77,6 @@ class DependencyCheckExtension {
      * The path to the hints file.
      */
     String hintsFile
-
     /**
      * Sets whether auto-updating of the NVD CVE/CPE data is enabled.
      */
@@ -113,18 +111,20 @@ class DependencyCheckExtension {
      * Displays a summary of the findings. Defaults to true.
      */
     Boolean showSummary = true
-
     /**
      * Names of the configurations to scan.
      *
      * This is mutually exclusive with the skipConfigurations property.
      */
     List<String> scanConfigurations = []
-
     /**
      * Names of the configurations to skip when scanning.
      *
      * This is mutually exclusive with the scanConfigurations property.
      */
     List<String> skipConfigurations = []
+    /**
+     * Whether or not to skip the execution of dependency-check.
+     */
+    Boolean skip = false
 }

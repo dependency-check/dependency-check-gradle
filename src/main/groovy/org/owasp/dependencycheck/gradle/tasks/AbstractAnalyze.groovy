@@ -57,6 +57,10 @@ abstract class AbstractAnalyze extends DefaultTask {
      */
     @TaskAction
     analyze() {
+        if (config.skip) {
+            logger.lifecycle("Skipping dependency-check-gradle")
+            return
+        }
         verifySettings()
         initializeSettings()
         def engine = null
