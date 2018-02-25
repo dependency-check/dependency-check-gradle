@@ -254,7 +254,7 @@ abstract class AbstractAnalyze extends DefaultTask {
             dependency.getVulnerabilities()
         }.flatten()
 
-        logger.lifecycle("Found ${vulnerabilities.size()} vulnerabilities in project ${currentProjectName}")
+        logger.warn("Found ${vulnerabilities.size()} vulnerabilities in project ${currentProjectName}")
         if (config.showSummary) {
             final StringBuilder summary = new StringBuilder()
             for (Dependency d : engine.getDependencies()) {
@@ -286,7 +286,7 @@ abstract class AbstractAnalyze extends DefaultTask {
                 final String msg = String.format("%n%n"
                         + "One or more dependencies were identified with known vulnerabilities:%n%n%s"
                         + "%n%nSee the dependency-check report for more details.%n%n", summary.toString())
-                logger.lifecycle(msg)
+                logger.warn(msg)
             }
         }
     }
