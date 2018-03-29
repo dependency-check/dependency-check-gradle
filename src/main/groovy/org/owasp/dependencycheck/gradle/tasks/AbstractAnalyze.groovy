@@ -300,28 +300,21 @@ abstract class AbstractAnalyze extends DefaultTask {
             return
         }
 
-        def vulnerabilities = engine.getDependencies().collect { Dependency dependency ->
-            dependency.getVulnerabilities()
-        }.flatten()
+        final String vulnerabilities = engine.getDependencies()
+                .collect { it.getVulnerabilities() }
+                .flatten()
+                .unique()
+                .findAll { it.getCvssScore() >= config.failBuildOnCVSS }
+                .sort { a, b -> b.getCvssScore() <=> a.getCvssScore() ?: a.getName() <=> b.getName() }
+                .collect { it.getName() }
+                .join(", ")
 
-        final StringBuilder ids = new StringBuilder()
-
-        vulnerabilities.each {
-            if (it.getCvssScore() >= config.failBuildOnCVSS) {
-                if (ids.length() == 0) {
-                    ids.append(it.getName())
-                } else {
-                    ids.append(", ").append(it.getName())
-                }
-            }
-        }
-        if (ids.length() > 0) {
+        if (vulnerabilities.length() > 0) {
             final String msg = String.format("%n%nDependency-Analyze Failure:%n"
                     + "One or more dependencies were identified with vulnerabilities that have a CVSS score greater then '%.1f': %s%n"
-                    + "See the dependency-check report for more details.%n%n", config.failBuildOnCVSS, ids.toString())
+                    + "See the dependency-check report for more details.%n%n", config.failBuildOnCVSS, vulnerabilities)
             throw new GradleException(msg)
         }
-
     }
 
     /**
