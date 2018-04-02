@@ -64,7 +64,7 @@ dependencies {
         localGroovy(),
         gradleApi(),
         'commons-collections:commons-collections:3.2.2',
-        'org.owasp:dependency-check-core:3.1.1',
+        'org.owasp:dependency-check-core:3.1.2',
         'org.owasp:dependency-check-utils:3.1.1'
     )
 
