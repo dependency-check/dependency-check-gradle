@@ -69,6 +69,7 @@ abstract class AbstractAnalyze extends DefaultTask {
         } catch (DatabaseException ex) {
             String msg = "Unable to connect to the dependency-check database"
             if (config.failOnError) {
+                cleanup(engine)
                 throw new GradleException(msg, ex)
             } else {
                 logger.error(msg)
@@ -82,6 +83,7 @@ abstract class AbstractAnalyze extends DefaultTask {
                 engine.analyzeDependencies()
             } catch (ExceptionCollection ex) {
                 if (config.failOnError && ex.isFatal()) {
+                    cleanup(engine)
                     throw new GradleException("Analysis failed.", ex)
                 }
                 exCol = ex
@@ -94,6 +96,8 @@ abstract class AbstractAnalyze extends DefaultTask {
                 def groupId = project.getGroup()
                 File output = new File(config.outputDirectory)
                 engine.writeReports(displayName, groupId, name.toString(), project.getVersion().toString(), output, config.format.toString())
+                showSummary(engine)
+                checkForFailure(engine)
             } catch (ReportException ex) {
                 if (config.failOnError) {
                     if (exCol != null) {
@@ -108,9 +112,6 @@ abstract class AbstractAnalyze extends DefaultTask {
             } finally {
                 cleanup(engine)
             }
-            showSummary(engine)
-            checkForFailure(engine)
-            cleanup(engine)
             if (config.failOnError && exCol != null && exCol.getExceptions().size() > 0) {
                 throw new GradleException("One or more exceptions occurred during analysis", exCol)
             }
@@ -237,8 +238,12 @@ abstract class AbstractAnalyze extends DefaultTask {
      * Releases resources and removes temporary files used.
      */
     def cleanup(engine) {
-        settings.cleanup(true)
-        engine.close()
+        if (engine != null) {
+            engine.close()
+        }
+        if (settings != null) {
+            settings.cleanup(true)
+        }
     }
 
     /**
