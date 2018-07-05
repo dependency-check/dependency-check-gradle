@@ -98,6 +98,18 @@ class DependencyCheckGradlePluginSpec extends Specification {
                 url20Modified = 'cveUrl20Modified'
             }
 
+            analyzers {
+                artifactory {
+                    url = 'https://example.com/artifacgtory'
+                    bearerToken = 'abc123=='
+                }
+
+                retirejs {
+                    filters = ['filter1', 'filter2']
+                    filterNonVulnerable = true
+                }
+            }
+
             outputDirectory = 'outputDirectory'
             quickQueryTimestamp = false
 
@@ -125,6 +137,10 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.skipTestGroups == false
         project.dependencyCheck.suppressionFile == './src/config/suppression.xml'
         project.dependencyCheck.suppressionFiles == ['./src/config/suppression1.xml', './src/config/suppression2.xml']
+        project.dependencyCheck.analyzers.artifactory.url == 'https://example.com/artifacgtory'
+        project.dependencyCheck.analyzers.artifactory.bearerToken == 'abc123=='
+        project.dependencyCheck.analyzers.retirejs.filters == ['filter1', 'filter2']
+        project.dependencyCheck.analyzers.retirejs.filterNonVulnerable == true
     }
 
     def 'scanConfigurations and skipConfigurations are mutually exclusive'() {

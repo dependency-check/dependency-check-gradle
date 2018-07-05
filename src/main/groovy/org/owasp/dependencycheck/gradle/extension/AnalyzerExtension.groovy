@@ -22,7 +22,6 @@ package org.owasp.dependencycheck.gradle.extension
  * The analyzer configuration extension. Any value not configured will use the dependency-check-core defaults.
  */
 class AnalyzerExtension {
-
     /**
      * Sets whether the experimental analyzers will be used.
      */
@@ -121,4 +120,12 @@ class AnalyzerExtension {
      * Sets whether or not the NSP Analyzer should be used.
      */
     Boolean nspEnabled
+    /**
+     * Sets whether or not the NSP Analyzer should be used.
+     */
+    Boolean retireJSEnabled
+    /**
+     * Sets whether or not the Artifactory Analyzer should be used.
+     */
+    Boolean artifactoryAnalyzerEnabled
 }
