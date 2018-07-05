@@ -120,12 +120,4 @@ class AnalyzerExtension {
      * Sets whether or not the NSP Analyzer should be used.
      */
     Boolean nspEnabled
-    /**
-     * Sets whether or not the NSP Analyzer should be used.
-     */
-    Boolean retireJSEnabled
-    /**
-     * Sets whether or not the Artifactory Analyzer should be used.
-     */
-    Boolean artifactoryAnalyzerEnabled
 }

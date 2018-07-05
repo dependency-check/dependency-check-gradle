@@ -100,6 +100,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
 
             analyzers {
                 artifactory {
+                    enabled = true
                     url = 'https://example.com/artifacgtory'
                     bearerToken = 'abc123=='
                 }
@@ -137,6 +138,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.skipTestGroups == false
         project.dependencyCheck.suppressionFile == './src/config/suppression.xml'
         project.dependencyCheck.suppressionFiles == ['./src/config/suppression1.xml', './src/config/suppression2.xml']
+        project.dependencyCheck.analyzers.artifactory.enabled == true
         project.dependencyCheck.analyzers.artifactory.url == 'https://example.com/artifacgtory'
         project.dependencyCheck.analyzers.artifactory.bearerToken == 'abc123=='
         project.dependencyCheck.analyzers.retirejs.filters == ['filter1', 'filter2']

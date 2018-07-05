@@ -18,31 +18,20 @@
 package org.owasp.dependencycheck.gradle.extension
 
 /**
- * The artifactory analyzer configuration.
+ * The configuration for the RetireJS Analyzer.
  */
-class ArtifactoryConfig {
+class RetireJSExtension {
     /**
-     * The Artifactory server URL.
+     * Sets whether or not the NSP Analyzer should be used.
      */
-    String url
+    Boolean enabled
     /**
-     * Whether Artifactory should be accessed through a proxy or not.
+     * The JS content filters (regular expressions) used to filter which JS files will be skipped if the content matches one
+     * of the filters. This is most commonly used to filter by copyright.
      */
-    Boolean usesProxy
+    List<String>  filters = []
     /**
-     * Whether the Artifactory analyzer should be run in parallel or not.
+     * Whether the Retire JS analyzer should filter the non-vunerable JS from the report.
      */
-    Boolean parallelAnalysis
-    /**
-     * The user name (only used with API token) to connect to Artifactory instance.
-     */
-    String username
-    /**
-     * The API token to connect to Artifactory instance.
-     */
-    String apiToken
-    /**
-     * The bearer token to connect to Artifactory instance.
-     */
-    String bearerToken
+    Boolean filterNonVulnerable
 }
