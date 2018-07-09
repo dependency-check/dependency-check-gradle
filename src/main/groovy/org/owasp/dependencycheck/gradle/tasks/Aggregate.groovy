@@ -58,7 +58,12 @@ class Aggregate extends AbstractAnalyze {
             }.each { Configuration configuration ->
                 configuration.getResolvedConfiguration().getResolvedArtifacts().collect { ResolvedArtifact artifact ->
                     def deps = engine.scan(artifact.getFile())
-                    addInfoToDependencies(deps, artifact, "$it.name:$configuration.name")
+                    if (deps == null) {
+                        addVirtualDependency(engine, project.name, configuration.name, artifact.moduleVersion.id.group,
+                                artifact.moduleVersion.id.name, artifact.moduleVersion.id.version, artifact.id.displayName)
+                    } else {
+                        addInfoToDependencies(deps, artifact, "$it.name:$configuration.name")
+                    }
                 }
             }
         }

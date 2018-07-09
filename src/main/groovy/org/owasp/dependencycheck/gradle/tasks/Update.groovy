@@ -52,8 +52,10 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_PASSWORD
  */
 class Update extends DefaultTask {
 
-    @Internal def config = project.dependencyCheck
-    @Internal def settings
+    @Internal
+    def config = project.dependencyCheck
+    @Internal
+    def settings
 
     /**
      * Initializes the update task.
@@ -92,7 +94,6 @@ class Update extends DefaultTask {
             cleanup(engine)
         }
     }
-
 
     /**
      * Initializes the settings; if the setting is not configured

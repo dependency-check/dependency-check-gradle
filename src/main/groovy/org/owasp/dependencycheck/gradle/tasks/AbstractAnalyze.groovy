@@ -427,4 +427,44 @@ abstract class AbstractAnalyze extends DefaultTask {
         def id = artifact.moduleVersion.id
         new MavenArtifact(id.group, id.name, id.version)
     }
+
+    /**
+     * Adds a virtual dependency to the engine. This is used when an artifact is scanned that is not
+     * supported by dependency-check (different dependency type for possibly new language).
+     * @param engine a reference to the engine
+     * @param projectName the project name
+     * @param configurationName the configuration name
+     * @param groupid the group id
+     * @param name the name or artifact id
+     * @param version the version number
+     * @param displayName the display name
+     */
+    protected void addVirtualDependency(Engine engine, String projectName, String configurationName,
+                                        String groupid, String name, String version, String displayName) {
+
+        logger.info("Adding virtual dependency for ${displayName}")
+
+        Dependency virtualDependency = new Dependency(new File(project.buildDir, "../build.gradle"), true)
+
+        virtualDependency.setSha1sum(Checksum.getSHA1Checksum("${groupid}:${name}:${version}"))
+        virtualDependency.setSha256sum(Checksum.getSHA256Checksum("${groupid}:${name}:${version}"))
+        virtualDependency.setMd5sum(Checksum.getMD5Checksum("${groupid}:${name}:${version}"))
+        virtualDependency.addEvidence(EvidenceType.VENDOR, "build.gradle", "group", groupid, Confidence.HIGHEST)
+        virtualDependency.addEvidence(EvidenceType.VENDOR, "build.gradle", "name", name, Confidence.MEDIUM)
+        virtualDependency.addEvidence(EvidenceType.VENDOR, "build.gradle", "displayName", displayName, Confidence.MEDIUM)
+        virtualDependency.addEvidence(EvidenceType.PRODUCT, "build.gradle", "group", groupid, Confidence.MEDIUM)
+        virtualDependency.addEvidence(EvidenceType.PRODUCT, "build.gradle", "name", name, Confidence.HIGHEST)
+        virtualDependency.addEvidence(EvidenceType.PRODUCT, "build.gradle", "displayName", displayName, Confidence.HIGH)
+        virtualDependency.addEvidence(EvidenceType.VERSION, "build.gradle", "version", version, Confidence.HIGHEST)
+        virtualDependency.setName(name)
+        virtualDependency.setVersion(version)
+        virtualDependency.setDisplayFileName(displayName ? displayName : "${groupid}:${name}:${version}")
+        virtualDependency.setPackagePath("${groupid}:${name}:${version}")
+        virtualDependency.addProjectReference("${projectName}:${configurationName}")
+        virtualDependency.setEcosystem("gradle")
+        virtualDependency.addIdentifier("maven", "${groupid}:${name}:${version}",
+                null, Confidence.HIGHEST)
+
+        engine.addDependency(virtualDependency);
+    }
 }
