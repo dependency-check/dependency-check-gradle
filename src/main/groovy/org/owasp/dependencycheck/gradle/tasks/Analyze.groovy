@@ -18,24 +18,8 @@
 
 package org.owasp.dependencycheck.gradle.tasks
 
-import org.gradle.api.DefaultTask
-import org.gradle.api.GradleException
-import org.gradle.api.InvalidUserDataException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolvedArtifact
-import org.gradle.api.artifacts.ResolvedDependency
-import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.Internal
-import org.owasp.dependencycheck.Engine
-import org.owasp.dependencycheck.data.nvdcve.DatabaseException
-import org.owasp.dependencycheck.dependency.Confidence
-import org.owasp.dependencycheck.exception.ExceptionCollection
-import org.owasp.dependencycheck.exception.ReportException
-import org.owasp.dependencycheck.dependency.Dependency
-import org.owasp.dependencycheck.dependency.Identifier
-import org.owasp.dependencycheck.dependency.Vulnerability
-import org.owasp.dependencycheck.utils.Settings
-import static org.owasp.dependencycheck.utils.Settings.KEYS.*
 
 /**
  * Checks the projects dependencies for known vulnerabilities.
@@ -57,8 +41,12 @@ class Analyze extends AbstractAnalyze {
         }.each { Configuration configuration ->
             configuration.getResolvedConfiguration().getResolvedArtifacts().collect { ResolvedArtifact artifact ->
                 def deps = engine.scan(artifact.getFile())
-                //TODO determine why deps could be null in some cases.
-                addInfoToDependencies(deps, artifact, configuration.name)
+                if (deps == null) {
+                    addVirtualDependency(engine, project.name, configuration.name, artifact.moduleVersion.id.group,
+                            artifact.moduleVersion.id.name, artifact.moduleVersion.id.version, artifact.id.displayName)
+                } else {
+                    addInfoToDependencies(deps, artifact, configuration.name)
+                }
             }
         }
     }
