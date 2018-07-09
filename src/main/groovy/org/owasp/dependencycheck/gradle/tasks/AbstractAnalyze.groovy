@@ -442,7 +442,8 @@ abstract class AbstractAnalyze extends DefaultTask {
     protected void addVirtualDependency(Engine engine, String projectName, String configurationName,
                                         String groupid, String name, String version, String displayName) {
 
-        logger.info("Adding virtual dependency for ${displayName}")
+        def display = displayName ?: "${groupid}:${name}:${version}"
+        logger.info("Adding virtual dependency for ${display}")
 
         Dependency virtualDependency = new Dependency(new File(project.buildDir, "../build.gradle"), true)
 
@@ -451,14 +452,14 @@ abstract class AbstractAnalyze extends DefaultTask {
         virtualDependency.setMd5sum(Checksum.getMD5Checksum("${groupid}:${name}:${version}"))
         virtualDependency.addEvidence(EvidenceType.VENDOR, "build.gradle", "group", groupid, Confidence.HIGHEST)
         virtualDependency.addEvidence(EvidenceType.VENDOR, "build.gradle", "name", name, Confidence.MEDIUM)
-        virtualDependency.addEvidence(EvidenceType.VENDOR, "build.gradle", "displayName", displayName, Confidence.MEDIUM)
+        virtualDependency.addEvidence(EvidenceType.VENDOR, "build.gradle", "displayName", display, Confidence.MEDIUM)
         virtualDependency.addEvidence(EvidenceType.PRODUCT, "build.gradle", "group", groupid, Confidence.MEDIUM)
         virtualDependency.addEvidence(EvidenceType.PRODUCT, "build.gradle", "name", name, Confidence.HIGHEST)
-        virtualDependency.addEvidence(EvidenceType.PRODUCT, "build.gradle", "displayName", displayName, Confidence.HIGH)
+        virtualDependency.addEvidence(EvidenceType.PRODUCT, "build.gradle", "displayName", display, Confidence.HIGH)
         virtualDependency.addEvidence(EvidenceType.VERSION, "build.gradle", "version", version, Confidence.HIGHEST)
         virtualDependency.setName(name)
         virtualDependency.setVersion(version)
-        virtualDependency.setDisplayFileName(displayName ? displayName : "${groupid}:${name}:${version}")
+        virtualDependency.setDisplayFileName(display)
         virtualDependency.setPackagePath("${groupid}:${name}:${version}")
         virtualDependency.addProjectReference("${projectName}:${configurationName}")
         virtualDependency.setEcosystem("gradle")
