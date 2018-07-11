@@ -40,13 +40,19 @@ class Aggregate extends AbstractAnalyze {
             it.configurations.findAll {
                 shouldBeScanned(it) && !(shouldBeSkipped(it) || shouldBeSkippedAsTest(it)) && canBeResolved(it)
             }.each { Configuration configuration ->
-                configuration.getResolvedConfiguration().getResolvedArtifacts().collect { ResolvedArtifact artifact ->
-                    def deps = engine.scan(artifact.getFile())
+                String projectName = it.name
+                String scope = "$it.name:$configuration.name"
+                def resolved = configuration.getResolvedConfiguration().getResolvedArtifacts()
+                if (resolved.size() > 0) {
+                    logger.lifecycle("Analyzing ${scope}")
+                }
+                resolved.each { ResolvedArtifact artifact ->
+                    def deps = engine.scan(artifact.getFile(), scope)
                     if (deps == null) {
-                        addVirtualDependency(engine, project.name, configuration.name, artifact.moduleVersion.id.group,
+                        addVirtualDependency(engine, projectName, configuration.name, artifact.moduleVersion.id.group,
                                 artifact.moduleVersion.id.name, artifact.moduleVersion.id.version, artifact.id.displayName)
                     } else {
-                        addInfoToDependencies(deps, artifact, "$it.name:$configuration.name")
+                        addInfoToDependencies(deps, artifact, scope)
                     }
                 }
             }

@@ -35,6 +35,8 @@ import org.owasp.dependencycheck.exception.ExceptionCollection
 import org.owasp.dependencycheck.exception.ReportException
 import org.owasp.dependencycheck.utils.Settings
 
+import static org.owasp.dependencycheck.dependency.EvidenceType.*
+import static org.owasp.dependencycheck.utils.Checksum.*
 import static org.owasp.dependencycheck.utils.Settings.KEYS.*
 
 /**
@@ -143,19 +145,19 @@ abstract class AbstractAnalyze extends DefaultTask {
         settings = new Settings()
 
 
-        InputStream taskProperties = null;
+        InputStream taskProperties = null
         try {
-            taskProperties = this.getClass().getClassLoader().getResourceAsStream(PROPERTIES_FILE);
-            settings.mergeProperties(taskProperties);
+            taskProperties = this.getClass().getClassLoader().getResourceAsStream(PROPERTIES_FILE)
+            settings.mergeProperties(taskProperties)
         } catch (IOException ex) {
-            logger.warn("Unable to load the dependency-check gradle task.properties file.");
-            logger.debug("", ex);
+            logger.warn("Unable to load the dependency-check gradle task.properties file.")
+            logger.debug("", ex)
         } finally {
             if (taskProperties != null) {
                 try {
-                    taskProperties.close();
+                    taskProperties.close()
                 } catch (IOException ex) {
-                    logger.debug("", ex);
+                    logger.debug("", ex)
                 }
             }
         }
@@ -277,17 +279,17 @@ abstract class AbstractAnalyze extends DefaultTask {
             final StringBuilder summary = new StringBuilder()
             for (Dependency d : engine.getDependencies()) {
                 boolean firstEntry = true
-                final StringBuilder ids = new StringBuilder()
+                final StringBuilder vulnerabilityIds = new StringBuilder()
                 for (Vulnerability v : d.getVulnerabilities(true)) {
                     if (firstEntry) {
                         firstEntry = false
                     } else {
-                        ids.append(", ")
+                        vulnerabilityIds.append(", ")
                     }
-                    ids.append(v.getName())
+                    vulnerabilityIds.append(v.getName())
                 }
-                if (ids.length() > 0) {
-                    summary.append(d.getFileName()).append(" (")
+                if (vulnerabilityIds.length() > 0) {
+                    summary.append(d.getDisplayFileName()).append(": ids:(")
                     firstEntry = true
                     for (Identifier id : d.getIdentifiers()) {
                         if (firstEntry) {
@@ -297,7 +299,7 @@ abstract class AbstractAnalyze extends DefaultTask {
                         }
                         summary.append(id.getValue())
                     }
-                    summary.append(") : ").append(ids).append('\n')
+                    summary.append(") : ").append(vulnerabilityIds).append('\n')
                 }
             }
             if (summary.length() > 0) {
@@ -445,27 +447,36 @@ abstract class AbstractAnalyze extends DefaultTask {
         def display = displayName ?: "${groupid}:${name}:${version}"
         logger.info("Adding virtual dependency for ${display}")
 
-        Dependency virtualDependency = new Dependency(new File(project.buildDir, "../build.gradle"), true)
+        Dependency virtualDependency = new Dependency(new File(project.buildDir.getParentFile(), "build.gradle"), true)
 
-        virtualDependency.setSha1sum(Checksum.getSHA1Checksum("${groupid}:${name}:${version}"))
-        virtualDependency.setSha256sum(Checksum.getSHA256Checksum("${groupid}:${name}:${version}"))
-        virtualDependency.setMd5sum(Checksum.getMD5Checksum("${groupid}:${name}:${version}"))
-        virtualDependency.addEvidence(EvidenceType.VENDOR, "build.gradle", "group", groupid, Confidence.HIGHEST)
-        virtualDependency.addEvidence(EvidenceType.VENDOR, "build.gradle", "name", name, Confidence.MEDIUM)
-        virtualDependency.addEvidence(EvidenceType.VENDOR, "build.gradle", "displayName", display, Confidence.MEDIUM)
-        virtualDependency.addEvidence(EvidenceType.PRODUCT, "build.gradle", "group", groupid, Confidence.MEDIUM)
-        virtualDependency.addEvidence(EvidenceType.PRODUCT, "build.gradle", "name", name, Confidence.HIGHEST)
-        virtualDependency.addEvidence(EvidenceType.PRODUCT, "build.gradle", "displayName", display, Confidence.HIGH)
-        virtualDependency.addEvidence(EvidenceType.VERSION, "build.gradle", "version", version, Confidence.HIGHEST)
-        virtualDependency.setName(name)
-        virtualDependency.setVersion(version)
-        virtualDependency.setDisplayFileName(display)
-        virtualDependency.setPackagePath("${groupid}:${name}:${version}")
-        virtualDependency.addProjectReference("${projectName}:${configurationName}")
-        virtualDependency.setEcosystem("gradle")
-        virtualDependency.addIdentifier("maven", "${groupid}:${name}:${version}",
-                null, Confidence.HIGHEST)
+        String sha256 = getSHA256Checksum("${groupid}:${name}:${version}")
+        def existing = engine.dependencies.find {
+            sha256.equals(it.getSha256sum())
+        }
+        if (existing != null) {
+            existing.addProjectReference("${projectName}:${configurationName}")
+        } else {
 
-        engine.addDependency(virtualDependency);
+            virtualDependency.setSha1sum(getSHA1Checksum("${groupid}:${name}:${version}"))
+            virtualDependency.setSha256sum(sha256)
+            virtualDependency.setMd5sum(getMD5Checksum("${groupid}:${name}:${version}"))
+            virtualDependency.addEvidence(VENDOR, "build.gradle", "group", groupid, Confidence.HIGHEST)
+            virtualDependency.addEvidence(VENDOR, "build.gradle", "name", name, Confidence.MEDIUM)
+            virtualDependency.addEvidence(VENDOR, "build.gradle", "displayName", display, Confidence.MEDIUM)
+            virtualDependency.addEvidence(PRODUCT, "build.gradle", "group", groupid, Confidence.MEDIUM)
+            virtualDependency.addEvidence(PRODUCT, "build.gradle", "name", name, Confidence.HIGHEST)
+            virtualDependency.addEvidence(PRODUCT, "build.gradle", "displayName", display, Confidence.HIGH)
+            virtualDependency.addEvidence(VERSION, "build.gradle", "version", version, Confidence.HIGHEST)
+            virtualDependency.setName(name)
+            virtualDependency.setVersion(version)
+            virtualDependency.setDisplayFileName(display)
+            virtualDependency.setPackagePath("${groupid}:${name}:${version}")
+            virtualDependency.addProjectReference("${projectName}:${configurationName}")
+            virtualDependency.setEcosystem("gradle")
+            virtualDependency.addIdentifier("maven", "${groupid}:${name}:${version}",
+                    null, Confidence.HIGHEST)
+
+            engine.addDependency(virtualDependency)
+        }
     }
 }
