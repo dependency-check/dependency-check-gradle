@@ -124,6 +124,10 @@ class DependencyCheckExtension {
      */
     List<String> skipConfigurations = []
     /**
+     * The artifact types that will be analyzed in the gradle build.
+     */
+    List<String> analyzedTypes = ['jar', 'aar', 'js', 'war', 'ear', 'zip']
+    /**
      * Whether or not to skip the execution of dependency-check.
      */
     Boolean skip = false

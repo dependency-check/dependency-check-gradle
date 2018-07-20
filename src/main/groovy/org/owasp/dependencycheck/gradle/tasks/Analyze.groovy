@@ -17,10 +17,6 @@
  */
 
 package org.owasp.dependencycheck.gradle.tasks
-
-import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.ResolvedArtifact
-
 /**
  * Checks the projects dependencies for known vulnerabilities.
  */
@@ -36,26 +32,7 @@ class Analyze extends AbstractAnalyze {
      */
     def scanDependencies(engine) {
         logger.lifecycle("Verifying dependencies for project ${currentProjectName}")
-        project.getConfigurations().findAll {
-            shouldBeScanned(it) && !(shouldBeSkipped(it) || shouldBeSkippedAsTest(it)) && canBeResolved(it)
-        }.each { Configuration configuration ->
-
-            String projectName = project.name
-            String scope = "$projectName:$configuration.name"
-            def resolved = configuration.getResolvedConfiguration().getResolvedArtifacts()
-            if (resolved.size() > 0) {
-                logger.lifecycle("Analyzing ${scope}")
-            }
-            resolved.each { ResolvedArtifact artifact ->
-                def deps = engine.scan(artifact.getFile(), scope)
-                if (deps == null) {
-                    addVirtualDependency(engine, projectName, configuration.name, artifact.moduleVersion.id.group,
-                            artifact.moduleVersion.id.name, artifact.moduleVersion.id.version, artifact.id.displayName)
-                } else {
-                    addInfoToDependencies(deps, artifact, scope)
-                }
-            }
-        }
+        processConfigurations(project, engine)
     }
 
 }
