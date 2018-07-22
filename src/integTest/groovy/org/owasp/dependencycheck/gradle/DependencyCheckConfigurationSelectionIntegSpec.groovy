@@ -10,7 +10,8 @@ import static org.owasp.dependencycheck.gradle.DependencyCheckPlugin.*
 
 class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
 
-    @Rule final TemporaryFolder testProjectDir = new TemporaryFolder()
+    @Rule
+    final TemporaryFolder testProjectDir = new TemporaryFolder()
 
 
     def 'test dependencies are ignored by default'() {
@@ -30,13 +31,19 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
 
         when:
         def result = executeTaskAndGetResult(ANALYZE_TASK, false)
+        //println "-----------------"
+        //println result.output
+        //println "-----------------"
+        //String fileContents = new File(new File(testProjectDir.root, 'build/reports'), 'dependency-check-report.html').text
+        //println fileContents
 
         then:
         result.task(":$ANALYZE_TASK").outcome == FAILED
         result.output.contains('CVE-2015-6420')
         result.output.contains('CVE-2014-0114')
         result.output.contains('CVE-2016-3092')
-        result.output.contains('CVE-2015-5262')
+        //the nvd CVE was updated and the version used is no longer considered vulnerable
+        //result.output.contains('CVE-2015-5262')
     }
 
     def "custom configurations are scanned by default"() {

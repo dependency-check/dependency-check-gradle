@@ -21,7 +21,10 @@ package org.owasp.dependencycheck.gradle.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.InvalidUserDataException
-import org.gradle.api.artifacts.ResolvedArtifact
+import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.ModuleVersionIdentifier
+import org.gradle.api.attributes.Attribute
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.owasp.dependencycheck.Engine
@@ -52,6 +55,8 @@ abstract class AbstractAnalyze extends DefaultTask {
     def settings
     @Internal
     def PROPERTIES_FILE = "task.properties"
+    @Internal
+    def artifactType = Attribute.of('artifactType', String)
 
     /**
      * Calls dependency-check-core's analysis engine to scan
@@ -97,7 +102,8 @@ abstract class AbstractAnalyze extends DefaultTask {
                 def displayName = determineDisplayName()
                 def groupId = project.getGroup()
                 File output = new File(config.outputDirectory)
-                engine.writeReports(displayName, groupId, name.toString(), project.getVersion().toString(), output, config.format.toString())
+                engine.writeReports(displayName, groupId, name.toString(), project.getVersion().toString(), output,
+                        config.format.toString())
                 showSummary(engine)
                 checkForFailure(engine)
             } catch (ReportException ex) {
@@ -130,7 +136,9 @@ abstract class AbstractAnalyze extends DefaultTask {
         project.metaClass.respondsTo(project, "getDisplayName") ?
                 project.getDisplayName() : project.getName()
     }
-
+    /**
+     * Verifies aspects of the configuration to ensure dependency-check can run correctly.
+     */
     def verifySettings() {
         if (config.scanConfigurations && config.skipConfigurations) {
             throw new IllegalArgumentException("you can only specify one of scanConfigurations or skipConfigurations")
@@ -143,7 +151,6 @@ abstract class AbstractAnalyze extends DefaultTask {
      */
     def initializeSettings() {
         settings = new Settings()
-
 
         InputStream taskProperties = null
         try {
@@ -362,6 +369,11 @@ abstract class AbstractAnalyze extends DefaultTask {
         config.skipTestGroups && isTestConfiguration(configuration)
     }
 
+    /**
+     * Determines if the configuration should be considered a test configuration.
+     * @param configuration the configuration to insepct
+     * @return true if the configuration is considered a tet configuration; otherwise false
+     */
     def isTestConfiguration(configuration) {
         def isTestConfiguration = isTestConfigurationCheck(configuration)
 
@@ -389,29 +401,83 @@ abstract class AbstractAnalyze extends DefaultTask {
         isTestConfiguration
     }
 
+    /**
+     * Determines if the onfiguration can be resolved
+     * @param configuration the configuration to inspect
+     * @return true if the configuration can be resolved; otherwise false
+     */
     def canBeResolved(configuration) {
-        // Configuration.isCanBeResolved() has been introduced with Gradle 3.3,
-        // thus we need to check for the method's existence first
         configuration.metaClass.respondsTo(configuration, "isCanBeResolved") ?
                 configuration.isCanBeResolved() : true
     }
 
     /**
+     * Process the incoming artifacts for the given project's configurations.
+     * @param project the project to analyze
+     * @param engine the dependency-check engine
+     */
+    protected void processConfigurations(Project project, engine) {
+        project.configurations.findAll {
+            shouldBeScanned(it) && !(shouldBeSkipped(it) || shouldBeSkippedAsTest(it)) && canBeResolved(it)
+        }.each { Configuration configuration ->
+
+            String projectName = project.name
+            String scope = "$projectName:$configuration.name"
+
+            Map<String, ModuleVersionIdentifier> componentVersions = [:]
+            configuration.incoming.resolutionResult.allDependencies.each {
+                if (it.hasProperty('selected')) {
+                    componentVersions.put(it.selected.id, it.selected.moduleVersion)
+                } else if (it.hasProperty('attempted')) {
+                    logger.warn("Unable to resolve artifact: ${it.attempted.displayName}")
+                } else {
+                    logger.warn("Unable to resolve: ${it}")
+                }
+            }
+
+            def types = config.analyzedTypes
+
+            types.each { type ->
+                configuration.incoming.artifactView {
+                    attributes {
+                        it.attribute(artifactType, type)
+                    }
+                }.artifacts.each {
+                    ModuleVersionIdentifier id = componentVersions[it.id.componentIdentifier]
+                    def deps = engine.scan(it.file, scope)
+                    if (deps == null) {
+                        if (it.file.isFile()) {
+                            addDependency(engine, projectName, configuration.name,
+                                    id.group, id.name, id.version, it.id.displayName, it.file)
+                        } else {
+                            addDependency(engine, projectName, configuration.name,
+                                    id.group, id.name, id.version, it.id.displayName)
+                        }
+                    } else {
+                        addInfoToDependencies(deps, scope, id.group, id.name, id.version)
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Adds additional information and evidence to the dependencies.
      * @param deps the list of dependencies that will be updated
-     * @param artifact the artifact that was scanned to obtain the dependencies
      * @param configurationName the configuration name that the artifact was identified in
+     * @param group the group id for the artifact coordinates
+     * @param artifact the artifact id for the artifact coordinates
+     * @param version the version number for the artifact coordinates
      */
-    protected void addInfoToDependencies(List<Dependency> deps, ResolvedArtifact artifact, String configurationName) {
+    protected void addInfoToDependencies(List<Dependency> deps, String configurationName,
+                                         String group, String artifact, String version) {
         if (deps != null) {
             if (deps.size() == 1) {
                 def d = deps.get(0)
-                MavenArtifact mavenArtifact = createMavenArtifact(artifact)
+                MavenArtifact mavenArtifact = new MavenArtifact(group, artifact, version)
                 d.addAsEvidence("gradle", mavenArtifact, Confidence.HIGHEST)
-                if (artifact.moduleVersion.id.group != null && artifact.moduleVersion.id.name != null && artifact.moduleVersion.id.version != null) {
-                    d.addIdentifier("maven", String.format("%s:%s:%s",
-                            artifact.moduleVersion.id.group, artifact.moduleVersion.id.name, artifact.moduleVersion.id.version),
-                            null, Confidence.HIGHEST)
+                if (group != null && artifact != null && version != null) {
+                    d.addIdentifier("maven", String.format("%s:%s:%s", group, artifact, version), null, Confidence.HIGHEST)
                 }
                 d.addProjectReference(configurationName)
             } else {
@@ -421,62 +487,64 @@ abstract class AbstractAnalyze extends DefaultTask {
     }
 
     /**
-     * Creates a MavenArtifact from the Gradle artifact.
-     * @param artifact the Gradle artifact
-     * @return the MavenArtifact
-     */
-    private MavenArtifact createMavenArtifact(ResolvedArtifact artifact) {
-        def id = artifact.moduleVersion.id
-        new MavenArtifact(id.group, id.name, id.version)
-    }
-
-    /**
-     * Adds a virtual dependency to the engine. This is used when an artifact is scanned that is not
+     * Adds a dependency to the engine. This is used when an artifact is scanned that is not
      * supported by dependency-check (different dependency type for possibly new language).
      * @param engine a reference to the engine
      * @param projectName the project name
      * @param configurationName the configuration name
-     * @param groupid the group id
+     * @param group the group id
      * @param name the name or artifact id
      * @param version the version number
      * @param displayName the display name
      */
-    protected void addVirtualDependency(Engine engine, String projectName, String configurationName,
-                                        String groupid, String name, String version, String displayName) {
+    protected void addDependency(Engine engine, String projectName, String configurationName,
+                                 String group, String name, String version, String displayName,
+                                 File file = null) {
 
-        def display = displayName ?: "${groupid}:${name}:${version}"
-        logger.info("Adding virtual dependency for ${display}")
+        def display = displayName ?: "${group}:${name}:${version}"
+        Dependency dependency
+        String sha256
+        if (file == null) {
+            logger.info("Adding virtual dependency for ${display}")
+            dependency = new Dependency(new File(project.buildDir.getParentFile(), "build.gradle"), true)
+            sha256 = getSHA256Checksum("${group}:${name}:${version}")
+        } else {
+            logger.info("Adding dependency for ${display}")
+            dependency = new Dependency(file)
+            sha256 = dependency.getSha256sum()
+        }
 
-        Dependency virtualDependency = new Dependency(new File(project.buildDir.getParentFile(), "build.gradle"), true)
-
-        String sha256 = getSHA256Checksum("${groupid}:${name}:${version}")
         def existing = engine.dependencies.find {
             sha256.equals(it.getSha256sum())
         }
         if (existing != null) {
             existing.addProjectReference("${projectName}:${configurationName}")
         } else {
+            if (dependency.virtual) {
+                dependency.sha1sum = getSHA1Checksum("${group}:${name}:${version}")
+                dependency.sha256sum = sha256
+                dependency.md5sum = getMD5Checksum("${group}:${name}:${version}")
+                dependency.displayFileName = display
+            }
+            dependency.addEvidence(VENDOR, "build.gradle", "group", group, Confidence.HIGHEST)
+            dependency.addEvidence(VENDOR, "build.gradle", "name", name, Confidence.MEDIUM)
+            dependency.addEvidence(VENDOR, "build.gradle", "displayName", display, Confidence.MEDIUM)
+            dependency.addEvidence(PRODUCT, "build.gradle", "group", group, Confidence.MEDIUM)
+            dependency.addEvidence(PRODUCT, "build.gradle", "name", name, Confidence.HIGHEST)
+            dependency.addEvidence(PRODUCT, "build.gradle", "displayName", display, Confidence.HIGH)
+            dependency.addEvidence(VERSION, "build.gradle", "version", version, Confidence.HIGHEST)
+            dependency.name = name
+            dependency.version = version
+            dependency.packagePath = "${group}:${name}:${version}"
+            dependency.addProjectReference("${projectName}:${configurationName}")
+            if (file!=null && file.getName().endsWith(".aar")) {
+                dependency.ecosystem = "android"
+            } else {
+                dependency.ecosystem = "gradle"
+            }
+            dependency.addIdentifier("maven", "${group}:${name}:${version}", null, Confidence.HIGHEST)
 
-            virtualDependency.setSha1sum(getSHA1Checksum("${groupid}:${name}:${version}"))
-            virtualDependency.setSha256sum(sha256)
-            virtualDependency.setMd5sum(getMD5Checksum("${groupid}:${name}:${version}"))
-            virtualDependency.addEvidence(VENDOR, "build.gradle", "group", groupid, Confidence.HIGHEST)
-            virtualDependency.addEvidence(VENDOR, "build.gradle", "name", name, Confidence.MEDIUM)
-            virtualDependency.addEvidence(VENDOR, "build.gradle", "displayName", display, Confidence.MEDIUM)
-            virtualDependency.addEvidence(PRODUCT, "build.gradle", "group", groupid, Confidence.MEDIUM)
-            virtualDependency.addEvidence(PRODUCT, "build.gradle", "name", name, Confidence.HIGHEST)
-            virtualDependency.addEvidence(PRODUCT, "build.gradle", "displayName", display, Confidence.HIGH)
-            virtualDependency.addEvidence(VERSION, "build.gradle", "version", version, Confidence.HIGHEST)
-            virtualDependency.setName(name)
-            virtualDependency.setVersion(version)
-            virtualDependency.setDisplayFileName(display)
-            virtualDependency.setPackagePath("${groupid}:${name}:${version}")
-            virtualDependency.addProjectReference("${projectName}:${configurationName}")
-            virtualDependency.setEcosystem("gradle")
-            virtualDependency.addIdentifier("maven", "${groupid}:${name}:${version}",
-                    null, Confidence.HIGHEST)
-
-            engine.addDependency(virtualDependency)
+            engine.addDependency(dependency)
         }
     }
 }

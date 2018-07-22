@@ -18,13 +18,13 @@
 
 package org.owasp.dependencycheck.gradle.tasks
 
-import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.ResolvedArtifact
+import org.gradle.api.Project
 
 /**
  * Checks the projects dependencies for known vulnerabilities.
  */
 class Aggregate extends AbstractAnalyze {
+
 
     Aggregate() {
         group = 'OWASP dependency-check'
@@ -36,26 +36,8 @@ class Aggregate extends AbstractAnalyze {
      */
     def scanDependencies(engine) {
         logger.lifecycle("Verifying dependencies for project ${currentProjectName}")
-        project.rootProject.allprojects.collectMany {
-            it.configurations.findAll {
-                shouldBeScanned(it) && !(shouldBeSkipped(it) || shouldBeSkippedAsTest(it)) && canBeResolved(it)
-            }.each { Configuration configuration ->
-                String projectName = it.name
-                String scope = "$it.name:$configuration.name"
-                def resolved = configuration.getResolvedConfiguration().getResolvedArtifacts()
-                if (resolved.size() > 0) {
-                    logger.lifecycle("Analyzing ${scope}")
-                }
-                resolved.each { ResolvedArtifact artifact ->
-                    def deps = engine.scan(artifact.getFile(), scope)
-                    if (deps == null) {
-                        addVirtualDependency(engine, projectName, configuration.name, artifact.moduleVersion.id.group,
-                                artifact.moduleVersion.id.name, artifact.moduleVersion.id.version, artifact.id.displayName)
-                    } else {
-                        addInfoToDependencies(deps, artifact, scope)
-                    }
-                }
-            }
+        project.rootProject.allprojects.each { Project project ->
+            processConfigurations(project, engine)
         }
     }
 }
