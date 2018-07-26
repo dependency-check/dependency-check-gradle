@@ -85,7 +85,7 @@ abstract class AbstractAnalyze extends DefaultTask {
         if (engine != null) {
             scanDependencies(engine)
             ExceptionCollection exCol = null
-            logger.lifecycle("Checking for updates and analyzing vulnerabilities for dependencies")
+            logger.lifecycle("Checking for updates and analyzing dependencies for vulnerabilities")
             try {
                 engine.analyzeDependencies()
             } catch (ExceptionCollection ex) {
@@ -424,6 +424,8 @@ abstract class AbstractAnalyze extends DefaultTask {
             String projectName = project.name
             String scope = "$projectName:$configuration.name"
 
+            logger.info "- Analyzing ${scope}"
+
             Map<String, ModuleVersionIdentifier> componentVersions = [:]
             configuration.incoming.resolutionResult.allDependencies.each {
                 if (it.hasProperty('selected')) {
@@ -443,18 +445,22 @@ abstract class AbstractAnalyze extends DefaultTask {
                         it.attribute(artifactType, type)
                     }
                 }.artifacts.each {
-                    ModuleVersionIdentifier id = componentVersions[it.id.componentIdentifier]
                     def deps = engine.scan(it.file, scope)
-                    if (deps == null) {
-                        if (it.file.isFile()) {
-                            addDependency(engine, projectName, configuration.name,
-                                    id.group, id.name, id.version, it.id.displayName, it.file)
-                        } else {
-                            addDependency(engine, projectName, configuration.name,
-                                    id.group, id.name, id.version, it.id.displayName)
-                        }
+                    ModuleVersionIdentifier id = componentVersions[it.id.componentIdentifier]
+                    if (id==null) {
+                        logger.debug "Could not find dependency {'artifact': '${it.id.componentIdentifier}', 'file':'${it.file}'}"
                     } else {
-                        addInfoToDependencies(deps, scope, id.group, id.name, id.version)
+                        if (deps == null) {
+                            if (it.file.isFile()) {
+                                addDependency(engine, projectName, configuration.name,
+                                        id.group, id.name, id.version, it.id.displayName, it.file)
+                            } else {
+                                addDependency(engine, projectName, configuration.name,
+                                        id.group, id.name, id.version, it.id.displayName)
+                            }
+                        } else {
+                            addInfoToDependencies(deps, scope, id.group, id.name, id.version)
+                        }
                     }
                 }
             }
@@ -505,11 +511,11 @@ abstract class AbstractAnalyze extends DefaultTask {
         Dependency dependency
         String sha256
         if (file == null) {
-            logger.info("Adding virtual dependency for ${display}")
+            logger.debug("Adding virtual dependency for ${display}")
             dependency = new Dependency(new File(project.buildDir.getParentFile(), "build.gradle"), true)
             sha256 = getSHA256Checksum("${group}:${name}:${version}")
         } else {
-            logger.info("Adding dependency for ${display}")
+            logger.debug("Adding dependency for ${display}")
             dependency = new Dependency(file)
             sha256 = dependency.getSha256sum()
         }
