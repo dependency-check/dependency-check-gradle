@@ -26,7 +26,6 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.attributes.Attribute
-import org.gradle.api.internal.artifacts.configurations.DefaultConfiguration
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.util.GradleVersion
@@ -466,7 +465,7 @@ abstract class AbstractAnalyze extends DefaultTask {
             if (it.hasProperty('selected')) {
                 componentVersions.put(it.selected.id, it.selected.moduleVersion)
             } else if (it.hasProperty('attempted')) {
-                logger.warn("Unable to resolve artifact: ${it.attempted.displayName}")
+                logger.debug("Unable to resolve artifact in ${it.attempted.displayName}")
             } else {
                 logger.warn("Unable to resolve: ${it}")
             }
@@ -476,6 +475,7 @@ abstract class AbstractAnalyze extends DefaultTask {
 
         types.each { type ->
             configuration.incoming.artifactView {
+                lenient true
                 attributes {
                     it.attribute(artifactType, type)
                 }
