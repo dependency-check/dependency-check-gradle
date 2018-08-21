@@ -24,9 +24,11 @@ import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ModuleVersionIdentifier
+import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.attributes.Attribute
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
+import org.gradle.util.GradleVersion
 import org.owasp.dependencycheck.Engine
 import org.owasp.dependencycheck.data.nexus.MavenArtifact
 import org.owasp.dependencycheck.data.nvdcve.DatabaseException
@@ -57,6 +59,8 @@ abstract class AbstractAnalyze extends DefaultTask {
     def PROPERTIES_FILE = "task.properties"
     @Internal
     def artifactType = Attribute.of('artifactType', String)
+
+    static final GradleVersion CUTOVER_GRADLE_VERSION = GradleVersion.version("4.0")
 
     /**
      * Calls dependency-check-core's analysis engine to scan
@@ -417,51 +421,81 @@ abstract class AbstractAnalyze extends DefaultTask {
      * @param project the project to analyze
      * @param engine the dependency-check engine
      */
-    protected void processConfigurations(Project project, engine) {
-        project.configurations.findAll {
-            shouldBeScanned(it) && !(shouldBeSkipped(it) || shouldBeSkippedAsTest(it)) && canBeResolved(it)
+    protected void processConfigurations(Project project, Engine engine) {
+        project.configurations.findAll { Configuration configuration ->
+            shouldBeScanned(configuration) && !(shouldBeSkipped(configuration)
+                    || shouldBeSkippedAsTest(configuration)) && canBeResolved(configuration)
         }.each { Configuration configuration ->
-
-            String projectName = project.name
-            String scope = "$projectName:$configuration.name"
-
-            logger.info "- Analyzing ${scope}"
-
-            Map<String, ModuleVersionIdentifier> componentVersions = [:]
-            configuration.incoming.resolutionResult.allDependencies.each {
-                if (it.hasProperty('selected')) {
-                    componentVersions.put(it.selected.id, it.selected.moduleVersion)
-                } else if (it.hasProperty('attempted')) {
-                    logger.warn("Unable to resolve artifact: ${it.attempted.displayName}")
-                } else {
-                    logger.warn("Unable to resolve: ${it}")
-                }
+            if (CUTOVER_GRADLE_VERSION.compareTo(GradleVersion.current()) > 0) {
+                processConfigLegacy configuration, engine
+            } else {
+                processConfigV4 configuration, engine
             }
+        }
+    }
 
-            def types = config.analyzedTypes
+    /**
+     * Process the incoming artifacts for the given project's configurations using APIs pre-gradle 4.0.
+     * @param project the project to analyze
+     * @param engine the dependency-check engine
+     */
+    protected void processConfigLegacy(Configuration configuration, Engine engine) {
+        configuration.getResolvedConfiguration().getResolvedArtifacts().collect { ResolvedArtifact artifact ->
+            def dependencies = engine.scan(artifact.getFile())
+            addInfoToDependencies(dependencies, configuration.name,
+                    artifact.moduleVersion.id.group,
+                    artifact.moduleVersion.id.name,
+                    artifact.moduleVersion.id.version)
+        }
+    }
 
-            types.each { type ->
-                configuration.incoming.artifactView {
-                    attributes {
-                        it.attribute(artifactType, type)
-                    }
-                }.artifacts.each {
-                    def deps = engine.scan(it.file, scope)
-                    ModuleVersionIdentifier id = componentVersions[it.id.componentIdentifier]
-                    if (id==null) {
-                        logger.debug "Could not find dependency {'artifact': '${it.id.componentIdentifier}', 'file':'${it.file}'}"
-                    } else {
-                        if (deps == null) {
-                            if (it.file.isFile()) {
-                                addDependency(engine, projectName, configuration.name,
-                                        id.group, id.name, id.version, it.id.displayName, it.file)
-                            } else {
-                                addDependency(engine, projectName, configuration.name,
-                                        id.group, id.name, id.version, it.id.displayName)
-                            }
+    /**
+     * Process the incoming artifacts for the given project's configurations using APIs introduced in gradle 4.0+.
+     * @param project the project to analyze
+     * @param engine the dependency-check engine
+     */
+    protected void processConfigV4(Configuration configuration, Engine engine) {
+        String projectName = project.name
+        String scope = "$projectName:$configuration.name"
+
+        logger.info "- Analyzing ${scope}"
+
+        Map<String, ModuleVersionIdentifier> componentVersions = [:]
+        configuration.incoming.resolutionResult.allDependencies.each {
+            if (it.hasProperty('selected')) {
+                componentVersions.put(it.selected.id, it.selected.moduleVersion)
+            } else if (it.hasProperty('attempted')) {
+                logger.debug("Unable to resolve artifact in ${it.attempted.displayName}")
+            } else {
+                logger.warn("Unable to resolve: ${it}")
+            }
+        }
+
+        def types = config.analyzedTypes
+
+        types.each { type ->
+            configuration.incoming.artifactView {
+                lenient true
+                attributes {
+                    it.attribute(artifactType, type)
+                }
+            }.artifacts.each {
+                def deps = engine.scan(it.file, scope)
+                ModuleVersionIdentifier id = componentVersions[it.id.componentIdentifier]
+                if (id == null) {
+                    logger.debug "Could not find dependency {'artifact': '${it.id.componentIdentifier}', " +
+                            "'file':'${it.file}'}"
+                } else {
+                    if (deps == null) {
+                        if (it.file.isFile()) {
+                            addDependency(engine, projectName, configuration.name,
+                                    id.group, id.name, id.version, it.id.displayName, it.file)
                         } else {
-                            addInfoToDependencies(deps, scope, id.group, id.name, id.version)
+                            addDependency(engine, projectName, configuration.name,
+                                    id.group, id.name, id.version, it.id.displayName)
                         }
+                    } else {
+                        addInfoToDependencies(deps, scope, id.group, id.name, id.version)
                     }
                 }
             }
@@ -544,7 +578,7 @@ abstract class AbstractAnalyze extends DefaultTask {
             dependency.version = version
             dependency.packagePath = "${group}:${name}:${version}"
             dependency.addProjectReference("${projectName}:${configurationName}")
-            if (file!=null && file.getName().endsWith(".aar")) {
+            if (file != null && file.getName().endsWith(".aar")) {
                 dependency.ecosystem = "android"
             } else {
                 dependency.ecosystem = "gradle"
