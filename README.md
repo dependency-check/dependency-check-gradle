@@ -26,7 +26,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'org.owasp:dependency-check-gradle:3.3.1'
+        classpath 'org.owasp:dependency-check-gradle:3.3.2'
     }
 }
 
@@ -94,7 +94,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'org.owasp:dependency-check-gradle:3.3.0'
+    classpath 'org.owasp:dependency-check-gradle:3.3.2'
   }
 }
 
@@ -111,7 +111,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'org.owasp:dependency-check-gradle:3.3.0'
+    classpath 'org.owasp:dependency-check-gradle:3.3.2'
   }
 }
 
