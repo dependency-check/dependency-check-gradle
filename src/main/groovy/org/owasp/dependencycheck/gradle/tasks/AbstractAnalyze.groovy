@@ -49,18 +49,14 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.*
  */
 abstract class AbstractAnalyze extends DefaultTask {
 
-    @Internal
     def currentProjectName = project.getName()
-    @Internal
     def config = project.dependencyCheck
-    @Internal
     def settings
-    @Internal
     def PROPERTIES_FILE = "task.properties"
-    @Internal
     def artifactType = Attribute.of('artifactType', String)
-
     static final GradleVersion CUTOVER_GRADLE_VERSION = GradleVersion.version("4.0")
+
+
 
     /**
      * Calls dependency-check-core's analysis engine to scan
