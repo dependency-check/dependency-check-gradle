@@ -18,6 +18,7 @@
 
 package org.owasp.dependencycheck.gradle.extension
 
+import org.gradle.api.file.ConfigurableFileCollection
 import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
 import org.gradle.api.Project
 
@@ -131,4 +132,8 @@ class DependencyCheckExtension {
      * Whether or not to skip the execution of dependency-check.
      */
     Boolean skip = false
+    /**
+     * A set of files or folders to scan.
+     */
+    List<File> scanSet
 }
