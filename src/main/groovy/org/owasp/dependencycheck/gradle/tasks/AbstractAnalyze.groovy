@@ -168,8 +168,6 @@ abstract class AbstractAnalyze extends DefaultTask {
                 }
             }
         }
-
-
         settings.setBooleanIfNotNull(AUTO_UPDATE, config.autoUpdate)
 
         String[] suppressionLists = determineSuppressions(config.suppressionFiles, config.suppressionFile)
@@ -227,11 +225,17 @@ abstract class AbstractAnalyze extends DefaultTask {
         settings.setBooleanIfNotNull(ANALYZER_CMAKE_ENABLED, config.analyzers.cmakeEnabled)
         settings.setBooleanIfNotNull(ANALYZER_AUTOCONF_ENABLED, config.analyzers.autoconfEnabled)
         settings.setBooleanIfNotNull(ANALYZER_COMPOSER_LOCK_ENABLED, config.analyzers.composerEnabled)
-        settings.setBooleanIfNotNull(ANALYZER_NODE_PACKAGE_ENABLED, config.analyzers.nodeEnabled)
-        settings.setBooleanIfNotNull(ANALYZER_NSP_PACKAGE_ENABLED, config.analyzers.nspEnabled)
         settings.setBooleanIfNotNull(ANALYZER_NUGETCONF_ENABLED, config.analyzers.nugetconfEnabled)
 
-        settings.setBooleanIfNotNull(ANALYZER_RETIRED_ENABLED, config.analyzers.retirejs.enabled)
+        settings.setBooleanIfNotNull(ANALYZER_NODE_PACKAGE_ENABLED, config.analyzers.nodeEnabled)
+        if (config.analyzers.nspEnabled != null) {
+            logger.error("The nspAnalyzerEnabled configuration has been deprecated and replaced by nodeAuditAnalyzerEnabled");
+            logger.error("The nspAnalyzerEnabled configuration will be removed in the next major release");
+            settings.setBooleanIfNotNull(Settings.KEYS.ANALYZER_NODE_AUDIT_ENABLED, config.analyzers.nspEnabled);
+        }
+        settings.setBooleanIfNotNull(Settings.KEYS.ANALYZER_NODE_AUDIT_ENABLED, config.analyzers.nodeAuditEnabled);
+
+        settings.setBooleanIfNotNull(ANALYZER_RETIREJS_ENABLED, config.analyzers.retirejs.enabled)
         settings.setBooleanIfNotNull(ANALYZER_RETIREJS_FILTER_NON_VULNERABLE, config.analyzers.retirejs.filterNonVulnerable)
         settings.setArrayIfNotEmpty(ANALYZER_RETIREJS_FILTERS, config.analyzers.retirejs.filters)
 
@@ -426,6 +430,20 @@ abstract class AbstractAnalyze extends DefaultTask {
                 processConfigLegacy configuration, engine
             } else {
                 processConfigV4 configuration, engine
+            }
+        }
+        boolean customScanSet = false
+        List<String> toScan = ['src/main/resources','src/main/webapp']
+        if (config.scanSet != null) {
+            toScan = config.scanSet
+            customScanSet = true
+        }
+        toScan.each {
+            File f  = project.file it
+            if (f.exists()) {
+                engine.scan(f, project.name)
+            } else if (customScanSet) {
+                logger.warn("ScanSet file `${it}` does not exist in ${project.name}")
             }
         }
     }
