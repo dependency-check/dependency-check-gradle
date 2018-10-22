@@ -15,7 +15,6 @@
  *
  * Copyright (c) 2015 Jeremy Long. All Rights Reserved.
  */
-
 package org.owasp.dependencycheck.gradle.extension
 
 /**
@@ -118,8 +117,14 @@ class AnalyzerExtension {
     Boolean nodeEnabled
     /**
      * Sets whether or not the NSP Analyzer should be used.
+     * @deprecated As of release 3.3.3, replaced by {@link #nodeAuditAnalyzer}
      */
+    @Deprecated
     Boolean nspEnabled
+    /**
+     * Sets whether or not the NSP Analyzer should be used.
+     */
+    Boolean nodeAuditEnabled
     /**
      * Sets whether or not the Nuget packages.config Configuration Analyzer should be used.
      */
