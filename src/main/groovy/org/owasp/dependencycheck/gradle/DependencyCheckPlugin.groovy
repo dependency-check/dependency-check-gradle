@@ -20,7 +20,6 @@ package org.owasp.dependencycheck.gradle
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.internal.artifacts.ivyservice.ivyresolve.strategy.VersionComparator
 import org.gradle.util.GradleVersion
 import org.gradle.api.GradleException
 import org.owasp.dependencycheck.gradle.extension.AnalyzerExtension
