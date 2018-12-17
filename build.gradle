@@ -17,7 +17,7 @@
  */
 
 group = 'org.owasp'
-version = '4.0.0.1'
+version = '4.0.1'
  
 buildscript {
     repositories {
@@ -41,8 +41,8 @@ apply plugin: 'build-dashboard'
 apply plugin: 'com.gradle.plugin-publish'
 
 tasks.withType(GroovyCompile) {
-    sourceCompatibility = '1.7'
-    targetCompatibility = '1.7'
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
 }
 
 repositories {
@@ -64,8 +64,8 @@ dependencies {
         localGroovy(),
         gradleApi(),
         'commons-collections:commons-collections:3.2.2',
-        'org.owasp:dependency-check-core:4.0.0',
-        'org.owasp:dependency-check-utils:4.0.0'
+        'org.owasp:dependency-check-core:4.0.1',
+        'org.owasp:dependency-check-utils:4.0.1'
     )
 
     testCompile gradleTestKit()
