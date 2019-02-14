@@ -34,8 +34,7 @@ import org.owasp.dependencycheck.data.nexus.MavenArtifact
 import org.owasp.dependencycheck.data.nvdcve.DatabaseException
 import org.owasp.dependencycheck.dependency.Confidence
 import org.owasp.dependencycheck.dependency.Dependency
-import org.owasp.dependencycheck.dependency.Identifier
-import org.owasp.dependencycheck.dependency.Vulnerability
+import org.owasp.dependencycheck.agent.DependencyCheckScanAgent;
 import org.owasp.dependencycheck.exception.ExceptionCollection
 import org.owasp.dependencycheck.exception.ReportException
 import org.owasp.dependencycheck.utils.Settings
@@ -192,10 +191,8 @@ abstract class AbstractAnalyze extends DefaultTask {
         settings.setStringIfNotEmpty(DB_CONNECTION_STRING, config.data.connectionString)
         settings.setStringIfNotEmpty(DB_USER, config.data.username)
         settings.setStringIfNotEmpty(DB_PASSWORD, config.data.password)
-        settings.setStringIfNotEmpty(CVE_MODIFIED_12_URL, config.cve.url12Modified)
-        settings.setStringIfNotEmpty(CVE_MODIFIED_20_URL, config.cve.url20Modified)
-        settings.setStringIfNotEmpty(CVE_SCHEMA_1_2, config.cve.url12Base)
-        settings.setStringIfNotEmpty(CVE_SCHEMA_2_0, config.cve.url20Base)
+        settings.setStringIfNotEmpty(CVE_MODIFIED_JSON, config.cve.cveUrlModified)
+        settings.setStringIfNotEmpty(CVE_BASE_JSON, config.cve.cveUrlBase)
         settings.setBooleanIfNotNull(DOWNLOADER_QUICK_QUERY_TIMESTAMP, config.quickQueryTimestamp)
 
         if (config.cveValidForHours != null) {
@@ -237,9 +234,9 @@ abstract class AbstractAnalyze extends DefaultTask {
         if (config.analyzers.nspEnabled != null) {
             logger.error("The nspAnalyzerEnabled configuration has been deprecated and replaced by nodeAuditAnalyzerEnabled");
             logger.error("The nspAnalyzerEnabled configuration will be removed in the next major release");
-            settings.setBooleanIfNotNull(Settings.KEYS.ANALYZER_NODE_AUDIT_ENABLED, config.analyzers.nspEnabled);
+            settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_ENABLED, config.analyzers.nspEnabled);
         }
-        settings.setBooleanIfNotNull(Settings.KEYS.ANALYZER_NODE_AUDIT_ENABLED, config.analyzers.nodeAuditEnabled);
+        settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_ENABLED, config.analyzers.nodeAuditEnabled);
 
         settings.setBooleanIfNotNull(ANALYZER_RETIREJS_ENABLED, config.analyzers.retirejs.enabled)
         settings.setBooleanIfNotNull(ANALYZER_RETIREJS_FILTER_NON_VULNERABLE, config.analyzers.retirejs.filterNonVulnerable)
@@ -294,38 +291,7 @@ abstract class AbstractAnalyze extends DefaultTask {
 
         logger.warn("Found ${vulnerabilities.size()} vulnerabilities in project ${currentProjectName}")
         if (config.showSummary) {
-            final StringBuilder summary = new StringBuilder()
-            for (Dependency d : engine.getDependencies()) {
-                boolean firstEntry = true
-                final StringBuilder vulnerabilityIds = new StringBuilder()
-                for (Vulnerability v : d.getVulnerabilities(true)) {
-                    if (firstEntry) {
-                        firstEntry = false
-                    } else {
-                        vulnerabilityIds.append(", ")
-                    }
-                    vulnerabilityIds.append(v.getName())
-                }
-                if (vulnerabilityIds.length() > 0) {
-                    summary.append(d.getDisplayFileName()).append(": ids:(")
-                    firstEntry = true
-                    for (Identifier id : d.getIdentifiers()) {
-                        if (firstEntry) {
-                            firstEntry = false
-                        } else {
-                            summary.append(", ")
-                        }
-                        summary.append(id.getValue())
-                    }
-                    summary.append(") : ").append(vulnerabilityIds).append('\n')
-                }
-            }
-            if (summary.length() > 0) {
-                final String msg = String.format("%n%n"
-                        + "One or more dependencies were identified with known vulnerabilities:%n%n%s"
-                        + "%n%nSee the dependency-check report for more details.%n%n", summary.toString())
-                logger.warn(msg)
-            }
+            DependencyCheckScanAgent.showSummary(project.name, engine.getDependencies());
         }
     }
 
@@ -342,8 +308,8 @@ abstract class AbstractAnalyze extends DefaultTask {
                 .collect { it.getVulnerabilities() }
                 .flatten()
                 .unique()
-                .findAll { it.getCvssScore() >= config.failBuildOnCVSS }
-                .sort { a, b -> b.getCvssScore() <=> a.getCvssScore() ?: a.getName() <=> b.getName() }
+                .findAll { ((it.getCvssV2() != null && it.getCvssV2().getScore() >= config.failBuildOnCVSS)
+                        || (it.getCvssV3() != null && it.getCvssV3().getBaseScore() >= config.failBuildOnCVSS))}
                 .collect { it.getName() }
                 .join(", ")
 
@@ -537,9 +503,9 @@ abstract class AbstractAnalyze extends DefaultTask {
                 def d = deps.get(0)
                 MavenArtifact mavenArtifact = new MavenArtifact(group, artifact, version)
                 d.addAsEvidence("gradle", mavenArtifact, Confidence.HIGHEST)
-                if (group != null && artifact != null && version != null) {
-                    d.addIdentifier("maven", String.format("%s:%s:%s", group, artifact, version), null, Confidence.HIGHEST)
-                }
+                //if (group != null && artifact != null && version != null) {
+                //    d.addIdentifier("maven", String.format("%s:%s:%s", group, artifact, version), null, Confidence.HIGHEST)
+                //}
                 d.addProjectReference(configurationName)
             } else {
                 deps.forEach { it.addProjectReference(configurationName) }
@@ -603,7 +569,7 @@ abstract class AbstractAnalyze extends DefaultTask {
             } else {
                 dependency.ecosystem = "gradle"
             }
-            dependency.addIdentifier("maven", "${group}:${name}:${version}", null, Confidence.HIGHEST)
+            //dependency.addIdentifier("maven", "${group}:${name}:${version}", null, Confidence.HIGHEST)
 
             engine.addDependency(dependency)
         }

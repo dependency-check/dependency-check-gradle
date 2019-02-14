@@ -28,10 +28,8 @@ import org.owasp.dependencycheck.data.update.exception.UpdateException
 import org.owasp.dependencycheck.data.nvdcve.DatabaseException
 import org.owasp.dependencycheck.utils.Settings
 
-import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_MODIFIED_12_URL
-import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_MODIFIED_20_URL
-import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_SCHEMA_1_2
-import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_SCHEMA_2_0
+import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_MODIFIED_JSON
+import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_BASE_JSON
 import static org.owasp.dependencycheck.utils.Settings.KEYS.DOWNLOADER_QUICK_QUERY_TIMESTAMP
 import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_PASSWORD
 import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_PORT
@@ -112,10 +110,8 @@ class Update extends DefaultTask {
         settings.setStringIfNotEmpty(DB_CONNECTION_STRING, config.data.connectionString)
         settings.setStringIfNotEmpty(DB_USER, config.data.username)
         settings.setStringIfNotEmpty(DB_PASSWORD, config.data.password)
-        settings.setStringIfNotEmpty(CVE_MODIFIED_12_URL, config.cve.url12Modified)
-        settings.setStringIfNotEmpty(CVE_MODIFIED_20_URL, config.cve.url20Modified)
-        settings.setStringIfNotEmpty(CVE_SCHEMA_1_2, config.cve.url12Base)
-        settings.setStringIfNotEmpty(CVE_SCHEMA_2_0, config.cve.url20Base)
+        settings.setStringIfNotEmpty(CVE_MODIFIED_JSON, config.cve.cveUrlModified)
+        settings.setStringIfNotEmpty(CVE_BASE_JSON, config.cve.cveUrlBase)
 
         settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
         settings.setBooleanIfNotNull(DOWNLOADER_QUICK_QUERY_TIMESTAMP, config.quickQueryTimestamp)
