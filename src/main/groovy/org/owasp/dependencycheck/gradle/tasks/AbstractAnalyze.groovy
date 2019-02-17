@@ -401,7 +401,7 @@ abstract class AbstractAnalyze extends DefaultTask {
             if (CUTOVER_GRADLE_VERSION.compareTo(GradleVersion.current()) > 0) {
                 processConfigLegacy configuration, engine
             } else {
-                processConfigV4 configuration, engine
+                processConfigV4 project, configuration, engine
             }
         }
         boolean customScanSet = false
@@ -438,9 +438,10 @@ abstract class AbstractAnalyze extends DefaultTask {
     /**
      * Process the incoming artifacts for the given project's configurations using APIs introduced in gradle 4.0+.
      * @param project the project to analyze
+     * @param configuration a particular configuration of the project to analyze
      * @param engine the dependency-check engine
      */
-    protected void processConfigV4(Configuration configuration, Engine engine) {
+    protected void processConfigV4(Project project, Configuration configuration, Engine engine) {
         String projectName = project.name
         String scope = "$projectName:$configuration.name"
 
