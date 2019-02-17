@@ -25,7 +25,7 @@ class DataExtension {
     /**
      * The directory to store the H2 database that contains the cache of the NVD CVE data.
      */
-    String directory="[JAR]/../../dependency-check-data/3.0"
+    String directory="[JAR]/../../dependency-check-data/4.0"
     /**
      * The connection string to the database.
      */

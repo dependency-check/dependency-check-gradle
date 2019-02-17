@@ -17,7 +17,7 @@
  */
 
 group = 'org.owasp'
-version = '4.0.2'
+version = '5.0.0-M1'
  
 buildscript {
     repositories {
@@ -63,8 +63,8 @@ dependencies {
     compile(
         localGroovy(),
         gradleApi(),
-        'org.owasp:dependency-check-core:4.0.2',
-        'org.owasp:dependency-check-utils:4.0.2'
+        'org.owasp:dependency-check-core:5.0.0-M1',
+        'org.owasp:dependency-check-utils:5.0.0-M1'
     )
 
     testCompile gradleTestKit()
@@ -90,8 +90,6 @@ task integTest(type: Test) {
     jvmArgs '-XX:MaxPermSize=256m'
     jvmArgs '-Xmx1024m'
 }
-
-check.dependsOn integTest
 
 gradlePlugin {
     testSourceSets sourceSets.integTest

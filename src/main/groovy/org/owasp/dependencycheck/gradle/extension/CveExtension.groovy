@@ -20,23 +20,13 @@ package org.owasp.dependencycheck.gradle.extension
 
 class CveExtension {
     /**
-     * URL for the modified CVE 1.2:
-     *    https://nvd.nist.gov/download/nvdcve-Modified.xml.gz
+     * URL for the modified NVD CVE json data feed:
+     *    https://nvd.nist.gov/feeds/json/cve/1.0/nvdcve-1.0-modified.json.gz
      **/
-    String url20Modified
+    String urlModified
     /**
-     * URL for the modified CVE 1.2:
-     *    https://nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-Modified.xml.gz
+     * URL for the modified NVD CVE json data feed:
+     *    https://nvd.nist.gov/feeds/json/cve/1.0/nvdcve-1.0-%d.json.gz
      **/
-    String url12Modified
-    /**
-     * URL for the modified CVE 1.2:
-     *    https://nvd.nist.gov/download/nvdcve-%d.xml.gz
-     **/
-    String url20Base
-    /**
-     * Base URL for each year's CVE 2.0, the %d will be replaced with the year.
-     *    https://nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-%d.xml.gz
-     **/
-    String url12Base
+    String urlBase
 }

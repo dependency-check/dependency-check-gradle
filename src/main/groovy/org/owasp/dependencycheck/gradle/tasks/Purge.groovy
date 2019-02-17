@@ -50,7 +50,7 @@ class Purge extends DefaultTask {
     @TaskAction
     purge() {
         initializeSettings()
-        def db = new File(settings.getDataDirectory(), "dc.h2.db")
+        def db = new File(getSettings().getDataDirectory(), getSettings().getString(Settings.KEYS.DB_FILE_NAME, "dc.mv.db"));
         if (db.exists()) {
             if (db.delete()) {
                 logger.info("Database file purged; local copy of the NVD has been removed")
