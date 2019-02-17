@@ -23,10 +23,10 @@ class CveExtension {
      * URL for the modified NVD CVE json data feed:
      *    https://nvd.nist.gov/feeds/json/cve/1.0/nvdcve-1.0-modified.json.gz
      **/
-    String cveUrlModified
+    String urlModified
     /**
      * URL for the modified NVD CVE json data feed:
      *    https://nvd.nist.gov/feeds/json/cve/1.0/nvdcve-1.0-%d.json.gz
      **/
-    String cveUrlBase
+    String urlBase
 }

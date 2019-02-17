@@ -62,7 +62,7 @@ class DependencyCheckPluginIntegSpec extends Specification {
                 .withArguments(DependencyCheckPlugin.ANALYZE_TASK)
                 .withPluginClasspath()
                 .withDebug(true)
-        .forwardOutput()
+                .forwardOutput()
                 .build()
 
         then:

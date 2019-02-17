@@ -69,10 +69,8 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.proxy.port == null
         project.dependencyCheck.proxy.username == null
         project.dependencyCheck.proxy.password == null
-        project.dependencyCheck.cve.url12Modified == null
-        project.dependencyCheck.cve.url20Modified == null
-        project.dependencyCheck.cve.url12Base == null
-        project.dependencyCheck.cve.url20Base == null
+        project.dependencyCheck.cve.urlModified == null
+        project.dependencyCheck.cve.urlBase == null
         project.dependencyCheck.outputDirectory == "${project.buildDir}/reports"
         project.dependencyCheck.quickQueryTimestamp == null
         project.dependencyCheck.scanConfigurations == []
@@ -92,10 +90,8 @@ class DependencyCheckGradlePluginSpec extends Specification {
             }
 
             cve {
-                url12Base = 'cveUrl12Base'
-                url20Base = 'cveUrl20Base'
-                url12Modified = 'cveUrl12Modified'
-                url20Modified = 'cveUrl20Modified'
+                urlBase = 'cveUrlBase'
+                urlModified = 'cveUrlModified'
             }
 
             analyzers {
@@ -127,10 +123,8 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.proxy.port == 3128
         project.dependencyCheck.proxy.username == 'proxyUsername'
         project.dependencyCheck.proxy.password == 'proxyPassword'
-        project.dependencyCheck.cve.url12Modified == 'cveUrl12Modified'
-        project.dependencyCheck.cve.url20Modified == 'cveUrl20Modified'
-        project.dependencyCheck.cve.url12Base == 'cveUrl12Base'
-        project.dependencyCheck.cve.url20Base == 'cveUrl20Base'
+        project.dependencyCheck.cve.urlModified == 'cveUrlModified'
+        project.dependencyCheck.cve.urlBase == 'cveUrlBase'
         project.dependencyCheck.outputDirectory == 'outputDirectory'
         project.dependencyCheck.quickQueryTimestamp == false
         project.dependencyCheck.scanConfigurations == ['a']

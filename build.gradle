@@ -91,8 +91,6 @@ task integTest(type: Test) {
     jvmArgs '-Xmx1024m'
 }
 
-//check.dependsOn integTest
-
 gradlePlugin {
     testSourceSets sourceSets.integTest
 }
