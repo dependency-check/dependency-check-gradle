@@ -1,2 +1,5 @@
 language: groovy
+jdk:
+- openjdk8
+- openjdk11
 script: ./gradlew build
