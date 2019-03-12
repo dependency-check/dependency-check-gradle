@@ -191,8 +191,8 @@ abstract class AbstractAnalyze extends DefaultTask {
         settings.setStringIfNotEmpty(DB_CONNECTION_STRING, config.data.connectionString)
         settings.setStringIfNotEmpty(DB_USER, config.data.username)
         settings.setStringIfNotEmpty(DB_PASSWORD, config.data.password)
-        settings.setStringIfNotEmpty(CVE_MODIFIED_JSON, config.cve.cveUrlModified)
-        settings.setStringIfNotEmpty(CVE_BASE_JSON, config.cve.cveUrlBase)
+        settings.setStringIfNotEmpty(CVE_MODIFIED_JSON, config.cve.urlModified)
+        settings.setStringIfNotEmpty(CVE_BASE_JSON, config.cve.urlBase)
         settings.setBooleanIfNotNull(DOWNLOADER_QUICK_QUERY_TIMESTAMP, config.quickQueryTimestamp)
 
         if (config.cveValidForHours != null) {
@@ -214,7 +214,7 @@ abstract class AbstractAnalyze extends DefaultTask {
         settings.setBooleanIfNotNull(ANALYZER_ARCHIVE_ENABLED, config.analyzers.archiveEnabled)
         settings.setStringIfNotEmpty(ADDITIONAL_ZIP_EXTENSIONS, config.analyzers.zipExtensions)
         settings.setBooleanIfNotNull(ANALYZER_ASSEMBLY_ENABLED, config.analyzers.assemblyEnabled)
-        settings.setStringIfNotEmpty(ANALYZER_ASSEMBLY_MONO_PATH, config.analyzers.pathToMono)
+        settings.setStringIfNotEmpty(ANALYZER_ASSEMBLY_DOTNET_PATH, config.analyzers.pathToDotnet)
 
         settings.setBooleanIfNotNull(ANALYZER_COCOAPODS_ENABLED, config.analyzers.cocoapodsEnabled)
         settings.setBooleanIfNotNull(ANALYZER_SWIFT_PACKAGE_MANAGER_ENABLED, config.analyzers.swiftEnabled)

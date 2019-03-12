@@ -90,8 +90,8 @@ class DependencyCheckGradlePluginSpec extends Specification {
             }
 
             cve {
-                urlBase = 'cveUrlBase'
-                urlModified = 'cveUrlModified'
+                urlBase = 'urlBase'
+                urlModified = 'urlModified'
             }
 
             analyzers {
@@ -123,8 +123,8 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.proxy.port == 3128
         project.dependencyCheck.proxy.username == 'proxyUsername'
         project.dependencyCheck.proxy.password == 'proxyPassword'
-        project.dependencyCheck.cve.urlModified == 'cveUrlModified'
-        project.dependencyCheck.cve.urlBase == 'cveUrlBase'
+        project.dependencyCheck.cve.urlModified == 'urlModified'
+        project.dependencyCheck.cve.urlBase == 'urlBase'
         project.dependencyCheck.outputDirectory == 'outputDirectory'
         project.dependencyCheck.quickQueryTimestamp == false
         project.dependencyCheck.scanConfigurations == ['a']
