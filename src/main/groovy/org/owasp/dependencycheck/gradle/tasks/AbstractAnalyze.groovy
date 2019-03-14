@@ -148,6 +148,9 @@ abstract class AbstractAnalyze extends DefaultTask {
         if (config.scanConfigurations && config.skipConfigurations) {
             throw new IllegalArgumentException("you can only specify one of scanConfigurations or skipConfigurations")
         }
+        if (config.scanProjects && config.skipProjects) {
+            throw new IllegalArgumentException("you can only specify one of scanProjects or skipProjects")
+        }
     }
 
     /**
@@ -319,6 +322,23 @@ abstract class AbstractAnalyze extends DefaultTask {
                     + "See the dependency-check report for more details.%n%n", config.failBuildOnCVSS, vulnerabilities)
             throw new GradleException(msg)
         }
+    }
+
+    /**
+     * Checks whether the given project should be scanned
+     * because either scanProjects is empty or it contains the
+     * project's path.
+     */
+    def shouldBeScanned(Project project) {
+        !config.scanProjects || config.scanProjects.contains(project.path)
+    }
+
+    /**
+     * Checks whether the given project should be skipped
+     * because skipProjects contains the project's path.
+     */
+    def shouldBeSkipped(Project project) {
+        config.skipProjects.contains(project.path)
     }
 
     /**
