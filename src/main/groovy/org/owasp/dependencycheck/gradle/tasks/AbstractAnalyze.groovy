@@ -191,8 +191,8 @@ abstract class AbstractAnalyze extends DefaultTask {
         settings.setStringIfNotEmpty(DB_CONNECTION_STRING, config.data.connectionString)
         settings.setStringIfNotEmpty(DB_USER, config.data.username)
         settings.setStringIfNotEmpty(DB_PASSWORD, config.data.password)
-        settings.setStringIfNotEmpty(CVE_MODIFIED_JSON, config.cve.cveUrlModified)
-        settings.setStringIfNotEmpty(CVE_BASE_JSON, config.cve.cveUrlBase)
+        settings.setStringIfNotEmpty(CVE_MODIFIED_JSON, config.cve.urlModified)
+        settings.setStringIfNotEmpty(CVE_BASE_JSON, config.cve.urlBase)
         settings.setBooleanIfNotNull(DOWNLOADER_QUICK_QUERY_TIMESTAMP, config.quickQueryTimestamp)
 
         if (config.cveValidForHours != null) {
