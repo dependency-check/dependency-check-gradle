@@ -75,6 +75,8 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.quickQueryTimestamp == null
         project.dependencyCheck.scanConfigurations == []
         project.dependencyCheck.skipConfigurations == []
+        project.dependencyCheck.scanProjects == []
+        project.dependencyCheck.skipProjects == []
         project.dependencyCheck.skipTestGroups == true
         project.dependencyCheck.suppressionFile == null
     }
@@ -112,6 +114,8 @@ class DependencyCheckGradlePluginSpec extends Specification {
 
             scanConfigurations = ['a']
             skipConfigurations = ['b']
+            scanProjects = ['a']
+            skipProjects = ['b']
             skipTestGroups = false
 
             suppressionFile = './src/config/suppression.xml'
@@ -129,6 +133,8 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.quickQueryTimestamp == false
         project.dependencyCheck.scanConfigurations == ['a']
         project.dependencyCheck.skipConfigurations == ['b']
+        project.dependencyCheck.scanProjects == ['a']
+        project.dependencyCheck.skipProjects == ['b']
         project.dependencyCheck.skipTestGroups == false
         project.dependencyCheck.suppressionFile == './src/config/suppression.xml'
         project.dependencyCheck.suppressionFiles == ['./src/config/suppression1.xml', './src/config/suppression2.xml']
@@ -146,6 +152,18 @@ class DependencyCheckGradlePluginSpec extends Specification {
             skipConfigurations = ['b']
         }
         task = project.tasks.findByName(DependencyCheckPlugin.ANALYZE_TASK).analyze()
+
+        then:
+        thrown(IllegalArgumentException)
+    }
+
+    def 'scanProjects and skipProjects are mutually exclusive'() {
+        when:
+        project.dependencyCheck {
+            scanProjects = ['a']
+            skipProjects = ['b']
+        }
+        task = project.tasks.findByName(DependencyCheckPlugin.AGGREGATE_TASK).analyze()
 
         then:
         thrown(IllegalArgumentException)

@@ -31,8 +31,10 @@ class Analyze extends AbstractAnalyze {
      * Loads the projects dependencies into the dependency-check analysis engine.
      */
     def scanDependencies(engine) {
-        logger.lifecycle("Verifying dependencies for project ${currentProjectName}")
-        processConfigurations(project, engine)
+        if (shouldBeScanned(project) && !shouldBeSkipped(project)) {
+            logger.lifecycle("Verifying dependencies for project ${currentProjectName}")
+            processConfigurations(project, engine)
+        }
     }
 
 }

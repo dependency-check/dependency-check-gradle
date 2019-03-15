@@ -125,6 +125,18 @@ class DependencyCheckExtension {
      */
     List<String> skipConfigurations = []
     /**
+     * Paths of the projects to scan.
+     *
+     * This is mutually exclusive with the skipProjects property.
+     */
+    List<String> scanProjects = []
+    /**
+     * Paths of the projects to skip when scanning.
+     *
+     * This is mutually exclusive with the scanProjects property.
+     */
+    List<String> skipProjects = []
+    /**
      * The artifact types that will be analyzed in the gradle build.
      */
     List<String> analyzedTypes = ['jar', 'aar', 'js', 'war', 'ear', 'zip']
