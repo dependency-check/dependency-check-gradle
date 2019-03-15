@@ -62,9 +62,9 @@ class AnalyzerExtension {
      */
     Boolean assemblyEnabled
     /**
-     * The path to Mono for .NET assembly analysis on non-windows systems.
+     * The path to dotnet core - used to analyze dot net assemblies.
      */
-    String pathToMono
+    String pathToDotnet
     /**
      * Sets whether or not the cocoapods analyzer is enabled.
      */

@@ -17,7 +17,7 @@
  */
 
 group = 'org.owasp'
-version = '5.0.0-M1'
+version = '5.0.0-M2'
  
 buildscript {
     repositories {
@@ -63,8 +63,8 @@ dependencies {
     compile(
         localGroovy(),
         gradleApi(),
-        'org.owasp:dependency-check-core:5.0.0-M1',
-        'org.owasp:dependency-check-utils:5.0.0-M1'
+        'org.owasp:dependency-check-core:5.0.0-M2',
+        'org.owasp:dependency-check-utils:5.0.0-M2'
     )
 
     testCompile gradleTestKit()
@@ -106,7 +106,3 @@ gradlePlugin {
 
 
 defaultTasks 'build'
-
-task wrapper(type: Wrapper) {
-  gradleVersion = '3.5'
-}
