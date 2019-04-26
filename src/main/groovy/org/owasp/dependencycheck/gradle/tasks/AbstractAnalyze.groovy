@@ -207,6 +207,7 @@ abstract class AbstractAnalyze extends DefaultTask {
         }
         settings.setBooleanIfNotNull(ANALYZER_JAR_ENABLED, config.analyzers.jarEnabled)
         settings.setBooleanIfNotNull(ANALYZER_NUSPEC_ENABLED, config.analyzers.nuspecEnabled)
+        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_ENABLED, config.analyzers.ossIndexEnabled)
         settings.setBooleanIfNotNull(ANALYZER_CENTRAL_ENABLED, config.analyzers.centralEnabled)
 
         settings.setBooleanIfNotNull(ANALYZER_NEXUS_ENABLED, config.analyzers.nexusEnabled)
@@ -242,6 +243,7 @@ abstract class AbstractAnalyze extends DefaultTask {
         settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_ENABLED, config.analyzers.nodeAuditEnabled);
 
         settings.setBooleanIfNotNull(ANALYZER_RETIREJS_ENABLED, config.analyzers.retirejs.enabled)
+        settings.setStringIfNotNull(ANALYZER_RETIREJS_REPO_JS_URL, config.analyzers.retirejs.retireJsUrl)
         settings.setBooleanIfNotNull(ANALYZER_RETIREJS_FILTER_NON_VULNERABLE, config.analyzers.retirejs.filterNonVulnerable)
         settings.setArrayIfNotEmpty(ANALYZER_RETIREJS_FILTERS, config.analyzers.retirejs.filters)
 

@@ -129,4 +129,8 @@ class AnalyzerExtension {
      * Sets whether or not the Nuget packages.config Configuration Analyzer should be used.
      */
     Boolean nugetconfEnabled
+    /**
+     * Sets whether or not the OSS Index Analyzer should be used.
+     */
+    Boolean ossIndexEnabled
 }

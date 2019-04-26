@@ -34,4 +34,8 @@ class RetireJSExtension {
      * Whether the Retire JS analyzer should filter the non-vunerable JS from the report.
      */
     Boolean filterNonVulnerable
+    /**
+     * The Retire JS Repository URL.
+     */
+    String retireJsUrl
 }
