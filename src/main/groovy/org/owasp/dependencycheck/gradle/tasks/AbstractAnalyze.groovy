@@ -38,6 +38,7 @@ import org.owasp.dependencycheck.agent.DependencyCheckScanAgent;
 import org.owasp.dependencycheck.exception.ExceptionCollection
 import org.owasp.dependencycheck.exception.ReportException
 import org.owasp.dependencycheck.utils.Settings
+import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
 
 import static org.owasp.dependencycheck.dependency.EvidenceType.*
 import static org.owasp.dependencycheck.utils.Checksum.*
@@ -107,8 +108,10 @@ abstract class AbstractAnalyze extends DefaultTask {
                 def displayName = determineDisplayName()
                 def groupId = project.getGroup()
                 File output = new File(config.outputDirectory)
-                engine.writeReports(displayName, groupId, name.toString(), project.getVersion().toString(), output,
-                        config.format.toString())
+                for (Format f : getReportFormats(config.format, config.formats)) {
+                    engine.writeReports(displayName, groupId, name.toString(), project.getVersion().toString(), output,
+                            f.toString())
+                }
                 showSummary(engine)
                 checkForFailure(engine)
             } catch (ReportException ex) {
@@ -257,6 +260,19 @@ abstract class AbstractAnalyze extends DefaultTask {
 
     }
 
+    /**
+     * Combines the configured suppressionFile and suppressionFiles into a
+     * single array.
+     *
+     * @return an array of suppression file paths
+     */
+    private Set<Format> getReportFormats(Format format, List<Format> formats) {
+        Set<String> selectedFormats = formats == null ? new HashSet<>() : new HashSet<>(Arrays.asList(formats));
+        if (format != null && !selectedFormats.contains(format)) {
+            selectedFormats.add(format);
+        }
+        return selectedFormats;
+    }
     /**
      * Combines the configured suppressionFile and suppressionFiles into a
      * single array.
