@@ -29,6 +29,7 @@ import org.gradle.api.attributes.Attribute
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.util.GradleVersion
+import java.util.stream.Collectors
 import org.owasp.dependencycheck.Engine
 import org.owasp.dependencycheck.data.nexus.MavenArtifact
 import org.owasp.dependencycheck.data.nvdcve.DatabaseException
@@ -61,8 +62,6 @@ abstract class AbstractAnalyze extends DefaultTask {
     def artifactType = Attribute.of('artifactType', String)
     @Internal
     static final GradleVersion CUTOVER_GRADLE_VERSION = GradleVersion.version("4.0")
-
-
 
     /**
      * Calls dependency-check-core's analysis engine to scan
@@ -108,9 +107,8 @@ abstract class AbstractAnalyze extends DefaultTask {
                 def displayName = determineDisplayName()
                 def groupId = project.getGroup()
                 File output = new File(config.outputDirectory)
-                for (Format f : getReportFormats(config.format, config.formats)) {
-                    engine.writeReports(displayName, groupId, name.toString(), project.getVersion().toString(), output,
-                            f.toString())
+                for (String f : getReportFormats(config.format, config.formats)) {
+                    engine.writeReports(displayName, groupId, name.toString(), project.getVersion().toString(), output, f)
                 }
                 showSummary(engine)
                 checkForFailure(engine)
@@ -267,9 +265,11 @@ abstract class AbstractAnalyze extends DefaultTask {
      * @return an array of suppression file paths
      */
     private Set<Format> getReportFormats(Format format, List<Format> formats) {
-        Set<String> selectedFormats = formats == null ? new HashSet<>() : new HashSet<>(Arrays.asList(formats));
-        if (format != null && !selectedFormats.contains(format)) {
-            selectedFormats.add(format);
+        def mapFormat = { fmt -> fmt.toString() }
+        Set<String> selectedFormats = formats == null || formats.isEmpty() ? new HashSet<>() :
+                formats.stream().map(mapFormat).collect(Collectors.toSet());
+        if (format != null && !selectedFormats.contains(format.toString())) {
+            selectedFormats.add(format.toString());
         }
         return selectedFormats;
     }
@@ -329,9 +329,11 @@ abstract class AbstractAnalyze extends DefaultTask {
                 .collect { it.getVulnerabilities() }
                 .flatten()
                 .unique()
-                .findAll { ((it.getCvssV2() != null && it.getCvssV2().getScore() >= config.failBuildOnCVSS)
-                        || (it.getCvssV3() != null && it.getCvssV3().getBaseScore() >= config.failBuildOnCVSS))}
-                .collect { it.getName() }
+                .findAll {
+            ((it.getCvssV2() != null && it.getCvssV2().getScore() >= config.failBuildOnCVSS)
+                    || (it.getCvssV3() != null && it.getCvssV3().getBaseScore() >= config.failBuildOnCVSS))
+        }
+        .collect { it.getName() }
                 .join(", ")
 
         if (vulnerabilities.length() > 0) {
@@ -443,13 +445,13 @@ abstract class AbstractAnalyze extends DefaultTask {
             }
         }
         boolean customScanSet = false
-        List<String> toScan = ['src/main/resources','src/main/webapp']
+        List<String> toScan = ['src/main/resources', 'src/main/webapp']
         if (config.scanSet != null) {
             toScan = config.scanSet
             customScanSet = true
         }
         toScan.each {
-            File f  = project.file it
+            File f = project.file it
             if (f.exists()) {
                 engine.scan(f, project.name)
             } else if (customScanSet) {
