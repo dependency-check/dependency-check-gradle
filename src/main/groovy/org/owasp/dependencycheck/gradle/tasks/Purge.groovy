@@ -29,12 +29,7 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.DATA_DIRECTORY
 /**
  * Purges the local cache of the NVD CVE data.
  */
-class Purge extends DefaultTask {
-
-    @Internal
-    def config = project.dependencyCheck
-    @Internal
-    def settings
+class Purge extends ConfiguredTask {
 
     /**
      * Initializes the purge task.
@@ -74,17 +69,11 @@ class Purge extends DefaultTask {
     }
 
     /**
-     * Initializes the configuration.
-     */
-    def initializeSettings() {
-        settings = new Settings()
-        settings.setStringIfNotNull(DATA_DIRECTORY, config.data.directory)
-    }
-
-    /**
      * Releases resources and removes temporary files used.
      */
     def cleanup() {
-        settings.cleanup(true)
+        if (settings != null) {
+            settings.cleanup(true)
+        }
     }
 }

@@ -29,6 +29,7 @@ import org.owasp.dependencycheck.gradle.extension.CveExtension
 import org.owasp.dependencycheck.gradle.extension.DataExtension
 import org.owasp.dependencycheck.gradle.extension.ProxyExtension
 import org.owasp.dependencycheck.gradle.extension.RetireJSExtension
+import org.owasp.dependencycheck.gradle.extension.CacheExtension
 import org.owasp.dependencycheck.gradle.tasks.Update
 import org.owasp.dependencycheck.gradle.tasks.Analyze
 import org.owasp.dependencycheck.gradle.tasks.Aggregate
@@ -64,6 +65,7 @@ class DependencyCheckPlugin implements Plugin<Project> {
         def analyzers = ext.extensions.create(ANALYZERS_EXTENSION_NAME, AnalyzerExtension)
         analyzers.extensions.create('retirejs', RetireJSExtension)
         analyzers.extensions.create('artifactory', ArtifactoryExtension)
+        ext.extensions.create('cache', CacheExtension)
     }
 
     void registerTasks(Project project) {

@@ -48,12 +48,7 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_PASSWORD
  *
  * @author Jeremy Long
  */
-class Update extends DefaultTask {
-
-    @Internal
-    def config = project.dependencyCheck
-    @Internal
-    def settings
+class Update extends ConfiguredTask {
 
     /**
      * Initializes the update task.
@@ -81,11 +76,10 @@ class Update extends DefaultTask {
                 logger.error(msg)
             }
         } catch (UpdateException ex) {
-            String msg = "Unable to connect to the dependency-check database"
             if (config.failOnError) {
-                throw new GradleException(msg, ex)
+                throw new GradleException(ex.getMessage(), ex)
             } else {
-                logger.error(msg)
+                logger.error(ex.getMessage())
             }
         }
         if (engine != null) {
@@ -94,41 +88,14 @@ class Update extends DefaultTask {
     }
 
     /**
-     * Initializes the settings; if the setting is not configured
-     * then the default value from dependency-check-core is used.
-     */
-    def initializeSettings() {
-        settings = new Settings()
-        settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
-        settings.setStringIfNotEmpty(PROXY_PORT, "${config.proxy.port}")
-        settings.setStringIfNotEmpty(PROXY_USERNAME, config.proxy.username)
-        settings.setStringIfNotEmpty(PROXY_PASSWORD, config.proxy.password)
-        //settings.setStringIfNotEmpty(CONNECTION_TIMEOUT, connectionTimeout)
-        settings.setStringIfNotNull(DATA_DIRECTORY, config.data.directory)
-        settings.setStringIfNotEmpty(DB_DRIVER_NAME, config.data.driver)
-        settings.setStringIfNotEmpty(DB_DRIVER_PATH, config.data.driverPath)
-        settings.setStringIfNotEmpty(DB_CONNECTION_STRING, config.data.connectionString)
-        settings.setStringIfNotEmpty(DB_USER, config.data.username)
-        settings.setStringIfNotEmpty(DB_PASSWORD, config.data.password)
-        settings.setStringIfNotEmpty(CVE_MODIFIED_JSON, config.cve.urlModified)
-        settings.setStringIfNotEmpty(CVE_BASE_JSON, config.cve.urlBase)
-
-        settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
-        settings.setBooleanIfNotNull(DOWNLOADER_QUICK_QUERY_TIMESTAMP, config.quickQueryTimestamp)
-
-        if (config.cveValidForHours != null) {
-            if (config.cveValidForHours >= 0) {
-                settings.setInt(CVE_CHECK_VALID_FOR_HOURS, config.cveValidForHours)
-            } else {
-                throw new InvalidUserDataException("Invalid setting: `validForHours` must be 0 or greater")
-            }
-        }
-    }
-    /**
      * Releases resources and removes temporary files used.
      */
     def cleanup(engine) {
-        settings.cleanup(true)
-        engine.close()
+        if (engine != null) {
+            engine.close()
+        }
+        if (settings != null) {
+            settings.cleanup(true)
+        }
     }
 }

@@ -48,16 +48,10 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.*
 /**
  * Checks the projects dependencies for known vulnerabilities.
  */
-abstract class AbstractAnalyze extends DefaultTask {
+abstract class AbstractAnalyze extends ConfiguredTask {
 
     @Internal
     def currentProjectName = project.getName()
-    @Internal
-    def config = project.dependencyCheck
-    @Internal
-    def settings
-    @Internal
-    def PROPERTIES_FILE = "task.properties"
     @Internal
     def artifactType = Attribute.of('artifactType', String)
     @Internal
@@ -154,109 +148,7 @@ abstract class AbstractAnalyze extends DefaultTask {
         }
     }
 
-    /**
-     * Initializes the settings object. If the setting is not set the
-     * default from dependency-check-core is used.
-     */
-    def initializeSettings() {
-        settings = new Settings()
 
-        InputStream taskProperties = null
-        try {
-            taskProperties = this.getClass().getClassLoader().getResourceAsStream(PROPERTIES_FILE)
-            settings.mergeProperties(taskProperties)
-        } catch (IOException ex) {
-            logger.warn("Unable to load the dependency-check gradle task.properties file.")
-            logger.debug("", ex)
-        } finally {
-            if (taskProperties != null) {
-                try {
-                    taskProperties.close()
-                } catch (IOException ex) {
-                    logger.debug("", ex)
-                }
-            }
-        }
-        settings.setBooleanIfNotNull(AUTO_UPDATE, config.autoUpdate)
-
-        String[] suppressionLists = determineSuppressions(config.suppressionFiles, config.suppressionFile)
-
-        settings.setArrayIfNotEmpty(SUPPRESSION_FILE, suppressionLists)
-        settings.setStringIfNotEmpty(HINTS_FILE, config.hintsFile)
-
-        settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
-        settings.setStringIfNotEmpty(PROXY_PORT, "${config.proxy.port}")
-        settings.setStringIfNotEmpty(PROXY_USERNAME, config.proxy.username)
-        settings.setStringIfNotEmpty(PROXY_PASSWORD, config.proxy.password)
-        //settings.setStringIfNotEmpty(CONNECTION_TIMEOUT, connectionTimeout)
-        settings.setStringIfNotNull(DATA_DIRECTORY, config.data.directory)
-        settings.setStringIfNotEmpty(DB_DRIVER_NAME, config.data.driver)
-        settings.setStringIfNotEmpty(DB_DRIVER_PATH, config.data.driverPath)
-        settings.setStringIfNotEmpty(DB_CONNECTION_STRING, config.data.connectionString)
-        settings.setStringIfNotEmpty(DB_USER, config.data.username)
-        settings.setStringIfNotEmpty(DB_PASSWORD, config.data.password)
-        settings.setStringIfNotEmpty(CVE_MODIFIED_JSON, config.cve.urlModified)
-        settings.setStringIfNotEmpty(CVE_BASE_JSON, config.cve.urlBase)
-        settings.setBooleanIfNotNull(DOWNLOADER_QUICK_QUERY_TIMESTAMP, config.quickQueryTimestamp)
-
-        if (config.cveValidForHours != null) {
-            if (config.cveValidForHours >= 0) {
-                settings.setInt(CVE_CHECK_VALID_FOR_HOURS, config.cveValidForHours)
-            } else {
-                throw new InvalidUserDataException("Invalid setting: `validForHours` must be 0 or greater")
-            }
-        }
-        settings.setBooleanIfNotNull(ANALYZER_JAR_ENABLED, config.analyzers.jarEnabled)
-        settings.setBooleanIfNotNull(ANALYZER_NUSPEC_ENABLED, config.analyzers.nuspecEnabled)
-        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_ENABLED, config.analyzers.ossIndexEnabled)
-        settings.setBooleanIfNotNull(ANALYZER_CENTRAL_ENABLED, config.analyzers.centralEnabled)
-
-        settings.setBooleanIfNotNull(ANALYZER_NEXUS_ENABLED, config.analyzers.nexusEnabled)
-        settings.setStringIfNotEmpty(ANALYZER_NEXUS_URL, config.analyzers.nexusUrl)
-        settings.setBooleanIfNotNull(ANALYZER_NEXUS_USES_PROXY, config.analyzers.nexusUsesProxy)
-
-        settings.setBooleanIfNotNull(ANALYZER_EXPERIMENTAL_ENABLED, config.analyzers.experimentalEnabled)
-        settings.setBooleanIfNotNull(ANALYZER_ARCHIVE_ENABLED, config.analyzers.archiveEnabled)
-        settings.setStringIfNotEmpty(ADDITIONAL_ZIP_EXTENSIONS, config.analyzers.zipExtensions)
-        settings.setBooleanIfNotNull(ANALYZER_ASSEMBLY_ENABLED, config.analyzers.assemblyEnabled)
-        settings.setStringIfNotEmpty(ANALYZER_ASSEMBLY_DOTNET_PATH, config.analyzers.pathToDotnet)
-
-        settings.setBooleanIfNotNull(ANALYZER_COCOAPODS_ENABLED, config.analyzers.cocoapodsEnabled)
-        settings.setBooleanIfNotNull(ANALYZER_SWIFT_PACKAGE_MANAGER_ENABLED, config.analyzers.swiftEnabled)
-        settings.setBooleanIfNotNull(ANALYZER_BUNDLE_AUDIT_ENABLED, config.analyzers.bundleAuditEnabled)
-        settings.setStringIfNotEmpty(ANALYZER_BUNDLE_AUDIT_PATH, config.analyzers.pathToBundleAudit)
-
-        settings.setBooleanIfNotNull(ANALYZER_PYTHON_DISTRIBUTION_ENABLED, config.analyzers.pyDistributionEnabled)
-        settings.setBooleanIfNotNull(ANALYZER_PYTHON_PACKAGE_ENABLED, config.analyzers.pyPackageEnabled)
-        settings.setBooleanIfNotNull(ANALYZER_RUBY_GEMSPEC_ENABLED, config.analyzers.rubygemsEnabled)
-        settings.setBooleanIfNotNull(ANALYZER_OPENSSL_ENABLED, config.analyzers.opensslEnabled)
-        settings.setBooleanIfNotNull(ANALYZER_CMAKE_ENABLED, config.analyzers.cmakeEnabled)
-        settings.setBooleanIfNotNull(ANALYZER_AUTOCONF_ENABLED, config.analyzers.autoconfEnabled)
-        settings.setBooleanIfNotNull(ANALYZER_COMPOSER_LOCK_ENABLED, config.analyzers.composerEnabled)
-        settings.setBooleanIfNotNull(ANALYZER_NUGETCONF_ENABLED, config.analyzers.nugetconfEnabled)
-
-        settings.setBooleanIfNotNull(ANALYZER_NODE_PACKAGE_ENABLED, config.analyzers.nodeEnabled)
-        if (config.analyzers.nspEnabled != null) {
-            logger.error("The nspAnalyzerEnabled configuration has been deprecated and replaced by nodeAuditAnalyzerEnabled");
-            logger.error("The nspAnalyzerEnabled configuration will be removed in the next major release");
-            settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_ENABLED, config.analyzers.nspEnabled);
-        }
-        settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_ENABLED, config.analyzers.nodeAuditEnabled);
-
-        settings.setBooleanIfNotNull(ANALYZER_RETIREJS_ENABLED, config.analyzers.retirejs.enabled)
-        settings.setStringIfNotNull(ANALYZER_RETIREJS_REPO_JS_URL, config.analyzers.retirejs.retireJsUrl)
-        settings.setBooleanIfNotNull(ANALYZER_RETIREJS_FILTER_NON_VULNERABLE, config.analyzers.retirejs.filterNonVulnerable)
-        settings.setArrayIfNotEmpty(ANALYZER_RETIREJS_FILTERS, config.analyzers.retirejs.filters)
-
-        settings.setBooleanIfNotNull(ANALYZER_ARTIFACTORY_ENABLED, config.analyzers.artifactory.enabled)
-        settings.setBooleanIfNotNull(ANALYZER_ARTIFACTORY_PARALLEL_ANALYSIS, config.analyzers.artifactory.parallelAnalysis)
-        settings.setBooleanIfNotNull(ANALYZER_ARTIFACTORY_USES_PROXY, config.analyzers.artifactory.usesProxy)
-        settings.setStringIfNotNull(ANALYZER_ARTIFACTORY_URL, config.analyzers.artifactory.url)
-        settings.setStringIfNotNull(ANALYZER_ARTIFACTORY_API_TOKEN, config.analyzers.artifactory.apiToken)
-        settings.setStringIfNotNull(ANALYZER_ARTIFACTORY_API_USERNAME, config.analyzers.artifactory.username)
-        settings.setStringIfNotNull(ANALYZER_ARTIFACTORY_BEARER_TOKEN, config.analyzers.artifactory.bearerToken)
-
-    }
 
     /**
      * Combines the configured suppressionFile and suppressionFiles into a
@@ -273,18 +165,7 @@ abstract class AbstractAnalyze extends DefaultTask {
         }
         return selectedFormats;
     }
-    /**
-     * Combines the configured suppressionFile and suppressionFiles into a
-     * single array.
-     *
-     * @return an array of suppression file paths
-     */
-    private String[] determineSuppressions(suppressionFiles, suppressionFile) {
-        if (suppressionFile != null) {
-            suppressionFiles << suppressionFile
-        }
-        suppressionFiles
-    }
+
     /**
      * Releases resources and removes temporary files used.
      */
