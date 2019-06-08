@@ -18,13 +18,9 @@
 
 package org.owasp.dependencycheck.gradle.tasks
 
-import org.gradle.api.DefaultTask
-import org.gradle.api.GradleException
-import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.Internal
-import org.owasp.dependencycheck.utils.Settings
 
-import static org.owasp.dependencycheck.utils.Settings.KEYS.DATA_DIRECTORY
+import org.gradle.api.tasks.TaskAction
+import org.owasp.dependencycheck.Engine
 
 /**
  * Purges the local cache of the NVD CVE data.
@@ -45,27 +41,16 @@ class Purge extends ConfiguredTask {
     @TaskAction
     purge() {
         initializeSettings()
-        def db = new File(getSettings().getDataDirectory(), getSettings().getString(Settings.KEYS.DB_FILE_NAME, "dc.mv.db"));
-        if (db.exists()) {
-            if (db.delete()) {
-                logger.info("Database file purged; local copy of the NVD has been removed")
-            } else {
-                String msg = "Unable to delete '${db.getAbsolutePath()}'; please delete the file manually"
-                if (config.failOnError) {
-                    throw new GradleException(msg)
-                } else {
-                    logger.error(msg)
-                }
+        Engine engine = null
+        try {
+            engine = new Engine(Engine.Mode.EVIDENCE_PROCESSING, getSettings())
+            engine.purge()
+        } finally {
+            if (engine != null) {
+                engine.close()
             }
-        } else {
-            String msg = "Unable to purge database; the database file does not exist: ${db.getAbsolutePath()}"
-            if (config.failOnError) {
-                throw new GradleException(msg)
-            } else {
-                logger.error(msg)
-            }
+            cleanup()
         }
-        cleanup()
     }
 
     /**
