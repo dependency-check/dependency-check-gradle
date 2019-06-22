@@ -82,7 +82,6 @@ class AnalyzerExtension {
      * The path to Ruby's bundle audit.
      */
     String pathToBundleAudit
-
     /**
      * Sets whether the Python Distribution Analyzer will be used.
      */
@@ -117,12 +116,6 @@ class AnalyzerExtension {
     Boolean nodeEnabled
     /**
      * Sets whether or not the NSP Analyzer should be used.
-     * @deprecated As of release 3.3.3, replaced by {@link #nodeAuditAnalyzer}
-     */
-    @Deprecated
-    Boolean nspEnabled
-    /**
-     * Sets whether or not the NSP Analyzer should be used.
      */
     Boolean nodeAuditEnabled
     /**
@@ -131,6 +124,8 @@ class AnalyzerExtension {
     Boolean nugetconfEnabled
     /**
      * Sets whether or not the OSS Index Analyzer should be used.
+     * @deprecated As of the 5.0.1 - please use ossIndex { enabled = true }
      */
+    @Deprecated
     Boolean ossIndexEnabled
 }

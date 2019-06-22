@@ -48,13 +48,14 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_NEXUS_ENABL
 import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_NEXUS_URL
 import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_NEXUS_USES_PROXY
 import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_NODE_AUDIT_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_NODE_AUDIT_ENABLED
 import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_NODE_AUDIT_USE_CACHE
 import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_NODE_PACKAGE_ENABLED
 import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_NUGETCONF_ENABLED
 import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_NUSPEC_ENABLED
 import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_OPENSSL_ENABLED
 import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_OSSINDEX_ENABLED
+import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_OSSINDEX_USER
+import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_OSSINDEX_PASSWORD
 import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_OSSINDEX_USE_CACHE
 import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_PYTHON_DISTRIBUTION_ENABLED
 import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_PYTHON_PACKAGE_ENABLED
@@ -151,6 +152,10 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setBooleanIfNotNull(ANALYZER_JAR_ENABLED, config.analyzers.jarEnabled)
         settings.setBooleanIfNotNull(ANALYZER_NUSPEC_ENABLED, config.analyzers.nuspecEnabled)
         settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_ENABLED, config.analyzers.ossIndexEnabled)
+        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_ENABLED, config.analyzers.ossIndex.enabled)
+        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_USER, config.analyzers.ossIndex.username)
+        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_PASSWORD, config.analyzers.ossIndex.password)
+
         settings.setBooleanIfNotNull(ANALYZER_CENTRAL_ENABLED, config.analyzers.centralEnabled)
 
         settings.setBooleanIfNotNull(ANALYZER_NEXUS_ENABLED, config.analyzers.nexusEnabled)
