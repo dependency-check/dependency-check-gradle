@@ -59,6 +59,9 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_OSSINDEX_PA
 import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_OSSINDEX_USE_CACHE
 import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_PYTHON_DISTRIBUTION_ENABLED
 import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_PYTHON_PACKAGE_ENABLED
+import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_GOLANG_DEP_ENABLED
+import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_GOLANG_MOD_ENABLED
+import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_GOLANG_PATH
 import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_RETIREJS_ENABLED
 import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_RETIREJS_FILTERS
 import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_RETIREJS_FILTER_NON_VULNERABLE
@@ -167,6 +170,9 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setStringIfNotEmpty(ADDITIONAL_ZIP_EXTENSIONS, config.analyzers.zipExtensions)
         settings.setBooleanIfNotNull(ANALYZER_ASSEMBLY_ENABLED, config.analyzers.assemblyEnabled)
         settings.setStringIfNotEmpty(ANALYZER_ASSEMBLY_DOTNET_PATH, config.analyzers.pathToDotnet)
+        settings.setBooleanIfNotNull(ANALYZER_GOLANG_DEP_ENABLED, config.analyzers.golangDepEnabled);
+        settings.setBooleanIfNotNull(ANALYZER_GOLANG_MOD_ENABLED, config.analyzers.golangModEnabled);
+        settings.setStringIfNotNull(ANALYZER_GOLANG_PATH, config.analyzers.pathToGo);
 
         settings.setBooleanIfNotNull(ANALYZER_COCOAPODS_ENABLED, config.analyzers.cocoapodsEnabled)
         settings.setBooleanIfNotNull(ANALYZER_SWIFT_PACKAGE_MANAGER_ENABLED, config.analyzers.swiftEnabled)
@@ -183,11 +189,6 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setBooleanIfNotNull(ANALYZER_NUGETCONF_ENABLED, config.analyzers.nugetconfEnabled)
 
         settings.setBooleanIfNotNull(ANALYZER_NODE_PACKAGE_ENABLED, config.analyzers.nodeEnabled)
-        if (config.analyzers.nspEnabled != null) {
-            logger.error("The nspAnalyzerEnabled configuration has been deprecated and replaced by nodeAuditAnalyzerEnabled");
-            logger.error("The nspAnalyzerEnabled configuration will be removed in the next major release");
-            settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_ENABLED, config.analyzers.nspEnabled);
-        }
         settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_ENABLED, config.analyzers.nodeAuditEnabled);
 
         settings.setBooleanIfNotNull(ANALYZER_RETIREJS_ENABLED, config.analyzers.retirejs.enabled)

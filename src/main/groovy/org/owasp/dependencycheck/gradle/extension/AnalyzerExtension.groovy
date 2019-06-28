@@ -66,6 +66,19 @@ class AnalyzerExtension {
      */
     String pathToDotnet
     /**
+     * Sets whether the Golang Dependency analyzer is enabled. Default is true.
+     */
+    Boolean golangDepEnabled
+    /**
+     * Sets whether Golang Module Analyzer is enabled; this requires `go` to be
+     * installed. Default is true.
+     */
+    Boolean golangModEnabled
+    /**
+     * The path to `go` - used to analyze go modules via `go mod`.
+     */
+    String pathToGo
+    /**
      * Sets whether or not the cocoapods analyzer is enabled.
      */
     Boolean cocoapodsEnabled
