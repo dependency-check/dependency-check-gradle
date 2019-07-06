@@ -21,6 +21,8 @@ package org.owasp.dependencycheck.gradle
 import org.gradle.api.Task
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
+import org.owasp.dependencycheck.gradle.extension.DataExtension
+import org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension
 import spock.lang.Specification
 
 class DependencyCheckGradlePluginSpec extends Specification {
@@ -35,6 +37,14 @@ class DependencyCheckGradlePluginSpec extends Specification {
     def 'dependencyCheck extension exists'() {
         expect:
         project.extensions.findByName('dependencyCheck')
+    }
+
+    def 'dependencyCheck extension has correct default data configuration'() {
+        setup:
+        DependencyCheckExtension extension = project.extensions.findByName('dependencyCheck')
+        
+        expect:
+        extension.data.directory == "${project.gradle.gradleUserHomeDir}/dependency-check-data/4.0"
     }
 
     def "dependencyCheckAnalyze task exists"() {
