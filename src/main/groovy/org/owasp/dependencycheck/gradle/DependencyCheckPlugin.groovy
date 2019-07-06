@@ -62,7 +62,7 @@ class DependencyCheckPlugin implements Plugin<Project> {
         def ext = project.extensions.create(CHECK_EXTENSION_NAME, DependencyCheckExtension, project)
         ext.extensions.create(PROXY_EXTENSION_NAME, ProxyExtension)
         ext.extensions.create(CVE_EXTENSION_NAME, CveExtension)
-        ext.extensions.create(DATA_EXTENSION_NAME, DataExtension)
+        ext.extensions.create(DATA_EXTENSION_NAME, DataExtension, project)
         def analyzers = ext.extensions.create(ANALYZERS_EXTENSION_NAME, AnalyzerExtension)
         analyzers.extensions.create('retirejs', RetireJSExtension)
         analyzers.extensions.create('artifactory', ArtifactoryExtension)

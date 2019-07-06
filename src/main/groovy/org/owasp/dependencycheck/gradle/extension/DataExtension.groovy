@@ -18,14 +18,21 @@
 
 package org.owasp.dependencycheck.gradle.extension
 
+import org.gradle.api.Project
+
 /**
  * The update data configuration extension. Any value not configured will use the dependency-check-core defaults.
  */
 class DataExtension {
+    
+    DataExtension(Project project) {
+        directory = "${project.gradle.gradleUserHomeDir}/dependency-check-data/4.0"
+    }
+
     /**
      * The directory to store the H2 database that contains the cache of the NVD CVE data.
      */
-    String directory="[JAR]/../../dependency-check-data/4.0"
+    String directory;
     /**
      * The connection string to the database.
      */
