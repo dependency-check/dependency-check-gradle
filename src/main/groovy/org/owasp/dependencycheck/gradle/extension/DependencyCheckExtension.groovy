@@ -113,6 +113,11 @@ class DependencyCheckExtension {
      */
     Float failBuildOnCVSS = 11.0
     /**
+     * Specifies the CVSS score that should be considered a failure when generating a JUNIT formatted report. The default
+     * is 0.0 which means all identified vulnerabilities would be considered a failure.
+     */
+    Float junitFailOnCVSS = 0.0
+    /**
      * Displays a summary of the findings. Defaults to true.
      */
     Boolean showSummary = true

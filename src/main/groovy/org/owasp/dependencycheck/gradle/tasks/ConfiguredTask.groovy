@@ -85,6 +85,7 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_PORT
 import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_SERVER
 import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_USERNAME
 import static org.owasp.dependencycheck.utils.Settings.KEYS.SUPPRESSION_FILE
+import static org.owasp.dependencycheck.utils.Settings.KEYS.JUNIT_FAIL_ON_CVSS
 
 /**
  * Standard class to read in the configuration and populated the ODC settings.
@@ -144,7 +145,7 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setStringIfNotEmpty(CVE_MODIFIED_JSON, config.cve.urlModified)
         settings.setStringIfNotEmpty(CVE_BASE_JSON, config.cve.urlBase)
         settings.setBooleanIfNotNull(DOWNLOADER_QUICK_QUERY_TIMESTAMP, config.quickQueryTimestamp)
-
+        settings.setFloat(JUNIT_FAIL_ON_CVSS, config.junitFailOnCVSS)
         if (config.cveValidForHours != null) {
             if (config.cveValidForHours >= 0) {
                 settings.setInt(CVE_CHECK_VALID_FOR_HOURS, config.cveValidForHours)
