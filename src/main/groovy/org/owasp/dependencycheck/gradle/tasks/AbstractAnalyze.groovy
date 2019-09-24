@@ -88,7 +88,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             try {
                 engine.analyzeDependencies()
             } catch (ExceptionCollection ex) {
-                if (config.failOnError || ex.isFatal()) {
+                if (config.failOnError) {
                     cleanup(engine)
                     throw new GradleException("Analysis failed.", ex)
                 }
