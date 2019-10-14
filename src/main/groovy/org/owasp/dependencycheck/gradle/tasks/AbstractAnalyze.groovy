@@ -199,7 +199,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
 
     /**
      * If configured, fails the build if a vulnerability is identified with a CVSS
-     * score higher then the failure threshold configured.
+     * score higher than the failure threshold configured.
      */
     def checkForFailure(Engine engine) {
         if (config.failBuildOnCVSS > 10) {
@@ -219,7 +219,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
 
         if (vulnerabilities.length() > 0) {
             final String msg = String.format("%n%nDependency-Analyze Failure:%n"
-                    + "One or more dependencies were identified with vulnerabilities that have a CVSS score greater then '%.1f': %s%n"
+                    + "One or more dependencies were identified with vulnerabilities that have a CVSS score greater than '%.1f': %s%n"
                     + "See the dependency-check report for more details.%n%n", config.failBuildOnCVSS, vulnerabilities)
             throw new GradleException(msg)
         }
