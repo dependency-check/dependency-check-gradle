@@ -71,10 +71,10 @@ class DependencyCheckPlugin implements Plugin<Project> {
     }
 
     void registerTasks(Project project) {
-        project.task(PURGE_TASK, type: Purge)
-        project.task(UPDATE_TASK, type: Update)
-        project.task(ANALYZE_TASK, type: Analyze)
-        project.task(AGGREGATE_TASK, type: Aggregate)
+        project.tasks.register(PURGE_TASK, Purge)
+        project.tasks.register(UPDATE_TASK, Update)
+        project.tasks.register(ANALYZE_TASK, Analyze)
+        project.tasks.register(AGGREGATE_TASK, Aggregate)
     }
 
     void checkGradleVersion(Project project) {
