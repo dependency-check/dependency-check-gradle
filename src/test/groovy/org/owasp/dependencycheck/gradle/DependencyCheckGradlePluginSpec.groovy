@@ -21,7 +21,7 @@ package org.owasp.dependencycheck.gradle
 import org.gradle.api.Task
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
-import org.owasp.dependencycheck.gradle.extension.DataExtension
+import org.owasp.dependencycheck.Engine
 import org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension
 import spock.lang.Specification
 
@@ -89,6 +89,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.skipProjects == []
         project.dependencyCheck.skipTestGroups == true
         project.dependencyCheck.suppressionFile == null
+        project.dependencyCheck.analyzeMode == Engine.Mode.STANDALONE
     }
 
     def 'tasks use correct values when extension is used'() {
@@ -130,6 +131,8 @@ class DependencyCheckGradlePluginSpec extends Specification {
 
             suppressionFile = './src/config/suppression.xml'
             suppressionFiles = ['./src/config/suppression1.xml', './src/config/suppression2.xml']
+
+            analyzeMode = 'EVIDENCE_PROCESSING'
         }
 
         then:
@@ -153,6 +156,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.analyzers.artifactory.bearerToken == 'abc123=='
         project.dependencyCheck.analyzers.retirejs.filters == ['filter1', 'filter2']
         project.dependencyCheck.analyzers.retirejs.filterNonVulnerable == true
+        project.dependencyCheck.analyzeMode == Engine.Mode.EVIDENCE_PROCESSING
     }
 
     def 'scanConfigurations and skipConfigurations are mutually exclusive'() {

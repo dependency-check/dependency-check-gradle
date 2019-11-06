@@ -1,0 +1,21 @@
+plugins {
+    id 'org.owasp.dependencycheck'
+    id 'java'
+}
+
+sourceCompatibility = 1.5
+version = '1.0'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    compile 'io.micrometer:micrometer-registry-statsd:1.3.0'
+}
+
+dependencyCheck {
+    analyzeMode = 'STANDALONE'
+    failBuildOnCVSS = 0
+}

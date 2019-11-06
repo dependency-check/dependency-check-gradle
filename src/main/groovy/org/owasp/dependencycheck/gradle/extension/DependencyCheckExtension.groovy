@@ -20,6 +20,8 @@ package org.owasp.dependencycheck.gradle.extension
 
 import org.gradle.api.Action
 import org.gradle.api.file.ConfigurableFileCollection
+import org.owasp.dependencycheck.Engine
+
 import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
 import org.gradle.api.Project
 
@@ -169,6 +171,11 @@ class DependencyCheckExtension {
      * The configuration extension for cache settings.
      */
     CacheExtension cache = new CacheExtension()
+
+    /**
+     * Dependency check engine execution mode
+     */
+    Engine.Mode analyzeMode = Engine.Mode.STANDALONE
 
     /**
      * Allows programmatic configuration of the proxy extension

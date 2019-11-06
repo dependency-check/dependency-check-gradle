@@ -108,6 +108,28 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         result.task(":$ANALYZE_TASK").outcome == SUCCESS
     }
 
+    def "analyze task supports standalone engine mode"() {
+        given:
+        copyBuildFileIntoProjectDir('analyzeStandaloneMode.gradle')
+
+        when:
+        def result = executeTaskAndGetResult(ANALYZE_TASK, false)
+
+        then:
+        result.task(":$ANALYZE_TASK").outcome == FAILED
+        result.output.contains('CVE-2019-16869')
+    }
+
+    def "analyze task supports evidence engine mode"() {
+        given:
+        copyBuildFileIntoProjectDir('analyzeEvidenceMode.gradle')
+
+        when:
+        def result = executeTaskAndGetResult(ANALYZE_TASK, true)
+
+        then:
+        result.task(":$ANALYZE_TASK").outcome == SUCCESS
+    }
 
     private void copyBuildFileIntoProjectDir(String buildFileName) {
         copyResourceFileIntoProjectDir(buildFileName, 'build.gradle')

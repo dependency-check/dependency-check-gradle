@@ -73,7 +73,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         initializeSettings()
         def engine = null
         try {
-            engine = new Engine(settings)
+            engine = new Engine(config.analyzeMode, settings)
         } catch (DatabaseException ex) {
             String msg = "Unable to connect to the dependency-check database"
             if (config.failOnError) {
