@@ -26,4 +26,5 @@ class ProxyExtension {
     Integer port
     String username
     String password
+    List<String> nonProxyHosts = []
 }

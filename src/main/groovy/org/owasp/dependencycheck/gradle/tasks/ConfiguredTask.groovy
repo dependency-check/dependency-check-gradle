@@ -134,6 +134,7 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setStringIfNotEmpty(PROXY_PORT, "${config.proxy.port}")
         settings.setStringIfNotEmpty(PROXY_USERNAME, config.proxy.username)
         settings.setStringIfNotEmpty(PROXY_PASSWORD, config.proxy.password)
+        settings.setArrayIfNotEmpty(SUPPRESSION_FILE, config.proxy.nonProxyHosts)
         //settings.setStringIfNotEmpty(CONNECTION_TIMEOUT, connectionTimeout)
         settings.setStringIfNotNull(DATA_DIRECTORY, config.data.directory)
         settings.setStringIfNotEmpty(DB_DRIVER_NAME, config.data.driver)
