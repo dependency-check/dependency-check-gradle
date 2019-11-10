@@ -46,11 +46,7 @@ class DependencyCheckPlugin implements Plugin<Project> {
     public static final String PURGE_TASK = 'dependencyCheckPurge'
 
     /* configuration extensions */
-    private static final String PROXY_EXTENSION_NAME = "proxy"
-    private static final String CVE_EXTENSION_NAME = "cve"
-    private static final String DATA_EXTENSION_NAME = "data"
     private static final String CHECK_EXTENSION_NAME = "dependencyCheck"
-    private static final String ANALYZERS_EXTENSION_NAME = "analyzers"
 
     void apply(Project project) {
         checkGradleVersion()
@@ -59,15 +55,7 @@ class DependencyCheckPlugin implements Plugin<Project> {
     }
 
     void initializeConfigurations(Project project) {
-        def ext = project.extensions.create(CHECK_EXTENSION_NAME, DependencyCheckExtension, project)
-        ext.extensions.create(PROXY_EXTENSION_NAME, ProxyExtension)
-        ext.extensions.create(CVE_EXTENSION_NAME, CveExtension)
-        ext.extensions.create(DATA_EXTENSION_NAME, DataExtension, project)
-        def analyzers = ext.extensions.create(ANALYZERS_EXTENSION_NAME, AnalyzerExtension)
-        analyzers.extensions.create('retirejs', RetireJSExtension)
-        analyzers.extensions.create('artifactory', ArtifactoryExtension)
-        analyzers.extensions.create('ossIndex', OssIndexExtension)
-        ext.extensions.create('cache', CacheExtension)
+        project.extensions.create(CHECK_EXTENSION_NAME, DependencyCheckExtension, project)
     }
 
     void registerTasks(Project project) {

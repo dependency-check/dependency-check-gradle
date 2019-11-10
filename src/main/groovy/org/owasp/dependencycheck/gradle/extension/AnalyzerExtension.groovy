@@ -17,10 +17,19 @@
  */
 package org.owasp.dependencycheck.gradle.extension
 
+import org.gradle.api.Project
+
 /**
  * The analyzer configuration extension. Any value not configured will use the dependency-check-core defaults.
  */
 class AnalyzerExtension {
+
+    AnalyzerExtension(Project project) {
+        this.project = project;
+    }
+
+    Project project;
+
     /**
      * Sets whether the experimental analyzers will be used.
      */
@@ -141,4 +150,46 @@ class AnalyzerExtension {
      */
     @Deprecated
     Boolean ossIndexEnabled
+
+    /**
+     * The configuration extension for retirejs settings.
+     */
+    RetireJSExtension retirejs = new RetireJSExtension()
+
+    /**
+     * The configuration extension for artifactory settings.
+     */
+    ArtifactoryExtension artifactory = new ArtifactoryExtension()
+
+    /**
+     * The configuration extension for artifactory settings.
+     */
+    OssIndexExtension ossIndex = new OssIndexExtension()
+
+    /**
+     * Allows programmatic configuration of the retirejs extension
+     * @param configClosure the closure to configure the retirejs extension
+     * @return the retirejs extension
+     */
+    def retirejs(Closure configClosure) {
+        return project.configure(retirejs, configClosure)
+    }
+
+    /**
+     * Allows programmatic configuration of the artifactory extension
+     * @param configClosure the closure to configure the artifactory extension
+     * @return the artifactory extension
+     */
+    def artifactory(Closure configClosure) {
+        return project.configure(artifactory, configClosure)
+    }
+
+    /**
+     * Allows programmatic configuration of the ossIndex extension
+     * @param configClosure the closure to configure the ossIndex extension
+     * @return the ossIndex extension
+     */
+    def ossIndex(Closure configClosure) {
+        return project.configure(ossIndex, configClosure)
+    }
 }

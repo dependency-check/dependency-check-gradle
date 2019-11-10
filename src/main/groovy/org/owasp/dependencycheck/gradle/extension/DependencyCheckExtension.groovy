@@ -18,6 +18,7 @@
 
 package org.owasp.dependencycheck.gradle.extension
 
+import org.gradle.api.Action
 import org.gradle.api.file.ConfigurableFileCollection
 import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
 import org.gradle.api.Project
@@ -31,17 +32,22 @@ import org.gradle.api.Project
 class DependencyCheckExtension {
 
     DependencyCheckExtension(Project project) {
+        this.project = project;
         outputDirectory = "${project.buildDir}/reports"
     }
+
+    Project project;
 
     /**
      * The configuration extension for proxy settings.
      */
-    ProxyExtension proxyExtension
+    ProxyExtension proxy = new ProxyExtension()
+
     /**
      * The configuration extension that defines the location of the NVD CVE data.
      */
-    CveExtension cveExtension
+    CveExtension cve = new CveExtension()
+
     /**
      * Whether the plugin should fail when errors occur.
      */
@@ -49,7 +55,8 @@ class DependencyCheckExtension {
     /**
      * The configuration extension for data related configuration options.
      */
-    DataExtension dataExtension
+    DataExtension data = new DataExtension(project)
+
     /**
      * Set to false if the proxy does not support HEAD requests. The default is true.
      */
@@ -65,7 +72,7 @@ class DependencyCheckExtension {
     /**
      * Configuration for the analyzers.
      */
-    AnalyzerExtension analyzerExtension
+    AnalyzerExtension analyzers = new AnalyzerExtension(project)
     /**
      * The path to the suppression file.
      */
@@ -157,4 +164,54 @@ class DependencyCheckExtension {
      * A set of files or folders to scan.
      */
     List<File> scanSet
+
+    /**
+     * The configuration extension for cache settings.
+     */
+    CacheExtension cache = new CacheExtension()
+
+    /**
+     * Allows programmatic configuration of the proxy extension
+     * @param configClosure the closure to configure the proxy extension
+     * @return the proxy extension
+     */
+    def proxy(Closure configClosure) {
+        return project.configure(proxy, configClosure)
+    }
+
+    /**
+     * Allows programmatic configuration of the cve extension
+     * @param configClosure the closure to configure the cve extension
+     * @return the cve extension
+     */
+    def cve(Closure configClosure) {
+        return project.configure(cve, configClosure)
+    }
+
+    /**
+     * Allows programmatic configuration of the analyzer extension
+     * @param configClosure the closure to configure the analyzers extension
+     * @return the analyzers extension
+     */
+    def analyzers(Closure configClosure) {
+        return project.configure(analyzers, configClosure)
+    }
+
+    /**
+     * Allows programmatic configuration of the data extension
+     * @param configClosure the closure to configure the data extension
+     * @return the data extension
+     */
+    def data(Closure configClosure) {
+        return project.configure(data, configClosure)
+    }
+
+    /**
+     * Allows programmatic configuration of the cache extension
+     * @param configClosure the closure to configure the cache extension
+     * @return the cache extension
+     */
+    def cache(Closure configClosure) {
+        return project.configure(cache, configClosure)
+    }
 }
