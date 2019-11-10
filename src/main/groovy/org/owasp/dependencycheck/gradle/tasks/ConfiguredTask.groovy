@@ -206,7 +206,7 @@ abstract class ConfiguredTask extends DefaultTask {
 
         settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_USE_CACHE, config.cache.nodeAudit)
         settings.setBooleanIfNotNull(ANALYZER_CENTRAL_USE_CACHE, config.cache.central)
-        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_USE_CACHE, config.cache.ossInex)
+        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_USE_CACHE, config.cache.ossIndex)
     }
 
     /**

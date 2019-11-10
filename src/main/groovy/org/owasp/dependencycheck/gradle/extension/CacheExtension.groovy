@@ -25,7 +25,7 @@ class CacheExtension {
      * Sets whether or not the OSS Index Analyzer's results should be cached locally.
      * Cache expires after 24 hours.
      */
-    Boolean ossInex
+    Boolean ossIndex
     /**
      * Sets whether or not the Central Analyzer's results should be cached locally.
      * Cache expires after 30 days.
