@@ -42,6 +42,7 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_DRIVER_PATH
 import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_CONNECTION_STRING
 import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_USER
 import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_PASSWORD
+import static org.owasp.dependencycheck.utils.Settings.KEYS.AUTO_UPDATE
 
 /**
  * Updates the local cache of the NVD CVE data.
@@ -64,6 +65,7 @@ class Update extends ConfiguredTask {
     @TaskAction
     update() {
         initializeSettings()
+        settings.setBooleanIfNotNull(AUTO_UPDATE, true)
         def engine = null
         try {
             engine = new Engine(settings)
