@@ -29,6 +29,8 @@ import org.gradle.api.attributes.Attribute
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.util.GradleVersion
+import org.owasp.dependencycheck.utils.SeverityUtil
+
 import java.util.stream.Collectors
 import org.owasp.dependencycheck.Engine
 import org.owasp.dependencycheck.data.nexus.MavenArtifact
@@ -212,7 +214,8 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                 .unique()
                 .findAll {
             ((it.getCvssV2() != null && it.getCvssV2().getScore() >= config.failBuildOnCVSS)
-                    || (it.getCvssV3() != null && it.getCvssV3().getBaseScore() >= config.failBuildOnCVSS))
+                    || (it.getCvssV3() != null && it.getCvssV3().getBaseScore() >= config.failBuildOnCVSS)
+                    || (it.getUnscoredSeverity() != null && SeverityUtil.estimateCvssV2(it.getUnscoredSeverity()) >= config.failBuildOnCVSS))
         }
         .collect { it.getName() }
                 .join(", ")
