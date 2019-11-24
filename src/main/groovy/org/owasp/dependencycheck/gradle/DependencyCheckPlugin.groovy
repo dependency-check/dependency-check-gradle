@@ -39,6 +39,7 @@ import org.owasp.dependencycheck.gradle.tasks.Purge
 class DependencyCheckPlugin implements Plugin<Project> {
 
     static final GradleVersion MINIMUM_GRADLE_VERSION = GradleVersion.version("4.0")
+    static final GradleVersion REGISTER_TASK_GRADLE_VERSION = GradleVersion.version("4.9")
 
     public static final String ANALYZE_TASK = 'dependencyCheckAnalyze'
     public static final String AGGREGATE_TASK = 'dependencyCheckAggregate'
@@ -59,10 +60,17 @@ class DependencyCheckPlugin implements Plugin<Project> {
     }
 
     void registerTasks(Project project) {
-        project.tasks.register(PURGE_TASK, Purge)
-        project.tasks.register(UPDATE_TASK, Update)
-        project.tasks.register(ANALYZE_TASK, Analyze)
-        project.tasks.register(AGGREGATE_TASK, Aggregate)
+        if (REGISTER_TASK_GRADLE_VERSION.compareTo(GradleVersion.current())<=0) {
+            project.tasks.register(PURGE_TASK, Purge)
+            project.tasks.register(UPDATE_TASK, Update)
+            project.tasks.register(ANALYZE_TASK, Analyze)
+            project.tasks.register(AGGREGATE_TASK, Aggregate)
+        } else {
+            project.task(PURGE_TASK, type: Purge)
+            project.task(UPDATE_TASK, type: Update)
+            project.task(ANALYZE_TASK, type: Analyze)
+            project.task(AGGREGATE_TASK, type: Aggregate)
+        }
     }
 
     void checkGradleVersion(Project project) {
