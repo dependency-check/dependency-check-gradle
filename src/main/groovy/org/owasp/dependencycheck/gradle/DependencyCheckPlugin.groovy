@@ -18,23 +18,15 @@
 
 package org.owasp.dependencycheck.gradle
 
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.util.GradleVersion
-import org.gradle.api.GradleException
-import org.owasp.dependencycheck.gradle.extension.AnalyzerExtension
-import org.owasp.dependencycheck.gradle.extension.ArtifactoryExtension
 import org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension
-import org.owasp.dependencycheck.gradle.extension.CveExtension
-import org.owasp.dependencycheck.gradle.extension.DataExtension
-import org.owasp.dependencycheck.gradle.extension.ProxyExtension
-import org.owasp.dependencycheck.gradle.extension.RetireJSExtension
-import org.owasp.dependencycheck.gradle.extension.OssIndexExtension
-import org.owasp.dependencycheck.gradle.extension.CacheExtension
-import org.owasp.dependencycheck.gradle.tasks.Update
-import org.owasp.dependencycheck.gradle.tasks.Analyze
 import org.owasp.dependencycheck.gradle.tasks.Aggregate
+import org.owasp.dependencycheck.gradle.tasks.Analyze
 import org.owasp.dependencycheck.gradle.tasks.Purge
+import org.owasp.dependencycheck.gradle.tasks.Update
 
 class DependencyCheckPlugin implements Plugin<Project> {
 
