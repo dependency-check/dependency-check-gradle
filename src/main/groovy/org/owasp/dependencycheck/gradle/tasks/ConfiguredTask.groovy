@@ -23,69 +23,7 @@ import org.gradle.api.InvalidUserDataException
 import org.gradle.api.tasks.Internal
 import org.owasp.dependencycheck.utils.Settings
 
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ADDITIONAL_ZIP_EXTENSIONS
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_ARCHIVE_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_ARTIFACTORY_API_TOKEN
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_ARTIFACTORY_API_USERNAME
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_ARTIFACTORY_BEARER_TOKEN
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_ARTIFACTORY_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_ARTIFACTORY_PARALLEL_ANALYSIS
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_ARTIFACTORY_URL
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_ARTIFACTORY_USES_PROXY
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_ASSEMBLY_DOTNET_PATH
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_ASSEMBLY_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_AUTOCONF_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_BUNDLE_AUDIT_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_BUNDLE_AUDIT_PATH
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_CENTRAL_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_CENTRAL_USE_CACHE
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_CMAKE_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_COCOAPODS_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_COMPOSER_LOCK_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_EXPERIMENTAL_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_JAR_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_NEXUS_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_NEXUS_URL
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_NEXUS_USES_PROXY
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_NODE_AUDIT_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_NODE_AUDIT_USE_CACHE
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_NODE_PACKAGE_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_NUGETCONF_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_NUSPEC_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_OPENSSL_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_OSSINDEX_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_OSSINDEX_USER
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_OSSINDEX_PASSWORD
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_OSSINDEX_USE_CACHE
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_PYTHON_DISTRIBUTION_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_PYTHON_PACKAGE_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_GOLANG_DEP_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_GOLANG_MOD_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_GOLANG_PATH
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_RETIREJS_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_RETIREJS_FILTERS
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_RETIREJS_FILTER_NON_VULNERABLE
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_RETIREJS_REPO_JS_URL
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_RUBY_GEMSPEC_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.ANALYZER_SWIFT_PACKAGE_MANAGER_ENABLED
-import static org.owasp.dependencycheck.utils.Settings.KEYS.AUTO_UPDATE
-import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_BASE_JSON
-import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_CHECK_VALID_FOR_HOURS
-import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_MODIFIED_JSON
-import static org.owasp.dependencycheck.utils.Settings.KEYS.DATA_DIRECTORY
-import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_CONNECTION_STRING
-import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_DRIVER_NAME
-import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_DRIVER_PATH
-import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_PASSWORD
-import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_USER
-import static org.owasp.dependencycheck.utils.Settings.KEYS.DOWNLOADER_QUICK_QUERY_TIMESTAMP
-import static org.owasp.dependencycheck.utils.Settings.KEYS.HINTS_FILE
-import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_PASSWORD
-import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_PORT
-import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_SERVER
-import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_USERNAME
-import static org.owasp.dependencycheck.utils.Settings.KEYS.SUPPRESSION_FILE
-import static org.owasp.dependencycheck.utils.Settings.KEYS.JUNIT_FAIL_ON_CVSS
+import static org.owasp.dependencycheck.utils.Settings.KEYS.*
 
 /**
  * Standard class to read in the configuration and populated the ODC settings.
@@ -155,7 +93,7 @@ abstract class ConfiguredTask extends DefaultTask {
         }
         settings.setBooleanIfNotNull(ANALYZER_JAR_ENABLED, config.analyzers.jarEnabled)
         settings.setBooleanIfNotNull(ANALYZER_NUSPEC_ENABLED, config.analyzers.nuspecEnabled)
-        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_ENABLED, config.analyzers.ossIndexEnabled)
+        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_ENABLED, select(config.analyzers.ossIndex.enabled, config.analyzers.ossIndexEnabled))
         settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_ENABLED, config.analyzers.ossIndex.enabled)
         settings.setStringIfNotEmpty(ANALYZER_OSSINDEX_USER, config.analyzers.ossIndex.username)
         settings.setStringIfNotEmpty(ANALYZER_OSSINDEX_PASSWORD, config.analyzers.ossIndex.password)
@@ -190,9 +128,11 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setBooleanIfNotNull(ANALYZER_NUGETCONF_ENABLED, config.analyzers.nugetconfEnabled)
 
         settings.setBooleanIfNotNull(ANALYZER_NODE_PACKAGE_ENABLED, config.analyzers.nodeEnabled)
-        settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_ENABLED, config.analyzers.nodeAuditEnabled);
-
+        settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_ENABLED, select(config.analyzers.nodeAudit.enabled, config.analyzers.nodeAuditEnabled))
+        settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_USE_CACHE, config.analyzers.nodeAudit.useCache)
+        settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_SKIPDEV, config.analyzers.nodeAudit.skipDevDependencies)
         settings.setBooleanIfNotNull(ANALYZER_RETIREJS_ENABLED, config.analyzers.retirejs.enabled)
+        settings.setBooleanIfNotNull(ANALYZER_RETIREJS_FORCEUPDATE, config.analyzers.retirejs.forceupdate)
         settings.setStringIfNotNull(ANALYZER_RETIREJS_REPO_JS_URL, config.analyzers.retirejs.retireJsUrl)
         settings.setBooleanIfNotNull(ANALYZER_RETIREJS_FILTER_NON_VULNERABLE, config.analyzers.retirejs.filterNonVulnerable)
         settings.setArrayIfNotEmpty(ANALYZER_RETIREJS_FILTERS, config.analyzers.retirejs.filters)
@@ -221,5 +161,14 @@ abstract class ConfiguredTask extends DefaultTask {
             suppressionFiles << suppressionFile
         }
         suppressionFiles
+    }
+    /**
+     * Selects the current configiguration option - returns the deprecated option if the current configuration option is null
+     * @param current the current configuration
+     * @param deprecated the deprecated configuration
+     * @return the current configuration option if not null; otherwise the deprecated option is returned
+     */
+    private Boolean select(Boolean current, Boolean deprecated) {
+        return current != null ? current : deprecated;
     }
 }

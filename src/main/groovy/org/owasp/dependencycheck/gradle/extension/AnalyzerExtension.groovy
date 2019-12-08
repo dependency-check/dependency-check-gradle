@@ -138,7 +138,9 @@ class AnalyzerExtension {
     Boolean nodeEnabled
     /**
      * Sets whether or not the NSP Analyzer should be used.
+     * @deprecated As of the 5.2.5 - please use nodeAudit { enabled = true }
      */
+    @Deprecated
     Boolean nodeAuditEnabled
     /**
      * Sets whether or not the Nuget packages.config Configuration Analyzer should be used.
@@ -155,6 +157,11 @@ class AnalyzerExtension {
      * The configuration extension for retirejs settings.
      */
     RetireJSExtension retirejs = new RetireJSExtension()
+
+    /**
+     * The configuration extension for the node audit settings.
+     */
+    NodeAuditExtension nodeAudit = new NodeAuditExtension()
 
     /**
      * The configuration extension for artifactory settings.
