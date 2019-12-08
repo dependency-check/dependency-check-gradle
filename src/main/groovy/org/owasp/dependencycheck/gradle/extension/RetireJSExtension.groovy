@@ -22,7 +22,7 @@ package org.owasp.dependencycheck.gradle.extension
  */
 class RetireJSExtension {
     /**
-     * Sets whether or not the NSP Analyzer should be used.
+     * Sets whether or not the RetireJS Analyzer should be used.
      */
     Boolean enabled
     /**
@@ -38,4 +38,8 @@ class RetireJSExtension {
      * The Retire JS Repository URL.
      */
     String retireJsUrl
+    /**
+     * Whether the Retire JS analyzer should be updated regardless of the `autoupdate` setting.
+     */
+    Boolean forceupdate
 }
