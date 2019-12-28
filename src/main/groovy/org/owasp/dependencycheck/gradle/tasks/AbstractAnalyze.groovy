@@ -18,9 +18,8 @@
 
 package org.owasp.dependencycheck.gradle.tasks
 
-import org.gradle.api.DefaultTask
+
 import org.gradle.api.GradleException
-import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ModuleVersionIdentifier
@@ -29,23 +28,21 @@ import org.gradle.api.attributes.Attribute
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.util.GradleVersion
-import org.owasp.dependencycheck.utils.SeverityUtil
-
-import java.util.stream.Collectors
 import org.owasp.dependencycheck.Engine
+import org.owasp.dependencycheck.agent.DependencyCheckScanAgent
 import org.owasp.dependencycheck.data.nexus.MavenArtifact
 import org.owasp.dependencycheck.data.nvdcve.DatabaseException
 import org.owasp.dependencycheck.dependency.Confidence
 import org.owasp.dependencycheck.dependency.Dependency
-import org.owasp.dependencycheck.agent.DependencyCheckScanAgent;
 import org.owasp.dependencycheck.exception.ExceptionCollection
 import org.owasp.dependencycheck.exception.ReportException
-import org.owasp.dependencycheck.utils.Settings
-import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
+import org.owasp.dependencycheck.utils.SeverityUtil
+
+import java.util.stream.Collectors
 
 import static org.owasp.dependencycheck.dependency.EvidenceType.*
+import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
 import static org.owasp.dependencycheck.utils.Checksum.*
-import static org.owasp.dependencycheck.utils.Settings.KEYS.*
 
 /**
  * Checks the projects dependencies for known vulnerabilities.
@@ -151,7 +148,6 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     }
 
 
-
     /**
      * Combines the configured suppressionFile and suppressionFiles into a
      * single array.
@@ -213,11 +209,11 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                 .flatten()
                 .unique()
                 .findAll {
-            ((it.getCvssV2() != null && it.getCvssV2().getScore() >= config.failBuildOnCVSS)
-                    || (it.getCvssV3() != null && it.getCvssV3().getBaseScore() >= config.failBuildOnCVSS)
-                    || (it.getUnscoredSeverity() != null && SeverityUtil.estimateCvssV2(it.getUnscoredSeverity()) >= config.failBuildOnCVSS))
-        }
-        .collect { it.getName() }
+                    ((it.getCvssV2() != null && it.getCvssV2().getScore() >= config.failBuildOnCVSS)
+                            || (it.getCvssV3() != null && it.getCvssV3().getBaseScore() >= config.failBuildOnCVSS)
+                            || (it.getUnscoredSeverity() != null && SeverityUtil.estimateCvssV2(it.getUnscoredSeverity()) >= config.failBuildOnCVSS))
+                }
+                .collect { it.getName() }
                 .join(", ")
 
         if (vulnerabilities.length() > 0) {
@@ -329,7 +325,9 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             }
         }
         boolean customScanSet = false
-        List<String> toScan = ['src/main/resources', 'src/main/webapp']
+        List<String> toScan = ['src/main/resources', 'src/main/webapp',
+                               './package.json', './package-lock.json',
+                               './npm-shrinkwrap.json', './Gopkg.lock', './go.mod']
         if (config.scanSet != null) {
             toScan = config.scanSet
             customScanSet = true
