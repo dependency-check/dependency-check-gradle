@@ -199,4 +199,13 @@ class AnalyzerExtension {
     def ossIndex(Closure configClosure) {
         return project.configure(ossIndex, configClosure)
     }
+
+    /**
+     * Allows programmatic configuration of the nodeAudit extension
+     * @param configClosure the closure to configure the ossIndex extension
+     * @return the ossIndex extension
+     */
+    def nodeAudit(Closure configClosure) {
+        return project.configure(nodeAudit, configClosure)
+    }
 }
