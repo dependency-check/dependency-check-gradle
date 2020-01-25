@@ -17,8 +17,8 @@
  */
 
 group = 'org.owasp'
-version = '5.3.0'
- 
+version = '5.3.1-SNAPSHOT'
+
 buildscript {
     repositories {
         mavenLocal()
@@ -64,8 +64,8 @@ dependencies {
     compile(
         localGroovy(),
         gradleApi(),
-        'org.owasp:dependency-check-core:5.3.0',
-        'org.owasp:dependency-check-utils:5.3.0'
+        'org.owasp:dependency-check-core:5.3.1-SNAPSHOT',
+        'org.owasp:dependency-check-utils:5.3.1-SNAPSHOT'
     )
 
     testCompile gradleTestKit()
