@@ -21,6 +21,7 @@ package org.owasp.dependencycheck.gradle.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.tasks.Internal
+import org.owasp.dependencycheck.gradle.service.SlackNotificationSenderService
 import org.owasp.dependencycheck.utils.Settings
 
 import static org.owasp.dependencycheck.utils.Settings.KEYS.*
@@ -31,6 +32,7 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.*
  * @author Jeremy Long
  */
 abstract class ConfiguredTask extends DefaultTask {
+
     @Internal
     def config = project.dependencyCheck
     @Internal
@@ -67,7 +69,8 @@ abstract class ConfiguredTask extends DefaultTask {
 
         settings.setArrayIfNotEmpty(SUPPRESSION_FILE, suppressionLists)
         settings.setStringIfNotEmpty(HINTS_FILE, config.hintsFile)
-
+        settings.setBooleanIfNotNull(SlackNotificationSenderService.SLACK__WEBHOOK__ENABLED, config.slack.enabled)
+        settings.setStringIfNotEmpty(SlackNotificationSenderService.SLACK__WEBHOOK__URL, config.slack.webhookUrl)
         settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
         settings.setStringIfNotEmpty(PROXY_PORT, "${config.proxy.port}")
         settings.setStringIfNotEmpty(PROXY_USERNAME, config.proxy.username)

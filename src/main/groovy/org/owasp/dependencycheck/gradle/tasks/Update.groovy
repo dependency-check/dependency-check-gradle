@@ -18,30 +18,13 @@
 
 package org.owasp.dependencycheck.gradle.tasks
 
-import org.gradle.api.DefaultTask
+
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.Internal
-import org.gradle.api.InvalidUserDataException
 import org.owasp.dependencycheck.Engine
-import org.owasp.dependencycheck.data.update.exception.UpdateException
 import org.owasp.dependencycheck.data.nvdcve.DatabaseException
-import org.owasp.dependencycheck.utils.Settings
+import org.owasp.dependencycheck.data.update.exception.UpdateException
 
-import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_MODIFIED_JSON
-import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_BASE_JSON
-import static org.owasp.dependencycheck.utils.Settings.KEYS.DOWNLOADER_QUICK_QUERY_TIMESTAMP
-import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_PASSWORD
-import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_PORT
-import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_SERVER
-import static org.owasp.dependencycheck.utils.Settings.KEYS.PROXY_USERNAME
-import static org.owasp.dependencycheck.utils.Settings.KEYS.DATA_DIRECTORY
-import static org.owasp.dependencycheck.utils.Settings.KEYS.CVE_CHECK_VALID_FOR_HOURS
-import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_DRIVER_NAME
-import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_DRIVER_PATH
-import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_CONNECTION_STRING
-import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_USER
-import static org.owasp.dependencycheck.utils.Settings.KEYS.DB_PASSWORD
 import static org.owasp.dependencycheck.utils.Settings.KEYS.AUTO_UPDATE
 
 /**

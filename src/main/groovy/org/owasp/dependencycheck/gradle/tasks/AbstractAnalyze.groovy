@@ -18,7 +18,6 @@
 
 package org.owasp.dependencycheck.gradle.tasks
 
-
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -36,6 +35,7 @@ import org.owasp.dependencycheck.dependency.Confidence
 import org.owasp.dependencycheck.dependency.Dependency
 import org.owasp.dependencycheck.exception.ExceptionCollection
 import org.owasp.dependencycheck.exception.ReportException
+import org.owasp.dependencycheck.gradle.service.SlackNotificationSenderService
 import org.owasp.dependencycheck.utils.SeverityUtil
 
 import java.util.stream.Collectors
@@ -104,7 +104,11 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                     engine.writeReports(displayName, groupId, name.toString(), project.getVersion().toString(), output, f)
                 }
                 showSummary(engine)
-                checkForFailure(engine)
+                def result = checkForFailure(engine)
+                sendSlackNotification(result)
+                if (result.failed) {
+                    throw new GradleException(result.msg)
+                }
             } catch (ReportException ex) {
                 if (config.failOnError) {
                     if (exCol != null) {
@@ -199,9 +203,9 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * If configured, fails the build if a vulnerability is identified with a CVSS
      * score higher than the failure threshold configured.
      */
-    def checkForFailure(Engine engine) {
+    CheckForFailureResult checkForFailure(Engine engine) {
         if (config.failBuildOnCVSS > 10) {
-            return
+            return CheckForFailureResult.createSuccess()
         }
 
         final String vulnerabilities = engine.getDependencies()
@@ -220,7 +224,33 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             final String msg = String.format("%n%nDependency-Analyze Failure:%n"
                     + "One or more dependencies were identified with vulnerabilities that have a CVSS score greater than '%.1f': %s%n"
                     + "See the dependency-check report for more details.%n%n", config.failBuildOnCVSS, vulnerabilities)
-            throw new GradleException(msg)
+            return CheckForFailureResult.createFailed(msg)
+        } else {
+            return CheckForFailureResult.createSuccess()
+        }
+    }
+
+    void sendSlackNotification(CheckForFailureResult checkForFailureResult) {
+        if (checkForFailureResult.failed) {
+            new SlackNotificationSenderService(settings).send(getCurrentProjectName(), checkForFailureResult.msg)
+        }
+    }
+
+    def static class CheckForFailureResult {
+        private Boolean failed
+        private String msg
+
+        CheckForFailureResult(Boolean failed, String msg) {
+            this.failed = failed
+            this.msg = msg
+        }
+
+        static CheckForFailureResult createSuccess() {
+            return new CheckForFailureResult(false, "")
+        }
+
+        static CheckForFailureResult createFailed(String msg) {
+            return new CheckForFailureResult(true, msg)
         }
     }
 

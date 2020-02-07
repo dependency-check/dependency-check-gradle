@@ -62,10 +62,11 @@ repositories {
 
 dependencies {
     compile(
-        localGroovy(),
-        gradleApi(),
-        'org.owasp:dependency-check-core:5.3.1-SNAPSHOT',
-        'org.owasp:dependency-check-utils:5.3.1-SNAPSHOT'
+            localGroovy(),
+            gradleApi(),
+            'org.owasp:dependency-check-core:5.3.1-SNAPSHOT',
+            'org.owasp:dependency-check-utils:5.3.1-SNAPSHOT',
+            'net.gpedro.integrations.slack:slack-webhook:1.4.0'
     )
 
     testCompile gradleTestKit()

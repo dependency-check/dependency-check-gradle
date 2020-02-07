@@ -18,10 +18,10 @@
 
 package org.owasp.dependencycheck.gradle.extension
 
-import org.gradle.api.Action
-import org.gradle.api.file.ConfigurableFileCollection
-import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
+
 import org.gradle.api.Project
+
+import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
 
 /*
  * Configuration extension for the dependencyCheck plugin.
@@ -29,6 +29,7 @@ import org.gradle.api.Project
  * @author Wei Ma
  * @author Jeremy Long
  */
+
 class DependencyCheckExtension {
 
     DependencyCheckExtension(Project project) {
@@ -42,6 +43,10 @@ class DependencyCheckExtension {
      * The configuration extension for proxy settings.
      */
     ProxyExtension proxy = new ProxyExtension()
+    /**
+     * The configuration extension for proxy settings.
+     */
+    SlackExtension slack = new SlackExtension()
 
     /**
      * The configuration extension that defines the location of the NVD CVE data.
@@ -177,6 +182,15 @@ class DependencyCheckExtension {
      */
     def proxy(Closure configClosure) {
         return project.configure(proxy, configClosure)
+    }
+
+    /**
+     * Allows programmatic configuration of the slack extension
+     * @param configClosure the closure to configure the slack extension
+     * @return the slack extension
+     */
+    def slack(Closure configClosure) {
+        return project.configure(slack, configClosure)
     }
 
     /**
