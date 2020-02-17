@@ -72,7 +72,7 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setStringIfNotEmpty(HINTS_FILE, config.hintsFile)
 
         configureProxy(settings)
-
+      
         //settings.setStringIfNotEmpty(CONNECTION_TIMEOUT, connectionTimeout)
         settings.setStringIfNotNull(DATA_DIRECTORY, config.data.directory)
         settings.setStringIfNotEmpty(DB_DRIVER_NAME, config.data.driver)

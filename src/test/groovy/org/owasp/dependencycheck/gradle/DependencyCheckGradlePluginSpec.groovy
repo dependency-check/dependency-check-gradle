@@ -140,7 +140,9 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.proxy.username == 'proxyUsername'
         project.dependencyCheck.proxy.password == 'proxyPassword'
         project.dependencyCheck.proxy.nonProxyHosts == ['localhost']
+        proxyFromGradleSettings
         */
+
         project.dependencyCheck.cve.urlModified == 'urlModified'
         project.dependencyCheck.cve.urlBase == 'urlBase'
         project.dependencyCheck.outputDirectory == 'outputDirectory'
