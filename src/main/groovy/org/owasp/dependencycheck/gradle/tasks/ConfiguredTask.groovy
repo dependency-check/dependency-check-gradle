@@ -21,6 +21,9 @@ package org.owasp.dependencycheck.gradle.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.tasks.Internal
+import org.gradle.internal.resource.transport.http.HttpProxySettings
+import org.gradle.internal.resource.transport.http.JavaSystemPropertiesSecureHttpProxySettings
+import org.gradle.internal.resource.transport.http.JavaSystemPropertiesHttpProxySettings
 import org.owasp.dependencycheck.utils.Settings
 
 import static org.owasp.dependencycheck.utils.Settings.KEYS.*
@@ -68,11 +71,8 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setArrayIfNotEmpty(SUPPRESSION_FILE, suppressionLists)
         settings.setStringIfNotEmpty(HINTS_FILE, config.hintsFile)
 
-        settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
-        settings.setStringIfNotEmpty(PROXY_PORT, "${config.proxy.port}")
-        settings.setStringIfNotEmpty(PROXY_USERNAME, config.proxy.username)
-        settings.setStringIfNotEmpty(PROXY_PASSWORD, config.proxy.password)
-        settings.setArrayIfNotEmpty(PROXY_NON_PROXY_HOSTS, config.proxy.nonProxyHosts)
+        configureProxy(settings)
+
         //settings.setStringIfNotEmpty(CONNECTION_TIMEOUT, connectionTimeout)
         settings.setStringIfNotNull(DATA_DIRECTORY, config.data.directory)
         settings.setStringIfNotEmpty(DB_DRIVER_NAME, config.data.driver)
@@ -148,6 +148,27 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_USE_CACHE, config.cache.nodeAudit)
         settings.setBooleanIfNotNull(ANALYZER_CENTRAL_USE_CACHE, config.cache.central)
         settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_USE_CACHE, config.cache.ossIndex)
+    }
+
+    private void configureProxy(Settings settings) {
+        HttpProxySettings proxyGradle = new JavaSystemPropertiesSecureHttpProxySettings()
+        if (proxyGradle.proxy == null) {  // if systemProp.https.proxyHost is not defined, fallback to http proxy
+            proxyGradle = new JavaSystemPropertiesHttpProxySettings()
+        }
+
+        if (proxyGradle.proxy != null) {
+            config.proxy.server = proxyGradle.proxy.host
+            config.proxy.port = proxyGradle.proxy.port
+            config.proxy.username = proxyGradle.proxy.credentials.username
+            pconfig.roxy.password = proxyGradle.proxy.credentials.password
+            config.proxy.nonProxyHosts = getNonProxyHosts(proxyGradle)
+
+            settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
+            settings.setStringIfNotEmpty(PROXY_PORT, "${config.proxy.port}")
+            settings.setStringIfNotEmpty(PROXY_USERNAME, config.proxy.username)
+            settings.setStringIfNotEmpty(PROXY_PASSWORD, config.proxy.password)
+            settings.setArrayIfNotEmpty(PROXY_NON_PROXY_HOSTS, config.proxy.nonProxyHosts)
+        }
     }
 
     /**

@@ -93,6 +93,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
     def 'tasks use correct values when extension is used'() {
         when:
         project.dependencyCheck {
+            /*
             proxy {
                 server = '127.0.0.1'
                 port = 3128
@@ -100,7 +101,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
                 password = 'proxyPassword'
                 nonProxyHosts = ['localhost']
             }
-
+            */
             cve {
                 urlBase = 'urlBase'
                 urlModified = 'urlModified'
@@ -133,11 +134,13 @@ class DependencyCheckGradlePluginSpec extends Specification {
         }
 
         then:
+        /*
         project.dependencyCheck.proxy.server == '127.0.0.1'
         project.dependencyCheck.proxy.port == 3128
         project.dependencyCheck.proxy.username == 'proxyUsername'
         project.dependencyCheck.proxy.password == 'proxyPassword'
         project.dependencyCheck.proxy.nonProxyHosts == ['localhost']
+        */
         project.dependencyCheck.cve.urlModified == 'urlModified'
         project.dependencyCheck.cve.urlBase == 'urlBase'
         project.dependencyCheck.outputDirectory == 'outputDirectory'
