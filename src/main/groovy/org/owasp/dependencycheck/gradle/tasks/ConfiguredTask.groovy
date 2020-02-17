@@ -72,7 +72,7 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setStringIfNotEmpty(PROXY_PORT, "${config.proxy.port}")
         settings.setStringIfNotEmpty(PROXY_USERNAME, config.proxy.username)
         settings.setStringIfNotEmpty(PROXY_PASSWORD, config.proxy.password)
-        settings.setArrayIfNotEmpty(SUPPRESSION_FILE, config.proxy.nonProxyHosts)
+        settings.setArrayIfNotEmpty(PROXY_NON_PROXY_HOSTS, config.proxy.nonProxyHosts)
         //settings.setStringIfNotEmpty(CONNECTION_TIMEOUT, connectionTimeout)
         settings.setStringIfNotNull(DATA_DIRECTORY, config.data.directory)
         settings.setStringIfNotEmpty(DB_DRIVER_NAME, config.data.driver)
@@ -109,9 +109,9 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setStringIfNotEmpty(ADDITIONAL_ZIP_EXTENSIONS, config.analyzers.zipExtensions)
         settings.setBooleanIfNotNull(ANALYZER_ASSEMBLY_ENABLED, config.analyzers.assemblyEnabled)
         settings.setStringIfNotEmpty(ANALYZER_ASSEMBLY_DOTNET_PATH, config.analyzers.pathToDotnet)
-        settings.setBooleanIfNotNull(ANALYZER_GOLANG_DEP_ENABLED, config.analyzers.golangDepEnabled);
-        settings.setBooleanIfNotNull(ANALYZER_GOLANG_MOD_ENABLED, config.analyzers.golangModEnabled);
-        settings.setStringIfNotNull(ANALYZER_GOLANG_PATH, config.analyzers.pathToGo);
+        settings.setBooleanIfNotNull(ANALYZER_GOLANG_DEP_ENABLED, config.analyzers.golangDepEnabled)
+        settings.setBooleanIfNotNull(ANALYZER_GOLANG_MOD_ENABLED, config.analyzers.golangModEnabled)
+        settings.setStringIfNotNull(ANALYZER_GOLANG_PATH, config.analyzers.pathToGo)
 
         settings.setBooleanIfNotNull(ANALYZER_COCOAPODS_ENABLED, config.analyzers.cocoapodsEnabled)
         settings.setBooleanIfNotNull(ANALYZER_SWIFT_PACKAGE_MANAGER_ENABLED, config.analyzers.swiftEnabled)
@@ -169,6 +169,6 @@ abstract class ConfiguredTask extends DefaultTask {
      * @return the current configuration option if not null; otherwise the deprecated option is returned
      */
     private Boolean select(Boolean current, Boolean deprecated) {
-        return current != null ? current : deprecated;
+        return current != null ? current : deprecated
     }
 }

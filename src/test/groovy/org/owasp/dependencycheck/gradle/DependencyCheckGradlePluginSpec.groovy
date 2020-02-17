@@ -21,7 +21,6 @@ package org.owasp.dependencycheck.gradle
 import org.gradle.api.Task
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
-import org.owasp.dependencycheck.gradle.extension.DataExtension
 import org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension
 import spock.lang.Specification
 
@@ -41,8 +40,8 @@ class DependencyCheckGradlePluginSpec extends Specification {
 
     def 'dependencyCheck extension has correct default data configuration'() {
         setup:
-        DependencyCheckExtension extension = project.extensions.findByName('dependencyCheck')
-        
+        DependencyCheckExtension extension = project.extensions.findByName('dependencyCheck') as DependencyCheckExtension
+
         expect:
         extension.data.directory == "${project.gradle.gradleUserHomeDir}/dependency-check-data/4.0"
     }
@@ -99,6 +98,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
                 port = 3128
                 username = 'proxyUsername'
                 password = 'proxyPassword'
+                nonProxyHosts = ['localhost']
             }
 
             cve {
@@ -137,6 +137,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.proxy.port == 3128
         project.dependencyCheck.proxy.username == 'proxyUsername'
         project.dependencyCheck.proxy.password == 'proxyPassword'
+        project.dependencyCheck.proxy.nonProxyHosts == ['localhost']
         project.dependencyCheck.cve.urlModified == 'urlModified'
         project.dependencyCheck.cve.urlBase == 'urlBase'
         project.dependencyCheck.outputDirectory == 'outputDirectory'
