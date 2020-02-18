@@ -155,7 +155,9 @@ abstract class ConfiguredTask extends DefaultTask {
         if (proxyGradle.proxy == null) {  // if systemProp.https.proxyHost is not defined, fallback to http proxy
             proxyGradle = new JavaSystemPropertiesHttpProxySettings()
         }
-
+if (config.proxy.server) {
+   project.logger.warn("Deprecated configuration `proxy { server='${config.proxy.server}' }`; please update your configuration to use the gradle proxy configuration")
+}
         if (proxyGradle.proxy != null) {
             config.proxy.server = proxyGradle.proxy.host
             config.proxy.port = proxyGradle.proxy.port
