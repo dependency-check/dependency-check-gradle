@@ -18,8 +18,8 @@
 
 package org.owasp.dependencycheck.gradle
 
-import org.gradle.api.Task
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.testfixtures.ProjectBuilder
 import org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension
 import spock.lang.Specification
@@ -91,6 +91,8 @@ class DependencyCheckGradlePluginSpec extends Specification {
     }
 
     def 'tasks use correct values when extension is used'() {
+        given:
+        def slackWebhookUrl = 'https://slack.com/webhook'
         when:
         project.dependencyCheck {
             /*
@@ -105,6 +107,11 @@ class DependencyCheckGradlePluginSpec extends Specification {
             cve {
                 urlBase = 'urlBase'
                 urlModified = 'urlModified'
+            }
+
+            slack {
+                enabled = true
+                webhookUrl = slackWebhookUrl
             }
 
             analyzers {
@@ -159,6 +166,8 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.analyzers.artifactory.bearerToken == 'abc123=='
         project.dependencyCheck.analyzers.retirejs.filters == ['filter1', 'filter2']
         project.dependencyCheck.analyzers.retirejs.filterNonVulnerable == true
+        project.dependencyCheck.slack.enabled == true
+        project.dependencyCheck.slack.webhookUrl == slackWebhookUrl
     }
 
     def 'scanConfigurations and skipConfigurations are mutually exclusive'() {

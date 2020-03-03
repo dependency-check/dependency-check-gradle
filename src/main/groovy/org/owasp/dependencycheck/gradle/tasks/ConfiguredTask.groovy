@@ -21,6 +21,8 @@ package org.owasp.dependencycheck.gradle.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.tasks.Internal
+
+import org.owasp.dependencycheck.gradle.service.SlackNotificationSenderService
 import org.gradle.internal.resource.transport.http.HttpProxySettings
 import org.gradle.internal.resource.transport.http.JavaSystemPropertiesSecureHttpProxySettings
 import org.gradle.internal.resource.transport.http.JavaSystemPropertiesHttpProxySettings
@@ -34,6 +36,7 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.*
  * @author Jeremy Long
  */
 abstract class ConfiguredTask extends DefaultTask {
+
     @Internal
     def config = project.dependencyCheck
     @Internal
