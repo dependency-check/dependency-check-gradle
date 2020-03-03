@@ -155,22 +155,21 @@ abstract class ConfiguredTask extends DefaultTask {
         if (proxyGradle.proxy == null) {  // if systemProp.https.proxyHost is not defined, fallback to http proxy
             proxyGradle = new JavaSystemPropertiesHttpProxySettings()
         }
-if (config.proxy.server) {
-   project.logger.warn("Deprecated configuration `proxy { server='${config.proxy.server}' }`; please update your configuration to use the gradle proxy configuration")
-}
+        if (config.proxy.server) {
+           project.logger.warn("Deprecated configuration `proxy { server='${config.proxy.server}' }`; please update your configuration to use the gradle proxy configuration")
+        }
         if (proxyGradle.proxy != null) {
             config.proxy.server = proxyGradle.proxy.host
             config.proxy.port = proxyGradle.proxy.port
             config.proxy.username = proxyGradle.proxy.credentials.username
-            pconfig.roxy.password = proxyGradle.proxy.credentials.password
+            config.proxy.password = proxyGradle.proxy.credentials.password
             config.proxy.nonProxyHosts = getNonProxyHosts(proxyGradle)
-
-            settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
-            settings.setStringIfNotEmpty(PROXY_PORT, "${config.proxy.port}")
-            settings.setStringIfNotEmpty(PROXY_USERNAME, config.proxy.username)
-            settings.setStringIfNotEmpty(PROXY_PASSWORD, config.proxy.password)
-            settings.setArrayIfNotEmpty(PROXY_NON_PROXY_HOSTS, config.proxy.nonProxyHosts)
         }
+        settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
+        settings.setStringIfNotEmpty(PROXY_PORT, "${config.proxy.port}")
+        settings.setStringIfNotEmpty(PROXY_USERNAME, config.proxy.username)
+        settings.setStringIfNotEmpty(PROXY_PASSWORD, config.proxy.password)
+        settings.setArrayIfNotEmpty(PROXY_NON_PROXY_HOSTS, config.proxy.nonProxyHosts)
     }
 
     /**
