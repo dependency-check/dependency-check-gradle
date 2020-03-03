@@ -21,6 +21,7 @@ package org.owasp.dependencycheck.gradle.extension
  * TODO - this should not be needed, instead rely on the configured HTTP or HTTPS proxies
  * https://docs.gradle.org/current/userguide/build_environment.html
  */
+@Deprecated
 class ProxyExtension {
     String server
     Integer port

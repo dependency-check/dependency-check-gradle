@@ -21,7 +21,11 @@ package org.owasp.dependencycheck.gradle.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.tasks.Internal
+
 import org.owasp.dependencycheck.gradle.service.SlackNotificationSenderService
+import org.gradle.internal.resource.transport.http.HttpProxySettings
+import org.gradle.internal.resource.transport.http.JavaSystemPropertiesSecureHttpProxySettings
+import org.gradle.internal.resource.transport.http.JavaSystemPropertiesHttpProxySettings
 import org.owasp.dependencycheck.utils.Settings
 
 import static org.owasp.dependencycheck.utils.Settings.KEYS.*
@@ -69,13 +73,9 @@ abstract class ConfiguredTask extends DefaultTask {
 
         settings.setArrayIfNotEmpty(SUPPRESSION_FILE, suppressionLists)
         settings.setStringIfNotEmpty(HINTS_FILE, config.hintsFile)
-        settings.setBooleanIfNotNull(SlackNotificationSenderService.SLACK__WEBHOOK__ENABLED, config.slack.enabled)
-        settings.setStringIfNotEmpty(SlackNotificationSenderService.SLACK__WEBHOOK__URL, config.slack.webhookUrl)
-        settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
-        settings.setStringIfNotEmpty(PROXY_PORT, "${config.proxy.port}")
-        settings.setStringIfNotEmpty(PROXY_USERNAME, config.proxy.username)
-        settings.setStringIfNotEmpty(PROXY_PASSWORD, config.proxy.password)
-        settings.setArrayIfNotEmpty(SUPPRESSION_FILE, config.proxy.nonProxyHosts)
+
+        configureProxy(settings)
+      
         //settings.setStringIfNotEmpty(CONNECTION_TIMEOUT, connectionTimeout)
         settings.setStringIfNotNull(DATA_DIRECTORY, config.data.directory)
         settings.setStringIfNotEmpty(DB_DRIVER_NAME, config.data.driver)
@@ -112,9 +112,9 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setStringIfNotEmpty(ADDITIONAL_ZIP_EXTENSIONS, config.analyzers.zipExtensions)
         settings.setBooleanIfNotNull(ANALYZER_ASSEMBLY_ENABLED, config.analyzers.assemblyEnabled)
         settings.setStringIfNotEmpty(ANALYZER_ASSEMBLY_DOTNET_PATH, config.analyzers.pathToDotnet)
-        settings.setBooleanIfNotNull(ANALYZER_GOLANG_DEP_ENABLED, config.analyzers.golangDepEnabled);
-        settings.setBooleanIfNotNull(ANALYZER_GOLANG_MOD_ENABLED, config.analyzers.golangModEnabled);
-        settings.setStringIfNotNull(ANALYZER_GOLANG_PATH, config.analyzers.pathToGo);
+        settings.setBooleanIfNotNull(ANALYZER_GOLANG_DEP_ENABLED, config.analyzers.golangDepEnabled)
+        settings.setBooleanIfNotNull(ANALYZER_GOLANG_MOD_ENABLED, config.analyzers.golangModEnabled)
+        settings.setStringIfNotNull(ANALYZER_GOLANG_PATH, config.analyzers.pathToGo)
 
         settings.setBooleanIfNotNull(ANALYZER_COCOAPODS_ENABLED, config.analyzers.cocoapodsEnabled)
         settings.setBooleanIfNotNull(ANALYZER_SWIFT_PACKAGE_MANAGER_ENABLED, config.analyzers.swiftEnabled)
@@ -153,6 +153,28 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_USE_CACHE, config.cache.ossIndex)
     }
 
+    private void configureProxy(Settings settings) {
+        HttpProxySettings proxyGradle = new JavaSystemPropertiesSecureHttpProxySettings()
+        if (proxyGradle.proxy == null) {  // if systemProp.https.proxyHost is not defined, fallback to http proxy
+            proxyGradle = new JavaSystemPropertiesHttpProxySettings()
+        }
+        if (config.proxy.server) {
+           project.logger.warn("Deprecated configuration `proxy { server='${config.proxy.server}' }`; please update your configuration to use the gradle proxy configuration")
+        }
+        if (proxyGradle.proxy != null) {
+            config.proxy.server = proxyGradle.proxy.host
+            config.proxy.port = proxyGradle.proxy.port
+            config.proxy.username = proxyGradle.proxy.credentials.username
+            config.proxy.password = proxyGradle.proxy.credentials.password
+            config.proxy.nonProxyHosts = getNonProxyHosts(proxyGradle)
+        }
+        settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
+        settings.setStringIfNotEmpty(PROXY_PORT, "${config.proxy.port}")
+        settings.setStringIfNotEmpty(PROXY_USERNAME, config.proxy.username)
+        settings.setStringIfNotEmpty(PROXY_PASSWORD, config.proxy.password)
+        settings.setArrayIfNotEmpty(PROXY_NON_PROXY_HOSTS, config.proxy.nonProxyHosts)
+    }
+
     /**
      * Combines the configured suppressionFile and suppressionFiles into a
      * single array.
@@ -172,6 +194,6 @@ abstract class ConfiguredTask extends DefaultTask {
      * @return the current configuration option if not null; otherwise the deprecated option is returned
      */
     private Boolean select(Boolean current, Boolean deprecated) {
-        return current != null ? current : deprecated;
+        return current != null ? current : deprecated
     }
 }
