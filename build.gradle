@@ -16,14 +16,20 @@
  * Copyright (c) 2015 Wei Ma. All Rights Reserved.
  */
 
+ext {
+    odcVersion = '5.3.1'
+    slackWebhookVersion = '1.4.0'
+    spockCoreVersion = '1.1-groovy-2.4'
+}
+
 group = 'org.owasp'
-version = '5.3.1-SNAPSHOT'
+version = "$odcVersion"
 
 buildscript {
     repositories {
         mavenLocal()
         maven {
-            url "https://plugins.gradle.org/m2/"
+            url 'https://plugins.gradle.org/m2/'
         }
     }
     dependencies {
@@ -64,14 +70,14 @@ dependencies {
     compile(
             localGroovy(),
             gradleApi(),
-            'org.owasp:dependency-check-core:5.3.1-SNAPSHOT',
-            'org.owasp:dependency-check-utils:5.3.1-SNAPSHOT',
-            'net.gpedro.integrations.slack:slack-webhook:1.4.0'
+            "org.owasp:dependency-check-core:$odcVersion",
+            "org.owasp:dependency-check-utils:$odcVersion",
+            "net.gpedro.integrations.slack:slack-webhook:$slackWebhookVersion"
     )
 
     testCompile gradleTestKit()
-    testCompile("org.spockframework:spock-core:1.1-groovy-2.4") {
-        exclude module: "groovy-all"
+    testCompile("org.spockframework:spock-core:$spockCoreVersion") {
+        exclude module: 'groovy-all'
     }
 }
 
@@ -89,7 +95,6 @@ task integTest(type: Test) {
     mustRunAfter test
     testClassesDirs = sourceSets.integTest.output.classesDirs
     classpath = sourceSets.integTest.runtimeClasspath
-    jvmArgs '-XX:MaxPermSize=256m'
     jvmArgs '-Xmx1024m'
 }
 
@@ -100,7 +105,7 @@ gradlePlugin {
 //// ./gradlew uploadArchives
 //apply from: 'conf/publish/maven.gradle'
 //// ./gradlew publishPlugins
-//apply from: 'conf/publish/gradlePluginsPortal.gradle'
+apply from: 'conf/publish/gradlePluginsPortal.gradle'
 //apply from: 'conf/publish/bintray.gradle'        // according to the documentation of plugindev, this line has to be placed and the very end of the build file
 
 defaultTasks 'build'
