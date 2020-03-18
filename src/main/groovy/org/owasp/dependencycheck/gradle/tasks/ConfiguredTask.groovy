@@ -164,9 +164,15 @@ abstract class ConfiguredTask extends DefaultTask {
         if (proxyGradle.proxy != null) {
             config.proxy.server = proxyGradle.proxy.host
             config.proxy.port = proxyGradle.proxy.port
-            config.proxy.username = proxyGradle.proxy.credentials.username
-            config.proxy.password = proxyGradle.proxy.credentials.password
-            config.proxy.nonProxyHosts = getNonProxyHosts(proxyGradle)
+            if (proxyGradle.proxy.credentials != null) {
+                if (proxyGradle.proxy.credentials.username != null) {
+                    config.proxy.username = proxyGradle.proxy.credentials.username
+                }
+                if (proxyGradle.proxy.credentials.password != null) {
+                    config.proxy.password = proxyGradle.proxy.credentials.password
+                }
+            }
+            config.proxy.nonProxyHosts = proxyGradle.nonProxyHosts
         }
         settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
         settings.setStringIfNotEmpty(PROXY_PORT, "${config.proxy.port}")
