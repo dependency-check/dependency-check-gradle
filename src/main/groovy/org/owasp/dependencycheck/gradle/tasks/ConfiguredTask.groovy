@@ -161,7 +161,7 @@ abstract class ConfiguredTask extends DefaultTask {
         if (proxyGradle.proxy == null) {  // if systemProp.https.proxyHost is not defined, fallback to http proxy
             proxyGradle = new JavaSystemPropertiesHttpProxySettings()
         }
-        if (proxyGradle.proxy.host != null) {
+        if (proxyGradle.proxy != null && proxyGradle.proxy.host != null) {
             config.proxy.server = proxyGradle.proxy.host
             config.proxy.port = proxyGradle.proxy.port
             if (proxyGradle.proxy.credentials != null) {
