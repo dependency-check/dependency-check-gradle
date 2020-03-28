@@ -33,7 +33,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "com.gradle.publish:plugin-publish-plugin:0.9.7"
+        classpath "com.gradle.publish:plugin-publish-plugin:0.11.0"
     }
 }
 
@@ -105,7 +105,7 @@ gradlePlugin {
 //// ./gradlew uploadArchives
 //apply from: 'conf/publish/maven.gradle'
 //// ./gradlew publishPlugins
-apply from: 'conf/publish/gradlePluginsPortal.gradle'
+//apply from: 'conf/publish/gradlePluginsPortal.gradle'
 //apply from: 'conf/publish/bintray.gradle'        // according to the documentation of plugindev, this line has to be placed and the very end of the build file
 
 defaultTasks 'build'
