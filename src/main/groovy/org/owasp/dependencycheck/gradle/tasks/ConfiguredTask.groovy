@@ -42,7 +42,7 @@ abstract class ConfiguredTask extends DefaultTask {
     @Internal
     def settings
     @Internal
-    def PROPERTIES_FILE = "task.properties"
+    def PROPERTIES_FILE = 'task.properties'
 
     /**
      * Initializes the settings object. If the setting is not set the
@@ -56,8 +56,8 @@ abstract class ConfiguredTask extends DefaultTask {
             taskProperties = this.getClass().getClassLoader().getResourceAsStream(PROPERTIES_FILE)
             settings.mergeProperties(taskProperties)
         } catch (IOException ex) {
-            logger.warn("Unable to load the dependency-check gradle task.properties file.")
-            logger.debug("", ex)
+            logger.warn('Unable to load the dependency-check gradle task.properties file.')
+            logger.debug('', ex)
         } finally {
             if (taskProperties != null) {
                 try {
@@ -91,7 +91,7 @@ abstract class ConfiguredTask extends DefaultTask {
             if (config.cveValidForHours >= 0) {
                 settings.setInt(CVE_CHECK_VALID_FOR_HOURS, config.cveValidForHours)
             } else {
-                throw new InvalidUserDataException("Invalid setting: `validForHours` must be 0 or greater")
+                throw new InvalidUserDataException('Invalid setting: `validForHours` must be 0 or greater')
             }
         }
         settings.setBooleanIfNotNull(ANALYZER_JAR_ENABLED, config.analyzers.jarEnabled)
@@ -172,7 +172,9 @@ abstract class ConfiguredTask extends DefaultTask {
                     config.proxy.password = proxyGradle.proxy.credentials.password
                 }
             }
-            config.proxy.nonProxyHosts = proxyGradle.nonProxyHosts
+            if (proxyGradle.hasProperty('nonProxyHosts') && proxyGradle.nonProxyHosts) {
+                config.proxy.nonProxyHosts = proxyGradle.nonProxyHosts
+            }
         }
         settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
         settings.setStringIfNotEmpty(PROXY_PORT, "${config.proxy.port}")
