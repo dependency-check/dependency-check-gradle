@@ -70,7 +70,7 @@ repositories {
 }
 
 dependencies {
-    compile(
+    implementation(
             localGroovy(),
             gradleApi(),
             "org.owasp:dependency-check-core:$odcVersion",
@@ -78,8 +78,8 @@ dependencies {
             "net.gpedro.integrations.slack:slack-webhook:$slackWebhookVersion"
     )
 
-    testCompile gradleTestKit()
-    testCompile("org.spockframework:spock-core:$spockCoreVersion") {
+    testImplementation gradleTestKit()
+    testImplementation("org.spockframework:spock-core:$spockCoreVersion") {
         exclude module: 'groovy-all'
     }
 }
