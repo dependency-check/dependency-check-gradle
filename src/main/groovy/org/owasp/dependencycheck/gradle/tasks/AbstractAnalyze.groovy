@@ -53,8 +53,8 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     def currentProjectName = project.getName()
     @Internal
     def artifactType = Attribute.of('artifactType', String)
-    @Internal
-    static final GradleVersion CUTOVER_GRADLE_VERSION = GradleVersion.version("4.0")
+    // @Internal
+    private static final GradleVersion CUTOVER_GRADLE_VERSION = GradleVersion.version("4.0")
 
     /**
      * Calls dependency-check-core's analysis engine to scan
