@@ -75,7 +75,9 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setStringIfNotEmpty(HINTS_FILE, config.hintsFile)
 
         configureProxy(settings)
-      
+
+        configureSlack(settings)
+
         //settings.setStringIfNotEmpty(CONNECTION_TIMEOUT, connectionTimeout)
         settings.setStringIfNotNull(DATA_DIRECTORY, config.data.directory)
         settings.setStringIfNotEmpty(DB_DRIVER_NAME, config.data.driver)
@@ -151,6 +153,11 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_USE_CACHE, config.cache.nodeAudit)
         settings.setBooleanIfNotNull(ANALYZER_CENTRAL_USE_CACHE, config.cache.central)
         settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_USE_CACHE, config.cache.ossIndex)
+    }
+
+    private void configureSlack(Settings settings) {
+        settings.setBooleanIfNotNull(SlackNotificationSenderService.SLACK__WEBHOOK__ENABLED, config.slack.enabled)
+        settings.setStringIfNotEmpty(SlackNotificationSenderService.SLACK__WEBHOOK__URL, config.slack.webhookUrl)
     }
 
     private void configureProxy(Settings settings) {
