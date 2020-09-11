@@ -26,7 +26,7 @@ import org.gradle.api.Project
 class DataExtension {
     
     DataExtension(Project project) {
-        directory = "${project.gradle.gradleUserHomeDir}/dependency-check-data/4.0"
+        directory = "${project.gradle.gradleUserHomeDir}/dependency-check-data/5.0"
     }
 
     /**
