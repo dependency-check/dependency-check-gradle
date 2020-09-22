@@ -87,6 +87,10 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setStringIfNotEmpty(DB_PASSWORD, config.data.password)
         settings.setStringIfNotEmpty(CVE_MODIFIED_JSON, config.cve.urlModified)
         settings.setStringIfNotEmpty(CVE_BASE_JSON, config.cve.urlBase)
+        if (config.cve.user && config.cve.password) {
+            settings.setStringIfNotEmpty(CVE_USER, config.cve.user)
+            settings.setStringIfNotEmpty(CVE_PASSWORD, config.cve.password)
+        }
         settings.setBooleanIfNotNull(DOWNLOADER_QUICK_QUERY_TIMESTAMP, config.quickQueryTimestamp)
         settings.setFloat(JUNIT_FAIL_ON_CVSS, config.junitFailOnCVSS)
         if (config.cveValidForHours != null) {
