@@ -29,4 +29,8 @@ class CveExtension {
      *    https://nvd.nist.gov/feeds/json/cve/1.0/nvdcve-1.0-%d.json.gz
      **/
     String urlBase
+
+    String user
+
+    String password
 }
