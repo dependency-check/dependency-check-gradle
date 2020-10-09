@@ -55,6 +55,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     def artifactType = Attribute.of('artifactType', String)
     // @Internal
     private static final GradleVersion CUTOVER_GRADLE_VERSION = GradleVersion.version("4.0")
+    private static final GradleVersion IGNORE_NON_RESOLVABLE_SCOPES_GRADLE_VERSION = GradleVersion.version("7.0")
 
     /**
      * Calls dependency-check-core's analysis engine to scan
@@ -285,7 +286,13 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * because skipConfigurations contains the configuration's name.
      */
     def shouldBeSkipped(configuration) {
-        "archives".equals(configuration.name) || config.skipConfigurations.contains(configuration.name)
+        ((IGNORE_NON_RESOLVABLE_SCOPES_GRADLE_VERSION.compareTo(GradleVersion.current()) <= 0 && (
+            "archives".equals(configuration.name) ||
+            "default".equals(configuration.name) ||
+            "runtime".equals(configuration.name) ||
+            "compile".equals(configuration.name) ||
+            "compileOnly".equals(configuration.name)))
+        || config.skipConfigurations.contains(configuration.name))
     }
 
     /**
