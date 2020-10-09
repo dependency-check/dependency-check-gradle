@@ -285,7 +285,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * because skipConfigurations contains the configuration's name.
      */
     def shouldBeSkipped(configuration) {
-        config.skipConfigurations.contains(configuration.name)
+        "archives".equals(configuration.name) || config.skipConfigurations.contains(configuration.name)
     }
 
     /**
