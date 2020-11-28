@@ -216,7 +216,9 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                 .findAll {
                     ((it.getCvssV2() != null && it.getCvssV2().getScore() >= config.failBuildOnCVSS)
                             || (it.getCvssV3() != null && it.getCvssV3().getBaseScore() >= config.failBuildOnCVSS)
-                            || (it.getUnscoredSeverity() != null && SeverityUtil.estimateCvssV2(it.getUnscoredSeverity()) >= config.failBuildOnCVSS))
+                            || (it.getUnscoredSeverity() != null && SeverityUtil.estimateCvssV2(it.getUnscoredSeverity()) >= config.failBuildOnCVSS)
+                            //safety net to fail on any if for some reason the above misses on 0
+                            || (config.failBuildOnCVSS<=0.0f))
                 }
                 .collect { it.getName() }
                 .join(", ")
