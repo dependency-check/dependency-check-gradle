@@ -17,7 +17,7 @@
  */
 
 ext {
-    odcVersion = '6.0.3'
+    odcVersion = '6.0.4-SNAPSHOT'
     slackWebhookVersion = '1.4.0'
     spockCoreVersion = '1.1-groovy-2.4'
 }
@@ -56,11 +56,7 @@ repositories {
     mavenLocal()
     maven {
         name 'OWASP dependency-check snapshot'
-        url 'https://dependencycheck.jfrog.io/dependencycheck/libs-snapshot'
-    }
-    maven {
-        name 'OWASP dependency-check release'
-        url 'https://dependencycheck.jfrog.io/dependencycheck/libs-release'
+        url 'https://oss.sonatype.org/content/repositories/snapshots'
     }
     mavenCentral()
     jcenter()
