@@ -33,4 +33,8 @@ class NodeAuditExtension {
      * Sets whether or not the Node Audit Analyzer should skip devDependencies.
      */
     Boolean skipDevDependencies
+    /**
+     * Sets whether or not the Yarn Audit Analyzer should be used.
+     */
+    Boolean yarnEnabled
 }

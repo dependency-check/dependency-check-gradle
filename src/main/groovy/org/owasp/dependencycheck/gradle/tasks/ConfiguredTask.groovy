@@ -136,10 +136,12 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setBooleanIfNotNull(ANALYZER_COMPOSER_LOCK_ENABLED, config.analyzers.composerEnabled)
         settings.setBooleanIfNotNull(ANALYZER_NUGETCONF_ENABLED, config.analyzers.nugetconfEnabled)
 
+
         settings.setBooleanIfNotNull(ANALYZER_NODE_PACKAGE_ENABLED, config.analyzers.nodeEnabled)
         settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_ENABLED, select(config.analyzers.nodeAudit.enabled, config.analyzers.nodeAuditEnabled))
         settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_USE_CACHE, config.analyzers.nodeAudit.useCache)
         settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_SKIPDEV, config.analyzers.nodeAudit.skipDevDependencies)
+        settings.setBooleanIfNotNull(ANALYZER_YARN_AUDIT_ENABLED, config.analyzers.nodeAudit.yarnEnabled)
         settings.setBooleanIfNotNull(ANALYZER_RETIREJS_ENABLED, config.analyzers.retirejs.enabled)
         settings.setBooleanIfNotNull(ANALYZER_RETIREJS_FORCEUPDATE, config.analyzers.retirejs.forceupdate)
         settings.setStringIfNotNull(ANALYZER_RETIREJS_REPO_JS_URL, config.analyzers.retirejs.retireJsUrl)

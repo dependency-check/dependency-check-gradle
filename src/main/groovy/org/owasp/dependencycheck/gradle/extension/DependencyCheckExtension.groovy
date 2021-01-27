@@ -110,13 +110,13 @@ class DependencyCheckExtension {
      */
     Boolean skipTestGroups = true
     /**
-     * The report format to be generated (HTML, XML, CSV, JUNIT, ALL). This configuration option has
+     * The report format to be generated (HTML, XML, CSV, JUNIT, SARIF, ALL). This configuration option has
      * no affect if using this within the Site plugin unless the externalReport is set to true.
      * The default is HTML.
      */
     Format format = Format.HTML
     /**
-     * The list of formats to generate to report (HTML, XML, CSV, JUNIT, ALL).
+     * The list of formats to generate to report (HTML, XML, CSV, JUNIT, SARIF, ALL).
      */
     List<Format> formats = []
     /**
