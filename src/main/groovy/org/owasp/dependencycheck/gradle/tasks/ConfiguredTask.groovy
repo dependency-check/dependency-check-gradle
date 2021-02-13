@@ -117,7 +117,7 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setBooleanIfNotNull(ANALYZER_ARCHIVE_ENABLED, config.analyzers.archiveEnabled)
         settings.setStringIfNotEmpty(ADDITIONAL_ZIP_EXTENSIONS, config.analyzers.zipExtensions)
         settings.setBooleanIfNotNull(ANALYZER_ASSEMBLY_ENABLED, config.analyzers.assemblyEnabled)
-        settings.setBooleanIfNotNull(ANALYZER_MSBUILD_PROJECT_ENABLED, config.analyzers.msbuildEnalbed)
+        settings.setBooleanIfNotNull(ANALYZER_MSBUILD_PROJECT_ENABLED, config.analyzers.msbuildEnabled)
         settings.setStringIfNotEmpty(ANALYZER_ASSEMBLY_DOTNET_PATH, config.analyzers.pathToDotnet)
         settings.setBooleanIfNotNull(ANALYZER_GOLANG_DEP_ENABLED, config.analyzers.golangDepEnabled)
         settings.setBooleanIfNotNull(ANALYZER_GOLANG_MOD_ENABLED, config.analyzers.golangModEnabled)
