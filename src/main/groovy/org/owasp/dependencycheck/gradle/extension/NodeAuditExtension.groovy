@@ -37,4 +37,8 @@ class NodeAuditExtension {
      * Sets whether or not the Yarn Audit Analyzer should be used.
      */
     Boolean yarnEnabled
+    /**
+     * The path to `yarn`.
+     */
+    Boolean yarnPath
 }

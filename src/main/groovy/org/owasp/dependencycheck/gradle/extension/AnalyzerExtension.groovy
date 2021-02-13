@@ -71,6 +71,10 @@ class AnalyzerExtension {
      */
     Boolean assemblyEnabled
     /**
+     * Sets whether or not the MS Build Analyzer should be used.
+     */
+    Boolean msbuildEnabled
+    /**
      * The path to dotnet core - used to analyze dot net assemblies.
      */
     String pathToDotnet
