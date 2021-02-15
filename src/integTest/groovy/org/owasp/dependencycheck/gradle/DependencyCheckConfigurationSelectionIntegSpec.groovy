@@ -80,6 +80,17 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         result.task(":$ANALYZE_TASK").outcome == SUCCESS
     }
 
+    def "groups are skipped if blacklisted"() {
+        given:
+        copyBuildFileIntoProjectDir('skipGroups.gradle')
+
+        when:
+        def result = executeTaskAndGetResult(ANALYZE_TASK, true)
+
+        then:
+        result.task(":$ANALYZE_TASK").outcome == SUCCESS
+    }
+
     def "aggregate task aggregates"() {
         given:
         copyBuildFileIntoProjectDir('aggregateParent.gradle')

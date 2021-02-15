@@ -1,0 +1,23 @@
+plugins {
+    id 'org.owasp.dependencycheck'
+    id 'java'
+}
+
+sourceCompatibility = 1.5
+version = '1.0'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
+    compile group: 'commons-httpclient', name: 'commons-httpclient', version: '3.1'
+    compile group: 'commons-fileupload', name: 'commons-fileupload', version: '1.3.1'
+}
+
+dependencyCheck {
+    skipGroups = ['commons-collections', 'commons-httpclient', 'commons-fileupload']
+    failBuildOnCVSS = 0
+}
