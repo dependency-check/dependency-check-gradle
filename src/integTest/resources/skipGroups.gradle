@@ -18,6 +18,6 @@ dependencies {
 }
 
 dependencyCheck {
-    skipGroups = ['commons-collections', 'commons-httpclient', 'commons-fileupload']
+    skipGroups = ['commons-collections', 'commons-httpclient', 'commons-file']
     failBuildOnCVSS = 0
 }

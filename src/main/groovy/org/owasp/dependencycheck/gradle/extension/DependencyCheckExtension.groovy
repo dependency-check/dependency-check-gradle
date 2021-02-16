@@ -158,7 +158,9 @@ class DependencyCheckExtension {
      */
     List<String> skipProjects = []
     /**
-     * Groups of the modules to skip when scanning.
+     * Group prefixes of the modules to skip when scanning.
+     *
+     * The 'project' prefix can be used to skip all internal dependencies from multi-project build.
      */
     List<String> skipGroups = []
     /**
