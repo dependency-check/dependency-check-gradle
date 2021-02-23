@@ -40,5 +40,5 @@ class NodeAuditExtension {
     /**
      * The path to `yarn`.
      */
-    Boolean yarnPath
+    String yarnPath
 }
