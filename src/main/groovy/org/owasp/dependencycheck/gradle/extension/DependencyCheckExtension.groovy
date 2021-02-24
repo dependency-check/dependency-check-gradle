@@ -158,6 +158,12 @@ class DependencyCheckExtension {
      */
     List<String> skipProjects = []
     /**
+     * Group prefixes of the modules to skip when scanning.
+     *
+     * The 'project' prefix can be used to skip all internal dependencies from multi-project build.
+     */
+    List<String> skipGroups = []
+    /**
      * The artifact types that will be analyzed in the gradle build.
      */
     List<String> analyzedTypes = ['jar', 'aar', 'js', 'war', 'ear', 'zip']
