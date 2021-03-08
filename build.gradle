@@ -17,7 +17,7 @@
  */
 
 ext {
-    odcVersion = '6.1.1'
+    odcVersion = '6.1.2'
     slackWebhookVersion = '1.4.0'
     spockCoreVersion = '1.1-groovy-2.4'
 }
@@ -59,7 +59,6 @@ repositories {
         url 'https://oss.sonatype.org/content/repositories/snapshots'
     }
     mavenCentral()
-    jcenter()
 }
 
 dependencies {

@@ -24,7 +24,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'org.owasp:dependency-check-gradle:6.0.3'
+        classpath 'org.owasp:dependency-check-gradle:6.1.2'
     }
 }
 
@@ -46,39 +46,8 @@ If your project includes multiple sub-projects, the report will be generated for
 ## FAQ
 
 > **Questions List:**
-> - What if I'm behind a proxy?
 > - What if my project includes multiple sub-project? How can I use this plugin for each of them including the root project?
 > - How to customize the report directory?
-
-### What if I'm behind a proxy?
-
-Maybe you have to use proxy to access internet, in this case, you could configure proxy settings for this plugin (in addition
-you should read the [proxy configuration](http://jeremylong.github.io/DependencyCheck/data/proxy.html) page):
-
-```groovy
-dependencyCheck {
-    proxy {
-        server = "127.0.0.1"      // required, the server name or IP address of the proxy
-        port = 3128               // required, the port number of the proxy
-
-        // optional, the proxy server might require username
-        // username = "username"
-
-        // optional, the proxy server might require password
-        // password = "password"
-    }
-}
-```
-
-In addition, if the proxy only allow HTTP `GET` or `POST` methods, you will find that the update process will always fail,
- the root cause is that every time you run `dependencyCheck` task, it will try to query the latest timestamp to determine whether need to perform an update action,
- and for performance reason the HTTP method it uses by default is `HEAD`, which probably is disabled or not supported by the proxy. To avoid this problem, you can simply change the HTTP method by below configuration:
-
-```groovy
-dependencyCheck {
-    quickQueryTimestamp = false    // when set to false, it means use HTTP GET method to query timestamp. (default value is true)
-}
-```
 
 ### What if my project includes multiple sub-project? How can I use this plugin for each of them including the root project?
 
@@ -92,7 +61,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'org.owasp:dependency-check-gradle:6.0.3'
+    classpath 'org.owasp:dependency-check-gradle:6.1.2'
   }
 }
 
@@ -109,7 +78,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'org.owasp:dependency-check-gradle:6.0.2'
+    classpath 'org.owasp:dependency-check-gradle:6.1.2'
   }
 }
 
