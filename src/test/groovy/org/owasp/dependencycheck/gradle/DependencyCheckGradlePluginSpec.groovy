@@ -86,6 +86,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.skipConfigurations == []
         project.dependencyCheck.scanProjects == []
         project.dependencyCheck.skipProjects == []
+        project.dependencyCheck.skipGroups == []
         project.dependencyCheck.skipTestGroups == true
         project.dependencyCheck.suppressionFile == null
     }
@@ -132,6 +133,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
             skipConfigurations = ['b']
             scanProjects = ['a']
             skipProjects = ['b']
+            skipGroups = ['b']
             skipTestGroups = false
 
             suppressionFile = './src/config/suppression.xml'
@@ -153,6 +155,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.skipConfigurations == ['b']
         project.dependencyCheck.scanProjects == ['a']
         project.dependencyCheck.skipProjects == ['b']
+        project.dependencyCheck.skipGroups == ['b']
         project.dependencyCheck.skipTestGroups == false
         project.dependencyCheck.suppressionFile == './src/config/suppression.xml'
         project.dependencyCheck.suppressionFiles == ['./src/config/suppression1.xml', './src/config/suppression2.xml']

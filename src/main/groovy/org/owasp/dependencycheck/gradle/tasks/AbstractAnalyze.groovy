@@ -23,6 +23,7 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.gradle.api.artifacts.ResolvedArtifact
+import org.gradle.api.artifacts.result.ResolvedArtifactResult
 import org.gradle.api.attributes.Attribute
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
@@ -218,7 +219,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                             || (it.getCvssV3() != null && it.getCvssV3().getBaseScore() >= config.failBuildOnCVSS)
                             || (it.getUnscoredSeverity() != null && SeverityUtil.estimateCvssV2(it.getUnscoredSeverity()) >= config.failBuildOnCVSS)
                             //safety net to fail on any if for some reason the above misses on 0
-                            || (config.failBuildOnCVSS<=0.0f))
+                            || (config.failBuildOnCVSS <= 0.0f))
                 }
                 .collect { it.getName() }
                 .join(", ")
@@ -295,6 +296,15 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             "compile".equals(configuration.name) ||
             "compileOnly".equals(configuration.name)))
         || config.skipConfigurations.contains(configuration.name))
+    }
+
+    /**
+     * Checks whether the given artifact should be skipped
+     * because skipGroups contains the artifact's group prefix.
+     */
+    def shouldBeSkipped(ResolvedArtifactResult artifact) {
+        def name = artifact.id.componentIdentifier.displayName
+        config.skipGroups.any { name.startsWith(it) }
     }
 
     /**
@@ -427,7 +437,9 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                 attributes {
                     it.attribute(artifactType, type)
                 }
-            }.artifacts.each {
+            }.artifacts.findAll {
+                !shouldBeSkipped(it)
+            }.each {
                 def deps = engine.scan(it.file, scope)
                 ModuleVersionIdentifier id = componentVersions[it.id.componentIdentifier]
                 if (id == null) {
