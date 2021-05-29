@@ -137,6 +137,10 @@ class AnalyzerExtension {
      */
     Boolean composerEnabled
     /**
+     * Sets whether or not the Perl CPAN File Analyzer should be used.
+     */
+    Boolean cpanEnabled
+    /**
      * Sets whether or not the Node.js Analyzer should be used.
      */
     Boolean nodeEnabled
