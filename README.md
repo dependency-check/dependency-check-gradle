@@ -61,7 +61,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'org.owasp:dependency-check-gradle:6.2.0'
+    classpath 'org.owasp:dependency-check-gradle:6.2.2'
   }
 }
 
@@ -78,7 +78,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'org.owasp:dependency-check-gradle:6.2.0'
+    classpath 'org.owasp:dependency-check-gradle:6.2.2'
   }
 }
 
