@@ -96,10 +96,13 @@ class AnalyzerExtension {
      */
     Boolean cocoapodsEnabled
     /**
-     * Sets whether or not the swift package manager is enabled.
+     * Sets whether or not the swift package manager analyzer is enabled.
      */
     Boolean swiftEnabled
-
+    /**
+     * Sets whether or not the swift package resolved analyzer is enabled.
+     */
+    Boolean swiftPackageResolvedEnabled
     /**
      * Sets whether or not the Ruby Bundle Audit analyzer is enabled; requires running bundle audit.
      */
