@@ -102,3 +102,19 @@ subprojects {
     }
 }
 ```
+
+### How do I use the plugin with Gradle Kotlin DSL?
+
+```kotlin
+plugins {
+    id("org.owasp.dependencycheck") version "6.2.2" apply false 
+}
+
+allprojects {
+    apply(plugin = "org.owasp.dependencycheck")
+}
+
+configure<org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension> {
+    format = org.owasp.dependencycheck.reporting.ReportGenerator.Format.ALL
+}
+```
