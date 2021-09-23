@@ -376,7 +376,8 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         boolean customScanSet = false
         List<String> toScan = ['src/main/resources', 'src/main/webapp',
                                './package.json', './package-lock.json',
-                               './npm-shrinkwrap.json', './Gopkg.lock', './go.mod']
+                               './npm-shrinkwrap.json', './yarn.lock',
+                               './Gopkg.lock', './go.mod']
         if (config.scanSet != null) {
             toScan = config.scanSet
             customScanSet = true
