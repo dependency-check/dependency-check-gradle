@@ -33,4 +33,12 @@ class CveExtension {
     String user
 
     String password
+    /**
+     * The wait time in milliseconds between downloads from the NVD.
+     */
+    int waitTime
+    /**
+     * The first year of NVD CVE data to download from the NVD.
+     */
+    int startYear
 }
