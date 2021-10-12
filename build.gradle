@@ -23,7 +23,7 @@ ext {
 }
 
 group = 'org.owasp'
-version = "$odcVersion"
+version = "$odcVersion.1"
 
 buildscript {
     repositories {
@@ -41,7 +41,7 @@ apply plugin: 'groovy'
 apply plugin: 'java-gradle-plugin'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 apply plugin: 'signing'
 apply plugin: 'project-report'
 apply plugin: 'build-dashboard'
@@ -62,7 +62,7 @@ repositories {
 }
 
 dependencies {
-    compile(
+    implementation(
             localGroovy(),
             gradleApi(),
             "org.owasp:dependency-check-core:$odcVersion",
@@ -70,31 +70,17 @@ dependencies {
             "net.gpedro.integrations.slack:slack-webhook:$slackWebhookVersion"
     )
 
-    testCompile gradleTestKit()
-    testCompile("org.spockframework:spock-core:$spockCoreVersion") {
+    testImplementation gradleTestKit()
+    testImplementation("org.spockframework:spock-core:$spockCoreVersion") {
         exclude module: 'groovy-all'
     }
 }
 
-sourceSets {
-    integTest {
-        groovy.srcDir file('src/integTest/groovy')
-        resources.srcDir file('src/integTest/resources')
-        compileClasspath += sourceSets.main.output + configurations.testRuntime
-        runtimeClasspath += output + compileClasspath
+test {
+    filter {
+        includeTestsMatching "*IntegSpec"
+        includeTestsMatching "*PluginSpec"
     }
-}
-
-task integTest(type: Test) {
-    group = 'verification'
-    mustRunAfter test
-    testClassesDirs = sourceSets.integTest.output.classesDirs
-    classpath = sourceSets.integTest.runtimeClasspath
-    jvmArgs '-Xmx1024m'
-}
-
-gradlePlugin {
-    testSourceSets sourceSets.integTest
 }
 
 //// ./gradlew uploadArchives
