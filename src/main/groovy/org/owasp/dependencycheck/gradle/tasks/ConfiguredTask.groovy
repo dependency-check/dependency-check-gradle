@@ -87,12 +87,12 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setStringIfNotEmpty(DB_PASSWORD, config.data.password)
         settings.setStringIfNotEmpty(CVE_MODIFIED_JSON, config.cve.urlModified)
         settings.setStringIfNotEmpty(CVE_BASE_JSON, config.cve.urlBase)
-        settings.setStringIfNotEmpty(CVE_DOWNLOAD_WAIT_TIME, config.waitTime)
-        if (config.startYear != null) {
-            if (config.startYear >= 2002) {
-                settings.setInt(CVE_START_YEAR, config.startYear)
+        settings.setStringIfNotEmpty(CVE_DOWNLOAD_WAIT_TIME, config.cve.waitTime)
+        if (config.cve.startYear != null) {
+            if (config.cve.startYear >= 2002) {
+                settings.setInt(CVE_START_YEAR, config.cve.startYear)
             } else {
-                throw new InvalidUserDataException('Invalid setting: `validForHours` must be 0 or greater')
+                throw new InvalidUserDataException('Invalid setting: `cve.startYear` must be 2002 or greater')
             }
         }
         if (config.cve.user && config.cve.password) {
