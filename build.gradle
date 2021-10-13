@@ -76,73 +76,48 @@ dependencies {
     }
 }
 
-test {
-    filter {
-        includeTestsMatching "*IntegSpec"
-        includeTestsMatching "*PluginSpec"
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+javadoc {
+    if(JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
     }
-}
-
-
-task sourceJar(type: Jar) {
-    classifier "sources"
-    from sourceSets.main.allJava
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier "javadoc"
-    from javadoc.destinationDir
-}
-
-
-
-artifacts {
-    archives jar
-    archives sourceJar
-    archives javadocJar
-}
-
-signing {
-    sign configurations.archives
 }
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
-            customizePom(pom)
+        pluginPublication (MavenPublication) {
             groupId "$group"
             artifactId 'dependency-check-gradle'
             version "$version"
-
             from components.java
+            pom {
+                name = 'dependency-check-gradle'
+                description = 'OWASP dependency-check gradle plugin is a software ' +
+                        'composition analysis tool used to find known vulnerable dependencies.'
 
-            pom.withXml {
-                def pomFile = file("${project.buildDir}/generated-pom.xml")
-                writeTo(pomFile)
-                def pomAscFile = signing.sign(pomFile).signatureFiles[0]
-                artifact(pomAscFile) {
-                    classifier = null
-                    extension = 'pom.asc'
-                }
-            }
+                url = 'https://jeremylong.github.io/DependencyCheck/'
 
-            artifact(sourceJar) {
-                classifier = 'sources'
-            }
-            artifact(javadocJar) {
-                classifier = 'javadoc'
-            }
-
-            // create the signed artifacts
-            project.tasks.signArchives.signatureFiles.each {
-                artifact(it) {
-                    def matcher = it.file =~ /-(sources|javadoc)\.jar\.asc$/
-                    if (matcher.find()) {
-                        classifier = matcher.group(1)
-                    } else {
-                        classifier = null
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'https://github.com/dependency-check/dependency-check-gradle/blob/main/LICENSE.txt'
                     }
-                    extension = 'jar.asc'
+                }
+                developers {
+                    developer {
+                        id = 'jlong'
+                        name = 'Jeremy Long'
+                        email = 'jeremy.long@owasp.org'
+                    }
+                }
+                scm {
+                    url = 'https://github.com/dependency-check/dependency-check-gradle'
+                    connection = 'scm:git:https://github.com/dependency-check/dependency-check-gradle.git'
+                    developerConnection = 'scm:git:https://github.com/dependency-check/dependency-check-gradle.git'
                 }
             }
         }
@@ -158,63 +133,10 @@ publishing {
     }
 }
 
-def customizePom(pom) {
-    pom.withXml {
-        def root = asNode()
-
-        // eliminate test-scoped dependencies (no need in maven central POMs)
-        root.dependencies.removeAll { dep ->
-            dep.scope == "test"
-        }
-
-        // add all items necessary for maven central publication
-        root.children().last() + {
-            resolveStrategy = Closure.DELEGATE_FIRST
-
-            description 'OWASP dependency-check gradle plugin is a software ' +
-                    'composition analysis tool used to find known vulnerable dependencies.'
-            name 'dependency-check-gradle'
-            url 'https://jeremylong.github.io/DependencyCheck/'
-            organization {
-                name 'org.owasp'
-                url 'https://owasp.org/'
-            }
-            issueManagement {
-                system 'GitHub'
-                url 'https://github.com/dependency-check/dependency-check-gradle/issues'
-            }
-            licenses {
-                license {
-                    name 'Apache License 2.0'
-                    url 'https://github.com/dependency-check/dependency-check-gradle/blob/main/LICENSE.txt'
-                    distribution 'repo'
-                }
-            }
-            scm {
-                url 'https://github.com/dependency-check/dependency-check-gradle'
-                connection 'scm:git:https://github.com/dependency-check/dependency-check-gradle.git'
-                developerConnection 'scm:git:https://github.com/dependency-check/dependency-check-gradle.git'
-            }
-            developers {
-                developer {
-                    name 'Jeremy Long'
-                }
-            }
-        }
-    }
+signing {
+    sign publishing.publications.pluginPublication
 }
 
-model {
-    tasks.generatePomFileForMavenJavaPublication {
-        destination = file("$buildDir/generated-pom.xml")
-    }
-    tasks.publishMavenJavaPublicationToMavenLocal {
-        dependsOn project.tasks.signArchives
-    }
-    tasks.publishMavenJavaPublicationToMavenRepository {
-        dependsOn project.tasks.signArchives
-    }
-}
 
 pluginBundle {
     website = 'http://jeremylong.github.io/DependencyCheck/dependency-check-gradle/index.html'
