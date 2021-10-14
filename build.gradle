@@ -47,9 +47,6 @@ apply plugin: 'project-report'
 apply plugin: 'build-dashboard'
 apply plugin: 'com.gradle.plugin-publish'
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
-
 repositories {
     mavenLocal()
     maven {
@@ -75,6 +72,9 @@ dependencies {
 }
 
 java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
     withJavadocJar()
     withSourcesJar()
 }
