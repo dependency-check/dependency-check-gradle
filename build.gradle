@@ -47,11 +47,6 @@ apply plugin: 'project-report'
 apply plugin: 'build-dashboard'
 apply plugin: 'com.gradle.plugin-publish'
 
-tasks.withType(GroovyCompile) {
-    sourceCompatibility = '1.8'
-    targetCompatibility = '1.8'
-}
-
 repositories {
     mavenLocal()
     maven {
@@ -77,6 +72,9 @@ dependencies {
 }
 
 java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
     withJavadocJar()
     withSourcesJar()
 }
