@@ -138,6 +138,8 @@ class DependencyCheckGradlePluginSpec extends Specification {
 
             suppressionFile = './src/config/suppression.xml'
             suppressionFiles = ['./src/config/suppression1.xml', './src/config/suppression2.xml']
+            suppressionFileUsername = 'suppressionFileUsername'
+            suppressionFilePassword = 'suppressionFilePassword'
         }
 
         then:
@@ -159,6 +161,8 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.skipTestGroups == false
         project.dependencyCheck.suppressionFile == './src/config/suppression.xml'
         project.dependencyCheck.suppressionFiles == ['./src/config/suppression1.xml', './src/config/suppression2.xml']
+        project.dependencyCheck.suppressionFileUsername == 'suppressionFileUsername'
+        project.dependencyCheck.suppressionFilePassword == 'suppressionFilePassword'
         project.dependencyCheck.analyzers.artifactory.enabled == true
         project.dependencyCheck.analyzers.artifactory.url == 'https://example.com/artifacgtory'
         project.dependencyCheck.analyzers.artifactory.bearerToken == 'abc123=='

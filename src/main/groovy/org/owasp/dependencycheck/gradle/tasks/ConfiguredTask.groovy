@@ -72,6 +72,8 @@ abstract class ConfiguredTask extends DefaultTask {
         String[] suppressionLists = determineSuppressions(config.suppressionFiles, config.suppressionFile)
 
         settings.setArrayIfNotEmpty(SUPPRESSION_FILE, suppressionLists)
+        settings.setStringIfNotEmpty(SUPPRESSION_FILE_USER, config.suppressionFileUser)
+        settings.setStringIfNotEmpty(SUPPRESSION_FILE_PASSWORD, config.suppressionFilePassword)
         settings.setStringIfNotEmpty(HINTS_FILE, config.hintsFile)
 
         configureProxy(settings)
