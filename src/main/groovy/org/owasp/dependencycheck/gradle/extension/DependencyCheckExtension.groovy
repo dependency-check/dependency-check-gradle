@@ -89,7 +89,7 @@ class DependencyCheckExtension {
     /**
      * The username for downloading the suppresion file(s)
      */
-    String suppressionFileUsername
+    String suppressionFileUser
     /**
      * The password for downloading the suppresion file(s)
      */
