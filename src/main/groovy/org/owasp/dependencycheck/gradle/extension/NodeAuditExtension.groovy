@@ -41,4 +41,12 @@ class NodeAuditExtension {
      * The path to `yarn`.
      */
     String yarnPath
+    /**
+     * Sets whether or not the Pnpm Audit Analyzer should be used.
+     */
+    Boolean pnpmEnabled
+    /**
+     * The path to `pnpm`.
+     */
+    String pnpmPath
 }
