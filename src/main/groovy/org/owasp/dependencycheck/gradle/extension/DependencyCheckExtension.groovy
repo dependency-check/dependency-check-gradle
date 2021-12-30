@@ -87,6 +87,14 @@ class DependencyCheckExtension {
      */
     List<String> suppressionFiles = []
     /**
+     * The username for downloading the suppresion file(s)
+     */
+    String suppressionFileUser
+    /**
+     * The password for downloading the suppresion file(s)
+     */
+    String suppressionFilePassword
+    /**
      * The path to the hints file.
      */
     String hintsFile
