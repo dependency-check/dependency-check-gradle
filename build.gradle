@@ -17,7 +17,7 @@
  */
 
 ext {
-    odcVersion = '6.5.1'
+    odcVersion = '6.5.2'
     slackWebhookVersion = '1.4.0'
     spockCoreVersion = '1.1-groovy-2.4'
 }
@@ -59,7 +59,9 @@ repositories {
 dependencies {
     implementation(
             localGroovy(),
-            gradleApi(),
+            gradleApi()
+    )
+    api(
             "org.owasp:dependency-check-core:$odcVersion",
             "org.owasp:dependency-check-utils:$odcVersion",
             "net.gpedro.integrations.slack:slack-webhook:$slackWebhookVersion"
@@ -134,7 +136,6 @@ publishing {
 signing {
     sign publishing.publications.pluginPublication
 }
-
 
 pluginBundle {
     website = 'http://jeremylong.github.io/DependencyCheck/dependency-check-gradle/index.html'
