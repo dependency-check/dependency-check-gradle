@@ -334,6 +334,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * A configuration is considered a test configuration if and only if any of the following conditions holds:
      * <ul>
      *     <li>the name of the configuration or any of its parent configurations equals 'testCompile'</li>
+     *     <li>the name of the configuration or any of its parent configurations equals 'testImplementation'</li>
      *     <li>the name of the configuration or any of its parent configurations equals 'androidTestCompile'</li>
      *     <li>the configuration name starts with 'test'</li>
      *     <li>the configuration name starts with 'androidTest'</li>
@@ -342,7 +343,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     static isTestConfigurationCheck(configuration) {
         def isTestConfiguration = configuration.name.startsWith("test") || configuration.name.startsWith("androidTest")
         configuration.hierarchy.each {
-            isTestConfiguration |= (it.name == "testCompile" || it.name == "androidTestCompile")
+            isTestConfiguration |= (it.name == "testCompile" || it.name == "androidTestCompile" || it.name == "testImplementation")
         }
         isTestConfiguration
     }
