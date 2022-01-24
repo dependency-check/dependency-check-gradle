@@ -6,5 +6,6 @@
    ]]></notes>
         <gav regex="true">^commons-collections:commons-collections:.*$</gav>
         <cpe>cpe:/a:apache:commons_collections</cpe>
+        <cpe>cpe:/a:apache:james</cpe>
     </suppress>
 </suppressions>
