@@ -136,6 +136,8 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         def build = GradleRunner.create()
                 .withProjectDir(testProjectDir.root)
                 .withArguments(taskName)
+                .forwardOutput()
+                .withDebug(true)
                 .withPluginClasspath()
 
         isBuildExpectedToPass ? build.build() : build.buildAndFail()

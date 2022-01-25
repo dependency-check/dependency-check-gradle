@@ -29,6 +29,7 @@ class DependencyCheckPluginIntegSpec extends Specification {
             .withProjectDir(testProjectDir.root)
             .withArguments('tasks')
             .withPluginClasspath()
+            .forwardOutput()
             .build()
 
         then:
