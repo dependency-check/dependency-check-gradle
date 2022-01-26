@@ -442,22 +442,23 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             }.artifacts.findAll {
                 !shouldBeSkipped(it)
             }.each {
-                def deps = engine.scan(it.file, scope)
                 ModuleVersionIdentifier id = componentVersions[it.id.componentIdentifier]
                 if (id == null) {
                     logger.debug "Could not find dependency {'artifact': '${it.id.componentIdentifier}', " +
                             "'file':'${it.file}'}"
                 } else {
+                    def deps = engine.scan(it.file, scope)
+                    //if null ODC doesn't have an analyzer for the dependency type - maybe add anyway?
                     if (deps == null) {
                         if (it.file.isFile()) {
                             addDependency(engine, projectName, configuration.name,
-                                    id.group, id.name, id.version, it.id.displayName, it.file)
+                                    id, it.id.displayName, it.file)
                         } else {
                             addDependency(engine, projectName, configuration.name,
-                                    id.group, id.name, id.version, it.id.displayName)
+                                    id, it.id.displayName)
                         }
                     } else {
-                        addInfoToDependencies(deps, scope, id.group, id.name, id.version)
+                        addInfoToDependencies(deps, scope, id)
                     }
                 }
             }
@@ -473,15 +474,12 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * @param version the version number for the artifact coordinates
      */
     protected void addInfoToDependencies(List<Dependency> deps, String configurationName,
-                                         String group, String artifact, String version) {
+                                         ModuleVersionIdentifier id) {
         if (deps != null) {
             if (deps.size() == 1) {
                 def d = deps.get(0)
-                MavenArtifact mavenArtifact = new MavenArtifact(group, artifact, version)
+                MavenArtifact mavenArtifact = new MavenArtifact(id.group, id.name, id.version)
                 d.addAsEvidence("gradle", mavenArtifact, Confidence.HIGHEST)
-                //if (group != null && artifact != null && version != null) {
-                //    d.addIdentifier("maven", String.format("%s:%s:%s", group, artifact, version), null, Confidence.HIGHEST)
-                //}
                 d.addProjectReference(configurationName)
             } else {
                 deps.forEach { it.addProjectReference(configurationName) }
@@ -501,53 +499,36 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * @param displayName the display name
      */
     protected void addDependency(Engine engine, String projectName, String configurationName,
-                                 String group, String name, String version, String displayName,
-                                 File file = null) {
-
-        def display = displayName ?: "${group}:${name}:${version}"
+                                 ModuleVersionIdentifier id, String displayName, File file = null) {
+        //id.group, id.name, id.version,
+        def display = displayName ?: "${id.group}:${id.name}:${id.version}"
         Dependency dependency
         String sha256
         if (file == null) {
             logger.debug("Adding virtual dependency for ${display}")
             dependency = new Dependency(new File(project.buildDir.getParentFile(), "build.gradle"), true)
-            sha256 = getSHA256Checksum("${group}:${name}:${version}")
         } else {
             logger.debug("Adding dependency for ${display}")
             dependency = new Dependency(file)
-            sha256 = dependency.getSha256sum()
         }
 
-        def existing = engine.dependencies.find {
-            sha256.equals(it.getSha256sum())
+        if (dependency.sha1sum == null && dependency.virtual) {
+            dependency.sha1sum = getSHA1Checksum("${id.group}:${id.name}:${id.version}")
+            dependency.sha256sum = sha256Checksum("${id.group}:${id.name}:${id.version}")
+            dependency.md5sum = getMD5Checksum("${id.group}:${id.name}:${id.version}")
+            dependency.displayFileName = display
         }
-        if (existing != null) {
-            existing.addProjectReference("${projectName}:${configurationName}")
-        } else {
-            if (dependency.virtual) {
-                dependency.sha1sum = getSHA1Checksum("${group}:${name}:${version}")
-                dependency.sha256sum = sha256
-                dependency.md5sum = getMD5Checksum("${group}:${name}:${version}")
-                dependency.displayFileName = display
-            }
-            dependency.addEvidence(VENDOR, "build.gradle", "group", group, Confidence.HIGHEST)
-            dependency.addEvidence(VENDOR, "build.gradle", "name", name, Confidence.MEDIUM)
-            dependency.addEvidence(VENDOR, "build.gradle", "displayName", display, Confidence.MEDIUM)
-            dependency.addEvidence(PRODUCT, "build.gradle", "group", group, Confidence.MEDIUM)
-            dependency.addEvidence(PRODUCT, "build.gradle", "name", name, Confidence.HIGHEST)
-            dependency.addEvidence(PRODUCT, "build.gradle", "displayName", display, Confidence.HIGH)
-            dependency.addEvidence(VERSION, "build.gradle", "version", version, Confidence.HIGHEST)
+        dependency.addEvidence(VENDOR, "build.gradle", "displayName", display, Confidence.MEDIUM)
+        dependency.addEvidence(PRODUCT, "build.gradle", "displayName", display, Confidence.HIGH)
+        if (dependency.packagePath == null) {
             dependency.name = name
             dependency.version = version
             dependency.packagePath = "${group}:${name}:${version}"
-            dependency.addProjectReference("${projectName}:${configurationName}")
-            if (file != null && file.getName().endsWith(".aar")) {
-                dependency.ecosystem = "android"
-            } else {
-                dependency.ecosystem = "gradle"
-            }
-            //dependency.addIdentifier("maven", "${group}:${name}:${version}", null, Confidence.HIGHEST)
-
-            engine.addDependency(dependency)
         }
+        MavenArtifact mavenArtifact = new MavenArtifact(id.group, id.name, id.version)
+        d.addAsEvidence("gradle", mavenArtifact, Confidence.HIGHEST)
+        dependency.addProjectReference("${projectName}:${configurationName}")
+
+        engine.addDependency(dependency)
     }
 }
