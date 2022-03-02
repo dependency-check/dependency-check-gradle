@@ -514,7 +514,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
 
         if (dependency.sha1sum == null && dependency.virtual) {
             dependency.sha1sum = getSHA1Checksum("${id.group}:${id.name}:${id.version}")
-            dependency.sha256sum = sha256Checksum("${id.group}:${id.name}:${id.version}")
+            dependency.sha256sum = getSHA256Checksum("${id.group}:${id.name}:${id.version}")
             dependency.md5sum = getMD5Checksum("${id.group}:${id.name}:${id.version}")
             dependency.displayFileName = display
         }
