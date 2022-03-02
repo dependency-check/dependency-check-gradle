@@ -531,4 +531,22 @@ abstract class AbstractAnalyze extends ConfiguredTask {
 
         engine.addDependency(dependency)
     }
+
+    /**
+     * Check if the notCompatibleWithConfigurationCache method exists in the class.
+     * @return true if it exists; false otherwise.
+     */
+    protected boolean hasNotCompatibleWithConfigurationCacheOption() {
+        return metaClass.respondsTo(this, "notCompatibleWithConfigurationCache", String)
+    }
+
+    /**
+     * Calls notCompatibleWithConfigurationCache method in order to avoid failures when
+     * Gradle configuration cache is enabled.
+     */
+    protected void callIncompatibleWithConfigurationCache() {
+        String methodName = "notCompatibleWithConfigurationCache"
+        Object[] methodArgs = ["The gradle-versions-plugin isn't compatible with the configuration cache"]
+        metaClass.invokeMethod(this, methodName, methodArgs)
+    }
 }
