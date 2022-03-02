@@ -69,4 +69,39 @@ class DependencyCheckPluginIntegSpec extends Specification {
         then:
         result.task(":$DependencyCheckPlugin.ANALYZE_TASK").outcome == SUCCESS
     }
+
+    def "task completes successfully when configuration cache is enabled in Gradle 7.4"() {
+        given:
+        buildFile << """
+            plugins {
+                id 'org.owasp.dependencycheck'
+            }
+            apply plugin: 'java'
+            
+            sourceCompatibility = 1.5
+            version = '1.0'
+            
+            repositories {
+                mavenLocal()
+                mavenCentral()
+            }
+            
+            dependencies {
+                implementation group: 'commons-collections', name: 'commons-collections', version: '3.2'
+            }
+        """
+
+        when:
+        def result = GradleRunner.create()
+                .withGradleVersion("7.4")
+                .withProjectDir(testProjectDir.root)
+                .withArguments(DependencyCheckPlugin.ANALYZE_TASK, "--configuration-cache")
+                .withPluginClasspath()
+                .withDebug(true)
+                .forwardOutput()
+                .build()
+
+        then:
+        result.task(":$DependencyCheckPlugin.ANALYZE_TASK").outcome == SUCCESS
+    }
 }

@@ -29,6 +29,10 @@ class Aggregate extends AbstractAnalyze {
     Aggregate() {
         group = 'OWASP dependency-check'
         description = 'Identifies and reports known vulnerabilities (CVEs) in multi-project dependencies.'
+
+        if (hasNotCompatibleWithConfigurationCacheOption()) {
+            callIncompatibleWithConfigurationCache()
+        }
     }
 
     /**

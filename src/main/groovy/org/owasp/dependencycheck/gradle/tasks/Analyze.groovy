@@ -25,6 +25,10 @@ class Analyze extends AbstractAnalyze {
     Analyze() {
         group = 'OWASP dependency-check'
         description = 'Identifies and reports known vulnerabilities (CVEs) in project dependencies.'
+
+        if (hasNotCompatibleWithConfigurationCacheOption()) {
+            callIncompatibleWithConfigurationCache()
+        }
     }
 
     /**
