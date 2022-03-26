@@ -506,7 +506,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         String sha256
         if (file == null) {
             logger.debug("Adding virtual dependency for ${display}")
-            dependency = new Dependency(new File(project.buildFile), true)
+            dependency = new Dependency(project.buildFile, true)
         } else {
             logger.debug("Adding dependency for ${display}")
             dependency = new Dependency(file)
