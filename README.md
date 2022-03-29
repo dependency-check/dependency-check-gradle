@@ -24,7 +24,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'org.owasp:dependency-check-gradle:6.5.3'
+        classpath 'org.owasp:dependency-check-gradle:7.0.3'
     }
 }
 
@@ -61,7 +61,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'org.owasp:dependency-check-gradle:6.5.3'
+    classpath 'org.owasp:dependency-check-gradle:7.0.3'
   }
 }
 
@@ -78,7 +78,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'org.owasp:dependency-check-gradle:6.5.3'
+    classpath 'org.owasp:dependency-check-gradle:7.0.3'
   }
 }
 
@@ -98,7 +98,7 @@ subprojects {
     apply plugin: 'org.owasp.dependencycheck'
 
     dependencyCheck {
-        outputDirectory = "security-report"
+        outputDirectory = "$buildDir/security-report"
     }
 }
 ```
@@ -107,7 +107,7 @@ subprojects {
 
 ```kotlin
 plugins {
-    id("org.owasp.dependencycheck") version "6.5.3" apply false 
+    id("org.owasp.dependencycheck") version "7.0.3" apply false 
 }
 
 allprojects {
