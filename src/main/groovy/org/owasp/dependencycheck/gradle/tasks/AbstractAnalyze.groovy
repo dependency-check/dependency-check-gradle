@@ -526,7 +526,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             dependency.packagePath = "${group}:${name}:${version}"
         }
         MavenArtifact mavenArtifact = new MavenArtifact(id.group, id.name, id.version)
-        d.addAsEvidence("gradle", mavenArtifact, Confidence.HIGHEST)
+        dependency.addAsEvidence("gradle", mavenArtifact, Confidence.HIGHEST)
         dependency.addProjectReference("${projectName}:${configurationName}")
 
         engine.addDependency(dependency)
