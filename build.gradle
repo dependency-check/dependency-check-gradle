@@ -17,7 +17,7 @@
  */
 
 ext {
-    odcVersion = '7.1.0'
+    odcVersion = '7.1.1'
     slackWebhookVersion = '1.4.0'
     spockCoreVersion = '1.1-groovy-2.4'
 }
