@@ -33,4 +33,8 @@ class OssIndexExtension {
      * The optional password or API token to connect to the OSS Index
      */
     String password
+    /**
+     * The OSS Index URL.
+     */
+    String url
 }
