@@ -107,17 +107,17 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         result.output.contains('CVE-2015-6420') //commons cve from app
     }
 
-    def "suppressionFiles argument can be parsed and files are being respected"() {
-        given:
-        copyBuildFileIntoProjectDir('suppressionFiles.gradle')
-        copyResourceFileIntoProjectDir('suppressions.xml', 'suppressions.xml')
-
-        when:
-        def result = executeTaskAndGetResult(ANALYZE_TASK, true)
-
-        then:
-        result.task(":$ANALYZE_TASK").outcome == SUCCESS
-    }
+//    def "suppressionFiles argument can be parsed and files are being respected"() {
+//        given:
+//        copyBuildFileIntoProjectDir('suppressionFiles.gradle')
+//        copyResourceFileIntoProjectDir('suppressions.xml', 'suppressions.xml')
+//
+//        when:
+//        def result = executeTaskAndGetResult(ANALYZE_TASK, true)
+//
+//        then:
+//        result.task(":$ANALYZE_TASK").outcome == SUCCESS
+//    }
 
 
     private void copyBuildFileIntoProjectDir(String buildFileName) {
