@@ -54,6 +54,11 @@ class DependencyCheckExtension {
     CveExtension cve = new CveExtension()
 
     /**
+     * The configuration extension that configures the hosted suppressions file.
+     */
+    HostedSuppressionsExtension hostedSuppressions = new HostedSuppressionsExtension()
+
+    /**
      * Whether the plugin should fail when errors occur.
      */
     Boolean failOnError = true
@@ -215,6 +220,15 @@ class DependencyCheckExtension {
      */
     def cve(Closure configClosure) {
         return project.configure(cve, configClosure)
+    }
+
+    /**
+     * Allows programmatic configuration of the hostedSuppressions extension.
+     * @param configClosure the closure to configure the hostedSuppressions extension
+     * @return the hostedSuppressions extension
+     */
+    def hostedSuppressions(Closure configClosure) {
+        return project.configure(hostedSuppressions, configClosure)
     }
 
     /**

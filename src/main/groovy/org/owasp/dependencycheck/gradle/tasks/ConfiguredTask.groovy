@@ -101,11 +101,21 @@ abstract class ConfiguredTask extends DefaultTask {
             settings.setStringIfNotEmpty(CVE_USER, config.cve.user)
             settings.setStringIfNotEmpty(CVE_PASSWORD, config.cve.password)
         }
+
         settings.setBooleanIfNotNull(DOWNLOADER_QUICK_QUERY_TIMESTAMP, config.quickQueryTimestamp)
         settings.setFloat(JUNIT_FAIL_ON_CVSS, config.junitFailOnCVSS)
         if (config.cveValidForHours != null) {
             if (config.cveValidForHours >= 0) {
                 settings.setInt(CVE_CHECK_VALID_FOR_HOURS, config.cveValidForHours)
+            } else {
+                throw new InvalidUserDataException('Invalid setting: `validForHours` must be 0 or greater')
+            }
+        }
+        settings.setBooleanIfNotNull(HOSTED_SUPPRESSIONS_FORCEUPDATE, config.hostedSuppressions.forceupdate)
+        settings.setStringIfNotNull(HOSTED_SUPPRESSIONS_URL, config.hostedSuppressions.url)
+        if (config.hostedSuppressions.validForHours != null) {
+            if (config.hostedSuppressions.validForHours >= 0) {
+                settings.setInt(HOSTED_SUPPRESSIONS_VALID_FOR_HOURS, config.hostedSuppressions.validForHours)
             } else {
                 throw new InvalidUserDataException('Invalid setting: `validForHours` must be 0 or greater')
             }
