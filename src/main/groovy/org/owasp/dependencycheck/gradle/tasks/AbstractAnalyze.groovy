@@ -402,9 +402,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         configuration.getResolvedConfiguration().getResolvedArtifacts().collect { ResolvedArtifact artifact ->
             def dependencies = engine.scan(artifact.getFile())
             addInfoToDependencies(dependencies, configuration.name,
-                    artifact.moduleVersion.id.group,
-                    artifact.moduleVersion.id.name,
-                    artifact.moduleVersion.id.version)
+                    artifact.moduleVersion.getId())
         }
     }
 
