@@ -22,7 +22,7 @@ package org.owasp.dependencycheck.gradle.extension
  */
 class OssIndexExtension {
     /**
-     * Sets whether or not the OSS Index Analyzer should be used.
+     * Sets whether the OSS Index Analyzer should be used.
      */
     Boolean enabled
     /**
