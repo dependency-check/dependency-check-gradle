@@ -59,19 +59,19 @@ class AnalyzerExtension {
      */
     String nexusUrl
     /**
-     * Whether or not the defined proxy should be used when connecting to Nexus.
+     * whether the defined proxy should be used when connecting to Nexus.
      */
     Boolean nexusUsesProxy
     /**
-     * Sets whether or not the .NET Nuget Nuspec Analyzer will be used.
+     * Sets whether the .NET Nuget Nuspec Analyzer will be used.
      */
     Boolean nuspecEnabled
     /**
-     * Sets whether or not the .NET Assembly Analyzer should be used.
+     * Sets whether the .NET Assembly Analyzer should be used.
      */
     Boolean assemblyEnabled
     /**
-     * Sets whether or not the MS Build Analyzer should be used.
+     * Sets whether the MS Build Analyzer should be used.
      */
     Boolean msbuildEnabled
     /**
@@ -92,19 +92,23 @@ class AnalyzerExtension {
      */
     String pathToGo
     /**
-     * Sets whether or not the cocoapods analyzer is enabled.
+     * Sets whether the cocoapods analyzer is enabled.
      */
     Boolean cocoapodsEnabled
     /**
-     * Sets whether or not the swift package manager analyzer is enabled.
+     * Sets whether the swift package manager analyzer is enabled.
      */
     Boolean swiftEnabled
     /**
-     * Sets whether or not the swift package resolved analyzer is enabled.
+     * Sets whether the swift package manager analyzer is enabled.
+     */
+    Boolean dartEnabled
+    /**
+     * Sets whether the swift package resolved analyzer is enabled.
      */
     Boolean swiftPackageResolvedEnabled
     /**
-     * Sets whether or not the Ruby Bundle Audit analyzer is enabled; requires running bundle audit.
+     * Sets whether the Ruby Bundle Audit analyzer is enabled; requires running bundle audit.
      */
     Boolean bundleAuditEnabled
     /**
@@ -124,41 +128,41 @@ class AnalyzerExtension {
      */
     Boolean rubygemsEnabled
     /**
-     * Sets whether or not the openssl Analyzer should be used.
+     * Sets whether the openssl Analyzer should be used.
      */
     Boolean opensslEnabled
     /**
-     * Sets whether or not the CMake Analyzer should be used.
+     * Sets whether the CMake Analyzer should be used.
      */
     Boolean cmakeEnabled
     /**
-     * Sets whether or not the autoconf Analyzer should be used.
+     * Sets whether the autoconf Analyzer should be used.
      */
     Boolean autoconfEnabled
     /**
-     * Sets whether or not the PHP Composer Lock File Analyzer should be used.
+     * Sets whether the PHP Composer Lock File Analyzer should be used.
      */
     Boolean composerEnabled
     /**
-     * Sets whether or not the Perl CPAN File Analyzer should be used.
+     * Sets whether the Perl CPAN File Analyzer should be used.
      */
     Boolean cpanEnabled
     /**
-     * Sets whether or not the Node.js Analyzer should be used.
+     * Sets whether the Node.js Analyzer should be used.
      */
     Boolean nodeEnabled
     /**
-     * Sets whether or not the NSP Analyzer should be used.
+     * Sets whether the NSP Analyzer should be used.
      * @deprecated As of the 5.2.5 - please use nodeAudit { enabled = true }
      */
     @Deprecated
     Boolean nodeAuditEnabled
     /**
-     * Sets whether or not the Nuget packages.config Configuration Analyzer should be used.
+     * Sets whether the Nuget packages.config Configuration Analyzer should be used.
      */
     Boolean nugetconfEnabled
     /**
-     * Sets whether or not the OSS Index Analyzer should be used.
+     * Sets whether the OSS Index Analyzer should be used.
      * @deprecated As of the 5.0.1 - please use ossIndex { enabled = true }
      */
     @Deprecated
