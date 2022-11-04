@@ -186,9 +186,6 @@ abstract class ConfiguredTask extends DefaultTask {
     }
 
     private void configureProxy(Settings settings) {
-        if (config.proxy.server) {
-            project.logger.warn("Deprecated configuration `proxy { server='${config.proxy.server}' }`; please update your configuration to use the gradle proxy configuration")
-        }
         String proxyHost = System.getProperty("https.proxyHost", System.getProperty("http.proxyHost"))
         if (!Strings.isNullOrEmpty(proxyHost)) {
             String proxyPort = System.getProperty("https.proxyPort", System.getProperty("http.proxyPort"))
