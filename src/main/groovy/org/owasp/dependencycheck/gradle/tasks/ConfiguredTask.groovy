@@ -18,6 +18,7 @@
 
 package org.owasp.dependencycheck.gradle.tasks
 
+import com.google.common.base.Strings
 import org.gradle.api.DefaultTask
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.tasks.Internal
@@ -188,23 +189,22 @@ abstract class ConfiguredTask extends DefaultTask {
         if (config.proxy.server) {
             project.logger.warn("Deprecated configuration `proxy { server='${config.proxy.server}' }`; please update your configuration to use the gradle proxy configuration")
         }
-        HttpProxySettings proxyGradle = new JavaSystemPropertiesSecureHttpProxySettings()
-        if (proxyGradle.proxy == null) {  // if systemProp.https.proxyHost is not defined, fallback to http proxy
-            proxyGradle = new JavaSystemPropertiesHttpProxySettings()
-        }
-        if (proxyGradle.proxy != null && proxyGradle.proxy.host != null) {
-            config.proxy.server = proxyGradle.proxy.host
-            config.proxy.port = proxyGradle.proxy.port
-            if (proxyGradle.proxy.credentials != null) {
-                if (proxyGradle.proxy.credentials.username != null) {
-                    config.proxy.username = proxyGradle.proxy.credentials.username
-                }
-                if (proxyGradle.proxy.credentials.password != null) {
-                    config.proxy.password = proxyGradle.proxy.credentials.password
-                }
+        String proxyHost = System.getProperty("https.proxyHost", System.getProperty("http.proxyHost"))
+        if (!Strings.isNullOrEmpty(proxyHost)) {
+            String proxyPort = System.getProperty("https.proxyPort", System.getProperty("http.proxyPort"))
+            String nonProxyHosts = System.getProperty("https.nonProxyHosts", System.getProperty("http.nonProxyHosts"))
+            String proxyUser = System.getProperty("https.proxyUser", System.getProperty("http.proxyUser"))
+            String proxyPassword = System.getProperty("https.proxyPassword", System.getProperty("http.proxyPassword"))
+            config.proxy.server = proxyHost
+            config.proxy.port = proxyPort
+            if (!Strings.isNullOrEmpty(proxyUser)) {
+                config.proxy.username = proxyUser
             }
-            if (proxyGradle.hasProperty('nonProxyHosts') && proxyGradle.nonProxyHosts) {
-                config.proxy.nonProxyHosts = proxyGradle.nonProxyHosts
+            if (!Strings.isNullOrEmpty(proxyPassword)) {
+                config.proxy.password = proxyPassword
+            }
+            if (!Strings.isNullOrEmpty(nonProxyHosts)) {
+                config.proxy.nonProxyHosts = nonProxyHosts
             }
         }
         settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
