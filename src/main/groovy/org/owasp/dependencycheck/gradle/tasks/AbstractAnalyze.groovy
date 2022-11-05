@@ -101,7 +101,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                 def name = project.getName()
                 def displayName = determineDisplayName()
                 def groupId = project.getGroup()
-                File output = new File(config.outputDirectory)
+                File output = project.file(config.outputDirectory)
                 for (String f : getReportFormats(config.format, config.formats)) {
                     engine.writeReports(displayName, groupId, name.toString(), project.getVersion().toString(), output, f, exCol)
                 }
