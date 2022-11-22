@@ -22,11 +22,7 @@ import com.google.common.base.Strings
 import org.gradle.api.DefaultTask
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.tasks.Internal
-
 import org.owasp.dependencycheck.gradle.service.SlackNotificationSenderService
-import org.gradle.internal.resource.transport.http.HttpProxySettings
-import org.gradle.internal.resource.transport.http.JavaSystemPropertiesSecureHttpProxySettings
-import org.gradle.internal.resource.transport.http.JavaSystemPropertiesHttpProxySettings
 import org.owasp.dependencycheck.utils.Settings
 
 import static org.owasp.dependencycheck.utils.Settings.KEYS.*
@@ -193,7 +189,11 @@ abstract class ConfiguredTask extends DefaultTask {
             String proxyUser = System.getProperty("https.proxyUser", System.getProperty("http.proxyUser"))
             String proxyPassword = System.getProperty("https.proxyPassword", System.getProperty("http.proxyPassword"))
             config.proxy.server = proxyHost
-            config.proxy.port = proxyPort
+            try {
+                config.proxy.port = Integer.parseInt(proxyPort)
+            } catch (NumberFormatException nfe) {
+                logger.warn("Unable to convert the configured `http.proxyPort` to a number: ${proxyPort}");
+            }
             if (!Strings.isNullOrEmpty(proxyUser)) {
                 config.proxy.username = proxyUser
             }
