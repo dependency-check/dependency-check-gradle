@@ -89,6 +89,38 @@ javadoc {
 
 publishing {
     publications {
+        maven(MavenPublication) {
+            groupId "$group"
+            artifactId 'dependency-check-gradle'
+            version "$version"
+            from components.java
+            pom {
+                name = 'dependency-check-gradle'
+                description = 'OWASP dependency-check gradle plugin is a software ' +
+                        'composition analysis tool used to find known vulnerable dependencies.'
+
+                url = 'https://jeremylong.github.io/DependencyCheck/'
+
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'https://github.com/dependency-check/dependency-check-gradle/blob/main/LICENSE.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'jlong'
+                        name = 'Jeremy Long'
+                        email = 'jeremy.long@owasp.org'
+                    }
+                }
+                scm {
+                    url = 'https://github.com/dependency-check/dependency-check-gradle'
+                    connection = 'scm:git:https://github.com/dependency-check/dependency-check-gradle.git'
+                    developerConnection = 'scm:git:https://github.com/dependency-check/dependency-check-gradle.git'
+                }
+            }
+        }
         pluginPublication (MavenPublication) {
             groupId "$group"
             artifactId 'dependency-check-gradle'
