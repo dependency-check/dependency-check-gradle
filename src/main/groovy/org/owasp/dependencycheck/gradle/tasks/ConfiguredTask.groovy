@@ -201,7 +201,7 @@ abstract class ConfiguredTask extends DefaultTask {
                 config.proxy.password = proxyPassword
             }
             if (!Strings.isNullOrEmpty(nonProxyHosts)) {
-                config.proxy.nonProxyHosts = nonProxyHosts
+                config.proxy.nonProxyHosts = nonProxyHosts.tokenize("|")
             }
         }
         settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
