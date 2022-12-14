@@ -48,6 +48,7 @@ import static org.owasp.dependencycheck.utils.Checksum.*
 /**
  * Checks the projects dependencies for known vulnerabilities.
  */
+//@groovy.transform.CompileStatic
 abstract class AbstractAnalyze extends ConfiguredTask {
 
     @Internal
@@ -98,12 +99,13 @@ abstract class AbstractAnalyze extends ConfiguredTask {
 
             logger.lifecycle("Generating report for project ${currentProjectName}")
             try {
-                def name = project.getName()
-                def displayName = determineDisplayName()
-                def groupId = project.getGroup()
+                String name = project.getName()
+                String displayName = determineDisplayName()
+                String groupId = project.getGroup()
+                String version = project.getVersion().toString()
                 File output = project.file(config.outputDirectory)
-                for (String f : getReportFormats(config.format, config.formats)) {
-                    engine.writeReports(displayName, groupId, name.toString(), project.getVersion().toString(), output, f, exCol)
+                for (Format f : getReportFormats(config.format, config.formats)) {
+                    engine.writeReports(displayName, groupId, name, version, output, f.toString(), exCol)
                 }
                 showSummary(engine)
                 def result = checkForFailure(engine)
@@ -115,7 +117,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                 if (config.failOnError) {
                     if (exCol != null) {
                         exCol.addException(ex)
-                        throw new GradleException(exCol)
+                        throw new GradleException("Error generating the report", exCol)
                     } else {
                         throw new GradleException("Error generating the report", ex)
                     }
@@ -162,10 +164,10 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      */
     private Set<Format> getReportFormats(Format format, List<Format> formats) {
         def mapFormat = { fmt -> fmt.toString() }
-        Set<String> selectedFormats = formats == null || formats.isEmpty() ? new HashSet<>() :
-                formats.stream().map(mapFormat).collect(Collectors.toSet());
+        Set<Format> selectedFormats = formats == null || formats.isEmpty() ? new HashSet<Format>() :
+                new HashSet<>(formats)
         if (format != null && !selectedFormats.contains(format.toString())) {
-            selectedFormats.add(format.toString());
+            selectedFormats.add(format);
         }
         return selectedFormats;
     }
@@ -173,7 +175,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     /**
      * Releases resources and removes temporary files used.
      */
-    def cleanup(engine) {
+    def cleanup(Engine engine) {
         if (engine != null) {
             engine.close()
         }
@@ -185,7 +187,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     /**
      * Loads the projects dependencies into the dependency-check analysis engine.
      */
-    abstract scanDependencies(engine)
+    abstract scanDependencies(Engine engine)
 
     /**
      * Displays a summary of the dependency-check results to the build console.
@@ -288,7 +290,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * Checks whether the given configuration should be skipped
      * because skipConfigurations contains the configuration's name.
      */
-    def shouldBeSkipped(configuration) {
+    def shouldBeSkipped(Configuration configuration) {
         ((IGNORE_NON_RESOLVABLE_SCOPES_GRADLE_VERSION.compareTo(GradleVersion.current()) <= 0 && (
             "archives".equals(configuration.name) ||
             "default".equals(configuration.name) ||
@@ -320,7 +322,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * @param configuration the configuration to insepct
      * @return true if the configuration is considered a tet configuration; otherwise false
      */
-    def isTestConfiguration(configuration) {
+    def isTestConfiguration(Configuration configuration) {
         def isTestConfiguration = isTestConfigurationCheck(configuration)
 
         def hierarchy = configuration.hierarchy.collect({ it.name }).join(" --> ")
@@ -374,21 +376,24 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                 processConfigV4 project, configuration, engine
             }
         }
-        boolean customScanSet = false
-        List<String> toScan = ['src/main/resources', 'src/main/webapp',
-                               './package.json', './package-lock.json',
-                               './npm-shrinkwrap.json', './yarn.lock',
-                               './pnpm.lock', './Gopkg.lock', './go.mod']
-        if (config.scanSet != null) {
-            toScan = config.scanSet
-            customScanSet = true
-        }
-        toScan.each {
-            File f = project.file it
-            if (f.exists()) {
-                engine.scan(f, project.name)
-            } else if (customScanSet) {
-                logger.warn("ScanSet file `${it}` does not exist in ${project.name}")
+        if (config.scanSet == null) {
+            List<String> toScan = ['src/main/resources', 'src/main/webapp',
+                                   './package.json', './package-lock.json',
+                                   './npm-shrinkwrap.json', './yarn.lock',
+                                   './pnpm.lock', './Gopkg.lock', './go.mod']
+            toScan.each {
+                File f = project.file it
+                if (f.exists()) {
+                    engine.scan(f, project.name)
+                }
+            }
+        } else {
+            config.scanSet.each {
+                if (it.exists()) {
+                    engine.scan(it, project.name)
+                } else {
+                    logger.warn("ScanSet file `${it}` does not exist in ${project.name}")
+                }
             }
         }
     }
@@ -519,9 +524,9 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         dependency.addEvidence(VENDOR, "build.gradle", "displayName", display, Confidence.MEDIUM)
         dependency.addEvidence(PRODUCT, "build.gradle", "displayName", display, Confidence.HIGH)
         if (dependency.packagePath == null) {
-            dependency.name = name
-            dependency.version = version
-            dependency.packagePath = "${group}:${name}:${version}"
+            dependency.name = id.name
+            dependency.version = id.version
+            dependency.packagePath = "${id.group}:${id.name}:${id.version}"
         }
         MavenArtifact mavenArtifact = new MavenArtifact(id.group, id.name, id.version)
         dependency.addAsEvidence("gradle", mavenArtifact, Confidence.HIGHEST)

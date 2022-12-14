@@ -135,7 +135,7 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
     private BuildResult executeTaskAndGetResult(String taskName, boolean isBuildExpectedToPass) {
         def build = GradleRunner.create()
                 .withProjectDir(testProjectDir.root)
-                .withArguments(taskName)
+                .withArguments(taskName,"--stacktrace")
                 .forwardOutput()
                 .withDebug(true)
                 .withPluginClasspath()

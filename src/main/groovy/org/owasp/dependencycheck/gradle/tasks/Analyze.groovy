@@ -17,9 +17,13 @@
  */
 
 package org.owasp.dependencycheck.gradle.tasks
+
+import org.owasp.dependencycheck.Engine
+
 /**
  * Checks the projects dependencies for known vulnerabilities.
  */
+@groovy.transform.CompileStatic
 class Analyze extends AbstractAnalyze {
 
     Analyze() {
@@ -34,7 +38,7 @@ class Analyze extends AbstractAnalyze {
     /**
      * Loads the projects dependencies into the dependency-check analysis engine.
      */
-    def scanDependencies(engine) {
+    def scanDependencies(Engine engine) {
         if (shouldBeScanned(project) && !shouldBeSkipped(project)) {
             logger.lifecycle("Verifying dependencies for project ${currentProjectName}")
             processConfigurations(project, engine)

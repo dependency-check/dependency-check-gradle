@@ -20,6 +20,7 @@ package org.owasp.dependencycheck.gradle.extension
 /**
  * The configuration for the OSS Index Analyzer.
  */
+@groovy.transform.CompileStatic
 class OssIndexExtension {
     /**
      * Sets whether the OSS Index Analyzer should be used.

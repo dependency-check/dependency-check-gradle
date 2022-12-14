@@ -22,6 +22,7 @@ import com.google.common.base.Strings
 import org.gradle.api.DefaultTask
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.tasks.Internal
+import org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension
 import org.owasp.dependencycheck.gradle.service.SlackNotificationSenderService
 import org.owasp.dependencycheck.utils.Settings
 
@@ -32,14 +33,15 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.*
  *
  * @author Jeremy Long
  */
+@groovy.transform.CompileStatic
 abstract class ConfiguredTask extends DefaultTask {
 
     @Internal
-    def config = project.dependencyCheck
+    DependencyCheckExtension config = (DependencyCheckExtension) project.getExtensions().findByName('dependencyCheck')
     @Internal
-    def settings
+    Settings settings
     @Internal
-    def PROPERTIES_FILE = 'task.properties'
+    String PROPERTIES_FILE = 'task.properties'
 
     /**
      * Initializes the settings object. If the setting is not set the
@@ -217,11 +219,15 @@ abstract class ConfiguredTask extends DefaultTask {
      *
      * @return an array of suppression file paths
      */
-    private String[] determineSuppressions(suppressionFiles, suppressionFile) {
-        if (suppressionFile != null) {
-            suppressionFiles << suppressionFile
+    private String[] determineSuppressions(Collection<String> suppressionFiles, String suppressionFile) {
+        List<String> files = []
+        if (suppressionFiles != null) {
+            files.addAll(suppressionFiles)
         }
-        suppressionFiles
+        if (suppressionFile != null) {
+            files << suppressionFile
+        }
+        return files.toArray(new String[0])
     }
     /**
      * Selects the current configiguration option - returns the deprecated option if the current configuration option is null

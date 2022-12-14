@@ -20,6 +20,7 @@ package org.owasp.dependencycheck.gradle.extension
 /**
  * The artifactory analyzer configuration.
  */
+@groovy.transform.CompileStatic
 class ArtifactoryExtension {
     /**
      * Sets whether the Artifactory Analyzer should be used.

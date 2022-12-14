@@ -19,11 +19,13 @@
 package org.owasp.dependencycheck.gradle.tasks
 
 import org.gradle.api.Project
+import org.owasp.dependencycheck.Engine
 import org.owasp.dependencycheck.gradle.DependencyCheckPlugin
 
 /**
  * Checks the projects dependencies for known vulnerabilities.
  */
+@groovy.transform.CompileStatic
 class Aggregate extends AbstractAnalyze {
 
     Aggregate() {
@@ -38,7 +40,7 @@ class Aggregate extends AbstractAnalyze {
     /**
      * Loads the projects dependencies into the dependency-check analysis engine.
      */
-    def scanDependencies(engine) {
+    def scanDependencies(Engine engine) {
         logger.lifecycle("Verifying dependencies for project ${currentProjectName}")
         if (project.rootProject.plugins.hasPlugin(DependencyCheckPlugin)) {
             scanProject(project.rootProject.allprojects, engine)
@@ -47,10 +49,10 @@ class Aggregate extends AbstractAnalyze {
         }
     }
 
-    private def scanProject(Set<Project> projects, engine) {
-        projects.each { Project Project ->
-            if (shouldBeScanned(Project) && !shouldBeSkipped(Project)) {
-                processConfigurations(Project, engine)
+    private def scanProject(Set<Project> projects, Engine engine) {
+        projects.each { Project project ->
+            if (shouldBeScanned(project) && !shouldBeSkipped(project)) {
+                processConfigurations(project, engine)
             }
         }
     }
