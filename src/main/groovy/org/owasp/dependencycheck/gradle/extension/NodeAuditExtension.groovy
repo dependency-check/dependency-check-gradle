@@ -20,6 +20,7 @@ package org.owasp.dependencycheck.gradle.extension
 /**
  * The configuration for the Node Audit Analyzer.
  */
+@groovy.transform.CompileStatic
 class NodeAuditExtension {
     /**
      * Sets whether the Node Audit Analyzer should be used.

@@ -25,6 +25,7 @@ import org.owasp.dependencycheck.Engine
 /**
  * Purges the local cache of the NVD CVE data.
  */
+@groovy.transform.CompileStatic
 class Purge extends ConfiguredTask {
 
     /**

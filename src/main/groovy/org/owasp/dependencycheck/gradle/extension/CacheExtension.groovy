@@ -20,6 +20,7 @@ package org.owasp.dependencycheck.gradle.extension
 /**
  * The configuration for caching external results.
  */
+@groovy.transform.CompileStatic
 class CacheExtension {
     /**
      * Sets whether the OSS Index Analyzer's results should be cached locally.

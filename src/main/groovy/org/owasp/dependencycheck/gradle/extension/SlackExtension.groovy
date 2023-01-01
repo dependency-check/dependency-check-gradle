@@ -20,6 +20,7 @@ package org.owasp.dependencycheck.gradle.extension
 /**
  * The configuration for the Node Audit Analyzer.
  */
+@groovy.transform.CompileStatic
 class SlackExtension {
     Boolean enabled
     String webhookUrl
