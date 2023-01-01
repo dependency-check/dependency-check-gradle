@@ -17,13 +17,14 @@
  */
 
 ext {
-    odcVersion = '7.4.3'
+    odcVersion = '8.0.0-SNAPSHOT'
     slackWebhookVersion = '1.4.0'
     spockCoreVersion = '1.1-groovy-2.4'
 }
 
 group = 'org.owasp'
-version = "${odcVersion}"
+//version = "${odcVersion}"
+version = "8.0.0-RC1"
 
 buildscript {
     repositories {
@@ -72,6 +73,8 @@ dependencies {
         exclude module: 'groovy-all'
     }
 }
+
+test.onlyIf { !project.hasProperty('skipTests') }
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
