@@ -30,7 +30,6 @@ class AnalyzerExtension {
     }
 
     Project project;
-
     /**
      * Sets whether the experimental analyzers will be used.
      */

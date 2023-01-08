@@ -43,6 +43,7 @@ import org.owasp.dependencycheck.dependency.Dependency
 import org.owasp.dependencycheck.exception.ExceptionCollection
 import org.owasp.dependencycheck.exception.ReportException
 import org.owasp.dependencycheck.gradle.service.SlackNotificationSenderService
+import org.owasp.dependencycheck.utils.Pair
 import org.owasp.dependencycheck.utils.SeverityUtil
 
 import static org.owasp.dependencycheck.dependency.EvidenceType.PRODUCT
@@ -151,6 +152,9 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * Verifies aspects of the configuration to ensure dependency-check can run correctly.
      */
     def verifySettings() {
+        if (!config.scanDependencies && !config.scanBuildEnv) {
+            throw new IllegalArgumentException("At least one of scanDependencies or scanBuildEnv must be set to true")
+        }
         if (config.scanConfigurations && config.skipConfigurations) {
             throw new IllegalArgumentException("you can only specify one of scanConfigurations or skipConfigurations")
         }
@@ -434,13 +438,13 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     }
 
     //todo add project as an arg for the root node
-    private Map<PackageURL, Set<String>> buildIncludedByMap(Project project, Configuration configuration, boolean scanningBuildEnv) {
-        Map<PackageURL, Set<String>> includedByMap = new HashMap<>()
-        String parent
+    private Map<PackageURL, Set<Pair<String,String>>> buildIncludedByMap(Project project, Configuration configuration, boolean scanningBuildEnv) {
+        Map<PackageURL, Set<Pair<String,String>>> includedByMap = new HashMap<>()
+        //includedBy is a pair of identifier and type (i.e., left=purl, right='buildEnv')
+        Pair<String, String> parent = new Pair<>()
+        parent.setLeft(convertIdentifier(project).toString())
         if (scanningBuildEnv) {
-            parent = "${convertIdentifier(project)} (buildEnv)"
-        } else {
-            parent = convertIdentifier(project).toString();
+            parent.setRight('buildEnv')
         }
 
         configuration.incoming.resolutionResult.root.getDependencies().each {
@@ -453,14 +457,13 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                 } else {
                     Set<String> rootParent = new HashSet<>()
                     rootParent.add(parent)
-                    includedByMap.put(purl, rootParent);
+                    includedByMap.put(purl, rootParent)
                 }
 
-                String root
+                Pair<String, String> root = new Pair<>();
+                root.setLeft("${convertIdentifier(current.id)}")
                 if (scanningBuildEnv) {
-                    root = "${convertIdentifier(current.id)} (buildEnv)"
-                } else {
-                    root = "${convertIdentifier(current.id)}";
+                    root.setRight('buildEnv')
                 }
                 collectDependencyMap(includedByMap, root, current.getDependencies(), 0)
             } else {
@@ -470,7 +473,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         return includedByMap
     }
 
-    private static void collectDependencyMap(Map<PackageURL, Set<String>> includedByMap, String root, Set<DependencyResult> dependencies, int depth) {
+    private static void collectDependencyMap(Map<PackageURL, Set<Pair<String, String>>> includedByMap, Pair<String, String> root, Set<DependencyResult> dependencies, int depth) {
         dependencies.each {
             if (it instanceof ResolvedDependencyResult) {
                 ResolvedDependencyResult rdr = (ResolvedDependencyResult) it

@@ -42,6 +42,14 @@ class DependencyCheckExtension {
     Project project;
 
     /**
+     * Whether the buildEnv should be analyzed.
+     */
+    Boolean scanBuildEnv = false
+    /**
+     * Whether the dependencies should be analyzed.
+     */
+    Boolean scanDependencies = true
+    /**
      * The configuration extension for proxy settings.
      */
     ProxyExtension proxy = new ProxyExtension()
