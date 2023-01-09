@@ -40,10 +40,10 @@ import org.owasp.dependencycheck.data.nexus.MavenArtifact
 import org.owasp.dependencycheck.data.nvdcve.DatabaseException
 import org.owasp.dependencycheck.dependency.Confidence
 import org.owasp.dependencycheck.dependency.Dependency
+import org.owasp.dependencycheck.dependency.IncludedByReference
 import org.owasp.dependencycheck.exception.ExceptionCollection
 import org.owasp.dependencycheck.exception.ReportException
 import org.owasp.dependencycheck.gradle.service.SlackNotificationSenderService
-import org.owasp.dependencycheck.utils.Pair
 import org.owasp.dependencycheck.utils.SeverityUtil
 
 import static org.owasp.dependencycheck.dependency.EvidenceType.PRODUCT
@@ -438,14 +438,13 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     }
 
     //todo add project as an arg for the root node
-    private Map<PackageURL, Set<Pair<String,String>>> buildIncludedByMap(Project project, Configuration configuration, boolean scanningBuildEnv) {
-        Map<PackageURL, Set<Pair<String,String>>> includedByMap = new HashMap<>()
-        //includedBy is a pair of identifier and type (i.e., left=purl, right='buildEnv')
-        Pair<String, String> parent = new Pair<>()
-        parent.setLeft(convertIdentifier(project).toString())
+    private Map<PackageURL, Set<IncludedByReference>> buildIncludedByMap(Project project, Configuration configuration, boolean scanningBuildEnv) {
+        Map<PackageURL, Set<IncludedByReference>> includedByMap = new HashMap<>()
+        String type = null
         if (scanningBuildEnv) {
-            parent.setRight('buildEnv')
+            type = 'buildEnv'
         }
+        IncludedByReference parent = new IncludedByReference(convertIdentifier(project).toString(), type)
 
         configuration.incoming.resolutionResult.root.getDependencies().each {
             if (it instanceof ResolvedDependencyResult) {
@@ -459,12 +458,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                     rootParent.add(parent)
                     includedByMap.put(purl, rootParent)
                 }
-
-                Pair<String, String> root = new Pair<>();
-                root.setLeft("${convertIdentifier(current.id)}")
-                if (scanningBuildEnv) {
-                    root.setRight('buildEnv')
-                }
+                IncludedByReference root = new IncludedByReference(convertIdentifier(current.id).toString(), type)
                 collectDependencyMap(includedByMap, root, current.getDependencies(), 0)
             } else {
                 //TODO logging?
@@ -473,7 +467,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         return includedByMap
     }
 
-    private static void collectDependencyMap(Map<PackageURL, Set<Pair<String, String>>> includedByMap, Pair<String, String> root, Set<DependencyResult> dependencies, int depth) {
+    private static void collectDependencyMap(Map<PackageURL, Set<IncludedByReference>> includedByMap, IncludedByReference root, Set<DependencyResult> dependencies, int depth) {
         dependencies.each {
             if (it instanceof ResolvedDependencyResult) {
                 ResolvedDependencyResult rdr = (ResolvedDependencyResult) it
