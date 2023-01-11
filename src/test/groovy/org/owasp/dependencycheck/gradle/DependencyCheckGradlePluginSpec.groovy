@@ -108,6 +108,12 @@ class DependencyCheckGradlePluginSpec extends Specification {
                 urlModified = 'urlModified'
             }
 
+            hostedSuppressions {
+                url = 'suppressionsurl'
+                validForHours = 5
+                forceupdate = true
+            }
+
             slack {
                 enabled = true
                 webhookUrl = slackWebhookUrl
@@ -151,6 +157,9 @@ class DependencyCheckGradlePluginSpec extends Specification {
 
         project.dependencyCheck.cve.urlModified == 'urlModified'
         project.dependencyCheck.cve.urlBase == 'urlBase'
+        project.dependencyCheck.hostedSuppressions.url == 'suppressionsurl'
+        project.dependencyCheck.hostedSuppressions.validForHours == 5
+        project.dependencyCheck.hostedSuppressions.forceupdate == true
         project.dependencyCheck.outputDirectory == 'outputDirectory'
         project.dependencyCheck.quickQueryTimestamp == false
         project.dependencyCheck.scanConfigurations == ['a']
