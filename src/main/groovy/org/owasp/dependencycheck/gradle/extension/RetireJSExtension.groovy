@@ -22,7 +22,7 @@ package org.owasp.dependencycheck.gradle.extension
  */
 class RetireJSExtension {
     /**
-     * Sets whether or not the RetireJS Analyzer should be used.
+     * Sets whether the RetireJS Analyzer should be used.
      */
     Boolean enabled
     /**

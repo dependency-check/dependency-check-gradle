@@ -182,7 +182,7 @@ class DependencyCheckExtension {
      */
     List<String> analyzedTypes = ['jar', 'aar', 'js', 'war', 'ear', 'zip']
     /**
-     * Whether or not to skip the execution of dependency-check.
+     * whether to skip the execution of dependency-check.
      */
     Boolean skip = false
     /**

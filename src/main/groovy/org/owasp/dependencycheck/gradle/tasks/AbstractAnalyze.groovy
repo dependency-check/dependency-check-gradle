@@ -101,7 +101,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                 def name = project.getName()
                 def displayName = determineDisplayName()
                 def groupId = project.getGroup()
-                File output = new File(config.outputDirectory)
+                File output = project.file(config.outputDirectory)
                 for (String f : getReportFormats(config.format, config.formats)) {
                     engine.writeReports(displayName, groupId, name.toString(), project.getVersion().toString(), output, f, exCol)
                 }
@@ -402,9 +402,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         configuration.getResolvedConfiguration().getResolvedArtifacts().collect { ResolvedArtifact artifact ->
             def dependencies = engine.scan(artifact.getFile())
             addInfoToDependencies(dependencies, configuration.name,
-                    artifact.moduleVersion.id.group,
-                    artifact.moduleVersion.id.name,
-                    artifact.moduleVersion.id.version)
+                    artifact.moduleVersion.getId())
         }
     }
 

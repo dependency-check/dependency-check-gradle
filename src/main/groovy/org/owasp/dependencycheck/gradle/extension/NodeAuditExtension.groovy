@@ -22,19 +22,19 @@ package org.owasp.dependencycheck.gradle.extension
  */
 class NodeAuditExtension {
     /**
-     * Sets whether or not the Node Audit Analyzer should be used.
+     * Sets whether the Node Audit Analyzer should be used.
      */
     Boolean enabled
     /**
-     * Sets whether or not the Node Audit Analyzer should cache results locally.
+     * Sets whether the Node Audit Analyzer should cache results locally.
      */
     Boolean useCache
     /**
-     * Sets whether or not the Node Audit Analyzer should skip devDependencies.
+     * Sets whether the Node Audit Analyzer should skip devDependencies.
      */
     Boolean skipDevDependencies
     /**
-     * Sets whether or not the Yarn Audit Analyzer should be used.
+     * Sets whether the Yarn Audit Analyzer should be used.
      */
     Boolean yarnEnabled
     /**
@@ -42,7 +42,7 @@ class NodeAuditExtension {
      */
     String yarnPath
     /**
-     * Sets whether or not the Pnpm Audit Analyzer should be used.
+     * Sets whether the Pnpm Audit Analyzer should be used.
      */
     Boolean pnpmEnabled
     /**

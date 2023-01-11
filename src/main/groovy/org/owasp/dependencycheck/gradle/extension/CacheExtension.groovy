@@ -22,17 +22,17 @@ package org.owasp.dependencycheck.gradle.extension
  */
 class CacheExtension {
     /**
-     * Sets whether or not the OSS Index Analyzer's results should be cached locally.
+     * Sets whether the OSS Index Analyzer's results should be cached locally.
      * Cache expires after 24 hours.
      */
     Boolean ossIndex
     /**
-     * Sets whether or not the Central Analyzer's results should be cached locally.
+     * Sets whether the Central Analyzer's results should be cached locally.
      * Cache expires after 30 days.
      */
     Boolean central
     /**
-     * Sets whether or not the Node Audit Analyzer's results should be cached locally.
+     * Sets whether the Node Audit Analyzer's results should be cached locally.
      * Cache expires after 24 hours.
      */
     Boolean nodeAudit

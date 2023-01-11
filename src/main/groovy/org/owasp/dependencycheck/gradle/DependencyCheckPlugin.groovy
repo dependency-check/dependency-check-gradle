@@ -18,6 +18,7 @@
 
 package org.owasp.dependencycheck.gradle
 
+import groovy.transform.CompileStatic
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -28,6 +29,7 @@ import org.owasp.dependencycheck.gradle.tasks.Analyze
 import org.owasp.dependencycheck.gradle.tasks.Purge
 import org.owasp.dependencycheck.gradle.tasks.Update
 
+@CompileStatic
 class DependencyCheckPlugin implements Plugin<Project> {
 
     static final GradleVersion MINIMUM_GRADLE_VERSION = GradleVersion.version("4.0")
@@ -42,7 +44,7 @@ class DependencyCheckPlugin implements Plugin<Project> {
     private static final String CHECK_EXTENSION_NAME = "dependencyCheck"
 
     void apply(Project project) {
-        checkGradleVersion()
+        checkGradleVersion(project)
         initializeConfigurations(project)
         registerTasks(project)
     }

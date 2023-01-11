@@ -22,7 +22,7 @@ package org.owasp.dependencycheck.gradle.extension
  */
 class ArtifactoryExtension {
     /**
-     * Sets whether or not the Artifactory Analyzer should be used.
+     * Sets whether the Artifactory Analyzer should be used.
      */
     Boolean enabled
     /**

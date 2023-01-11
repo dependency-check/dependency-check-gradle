@@ -18,14 +18,11 @@
 
 package org.owasp.dependencycheck.gradle.tasks
 
+import com.google.common.base.Strings
 import org.gradle.api.DefaultTask
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.tasks.Internal
-
 import org.owasp.dependencycheck.gradle.service.SlackNotificationSenderService
-import org.gradle.internal.resource.transport.http.HttpProxySettings
-import org.gradle.internal.resource.transport.http.JavaSystemPropertiesSecureHttpProxySettings
-import org.gradle.internal.resource.transport.http.JavaSystemPropertiesHttpProxySettings
 import org.owasp.dependencycheck.utils.Settings
 
 import static org.owasp.dependencycheck.utils.Settings.KEYS.*
@@ -146,6 +143,7 @@ abstract class ConfiguredTask extends DefaultTask {
 
         settings.setBooleanIfNotNull(ANALYZER_COCOAPODS_ENABLED, config.analyzers.cocoapodsEnabled)
         settings.setBooleanIfNotNull(ANALYZER_SWIFT_PACKAGE_MANAGER_ENABLED, config.analyzers.swiftEnabled)
+        settings.setBooleanIfNotNull(ANALYZER_DART_ENABLED, config.analyzers.dartEnabled)
         settings.setBooleanIfNotNull(ANALYZER_SWIFT_PACKAGE_RESOLVED_ENABLED, config.analyzers.swiftPackageResolvedEnabled)
         settings.setBooleanIfNotNull(ANALYZER_BUNDLE_AUDIT_ENABLED, config.analyzers.bundleAuditEnabled)
         settings.setStringIfNotEmpty(ANALYZER_BUNDLE_AUDIT_PATH, config.analyzers.pathToBundleAudit)
@@ -194,26 +192,26 @@ abstract class ConfiguredTask extends DefaultTask {
     }
 
     private void configureProxy(Settings settings) {
-        if (config.proxy.server) {
-            project.logger.warn("Deprecated configuration `proxy { server='${config.proxy.server}' }`; please update your configuration to use the gradle proxy configuration")
-        }
-        HttpProxySettings proxyGradle = new JavaSystemPropertiesSecureHttpProxySettings()
-        if (proxyGradle.proxy == null) {  // if systemProp.https.proxyHost is not defined, fallback to http proxy
-            proxyGradle = new JavaSystemPropertiesHttpProxySettings()
-        }
-        if (proxyGradle.proxy != null && proxyGradle.proxy.host != null) {
-            config.proxy.server = proxyGradle.proxy.host
-            config.proxy.port = proxyGradle.proxy.port
-            if (proxyGradle.proxy.credentials != null) {
-                if (proxyGradle.proxy.credentials.username != null) {
-                    config.proxy.username = proxyGradle.proxy.credentials.username
-                }
-                if (proxyGradle.proxy.credentials.password != null) {
-                    config.proxy.password = proxyGradle.proxy.credentials.password
-                }
+        String proxyHost = System.getProperty("https.proxyHost", System.getProperty("http.proxyHost"))
+        if (!Strings.isNullOrEmpty(proxyHost)) {
+            String proxyPort = System.getProperty("https.proxyPort", System.getProperty("http.proxyPort"))
+            String nonProxyHosts = System.getProperty("https.nonProxyHosts", System.getProperty("http.nonProxyHosts"))
+            String proxyUser = System.getProperty("https.proxyUser", System.getProperty("http.proxyUser"))
+            String proxyPassword = System.getProperty("https.proxyPassword", System.getProperty("http.proxyPassword"))
+            config.proxy.server = proxyHost
+            try {
+                config.proxy.port = Integer.parseInt(proxyPort)
+            } catch (NumberFormatException nfe) {
+                logger.warn("Unable to convert the configured `http.proxyPort` to a number: ${proxyPort}");
             }
-            if (proxyGradle.hasProperty('nonProxyHosts') && proxyGradle.nonProxyHosts) {
-                config.proxy.nonProxyHosts = proxyGradle.nonProxyHosts
+            if (!Strings.isNullOrEmpty(proxyUser)) {
+                config.proxy.username = proxyUser
+            }
+            if (!Strings.isNullOrEmpty(proxyPassword)) {
+                config.proxy.password = proxyPassword
+            }
+            if (!Strings.isNullOrEmpty(nonProxyHosts)) {
+                config.proxy.nonProxyHosts = nonProxyHosts.tokenize("|")
             }
         }
         settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
