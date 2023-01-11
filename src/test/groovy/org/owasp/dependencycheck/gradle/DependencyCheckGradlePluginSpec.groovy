@@ -169,7 +169,9 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.skipGroups == ['b']
         project.dependencyCheck.skipTestGroups == false
         project.dependencyCheck.suppressionFile == './src/config/suppression.xml'
-        project.dependencyCheck.suppressionFiles == ['./src/config/suppression1.xml', './src/config/suppression2.xml']
+        project.dependencyCheck.suppressionFiles.getAt(0) == './src/config/suppression2.xml'
+        project.dependencyCheck.suppressionFiles.getAt(1) == './src/config/suppression1.xml'
+        //project.dependencyCheck.suppressionFiles == ['./src/config/suppression1.xml', './src/config/suppression2.xml']
         project.dependencyCheck.suppressionFileUser == 'suppressionFileUsername'
         project.dependencyCheck.suppressionFilePassword == 'suppressionFilePassword'
         project.dependencyCheck.analyzers.artifactory.enabled == true

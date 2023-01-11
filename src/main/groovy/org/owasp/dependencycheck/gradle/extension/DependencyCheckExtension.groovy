@@ -18,8 +18,9 @@
 
 package org.owasp.dependencycheck.gradle.extension
 
-
 import org.gradle.api.Project
+
+import java.util.stream.Collectors
 
 import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
 
@@ -30,6 +31,7 @@ import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
  * @author Jeremy Long
  */
 
+@groovy.transform.CompileStatic
 class DependencyCheckExtension {
 
     DependencyCheckExtension(Project project) {
@@ -39,6 +41,14 @@ class DependencyCheckExtension {
 
     Project project;
 
+    /**
+     * Whether the buildEnv should be analyzed.
+     */
+    Boolean scanBuildEnv = false
+    /**
+     * Whether the dependencies should be analyzed.
+     */
+    Boolean scanDependencies = true
     /**
      * The configuration extension for proxy settings.
      */
@@ -90,13 +100,19 @@ class DependencyCheckExtension {
     /**
      * The list of paths to suppression files.
      */
-    List<String> suppressionFiles = []
+    Collection<String> suppressionFiles;
+
+    public void setSuppressionFiles(java.lang.Object[] files) {
+        if (files != null) {
+            suppressionFiles = Arrays.stream(files).map({ o -> o.toString() }).collect(Collectors.toSet())
+        }
+    }
     /**
-     * The username for downloading the suppresion file(s)
+     * The username for downloading the suppression file(s)
      */
     String suppressionFileUser
     /**
-     * The password for downloading the suppresion file(s)
+     * The password for downloading the suppression file(s)
      */
     String suppressionFilePassword
     /**
@@ -137,12 +153,12 @@ class DependencyCheckExtension {
      * Specifies if the build should be failed if a CVSS score above a specified level is identified. The default is
      * 11 which means since the CVSS scores are 0-10, by default the build will never fail.
      */
-    Float failBuildOnCVSS = 11.0
+    Float failBuildOnCVSS = 11.0f
     /**
      * Specifies the CVSS score that should be considered a failure when generating a JUNIT formatted report. The default
      * is 0.0 which means all identified vulnerabilities would be considered a failure.
      */
-    Float junitFailOnCVSS = 0.0
+    Float junitFailOnCVSS = 0.0f
     /**
      * Displays a summary of the findings. Defaults to true.
      */

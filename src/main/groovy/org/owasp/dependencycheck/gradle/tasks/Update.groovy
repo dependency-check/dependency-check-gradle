@@ -32,6 +32,7 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.AUTO_UPDATE
  *
  * @author Jeremy Long
  */
+@groovy.transform.CompileStatic
 class Update extends ConfiguredTask {
 
     /**
@@ -49,7 +50,7 @@ class Update extends ConfiguredTask {
     update() {
         initializeSettings()
         settings.setBooleanIfNotNull(AUTO_UPDATE, true)
-        def engine = null
+        Engine engine = null
         try {
             engine = new Engine(settings)
             engine.doUpdates()
@@ -75,7 +76,7 @@ class Update extends ConfiguredTask {
     /**
      * Releases resources and removes temporary files used.
      */
-    def cleanup(engine) {
+    def cleanup(Engine engine) {
         if (engine != null) {
             engine.close()
         }

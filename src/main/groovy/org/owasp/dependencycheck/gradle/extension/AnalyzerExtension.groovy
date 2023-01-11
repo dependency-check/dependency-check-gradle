@@ -22,6 +22,7 @@ import org.gradle.api.Project
 /**
  * The analyzer configuration extension. Any value not configured will use the dependency-check-core defaults.
  */
+@groovy.transform.CompileStatic
 class AnalyzerExtension {
 
     AnalyzerExtension(Project project) {
@@ -29,7 +30,6 @@ class AnalyzerExtension {
     }
 
     Project project;
-
     /**
      * Sets whether the experimental analyzers will be used.
      */

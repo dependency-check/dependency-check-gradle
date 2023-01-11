@@ -23,6 +23,7 @@ import org.gradle.api.Project
 /**
  * The update data configuration extension. Any value not configured will use the dependency-check-core defaults.
  */
+@groovy.transform.CompileStatic
 class DataExtension {
     
     DataExtension(Project project) {

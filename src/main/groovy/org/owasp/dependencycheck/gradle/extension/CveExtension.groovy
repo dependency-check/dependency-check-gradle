@@ -18,6 +18,7 @@
 
 package org.owasp.dependencycheck.gradle.extension
 
+@groovy.transform.CompileStatic
 class CveExtension {
     /**
      * URL for the modified NVD CVE json data feed:

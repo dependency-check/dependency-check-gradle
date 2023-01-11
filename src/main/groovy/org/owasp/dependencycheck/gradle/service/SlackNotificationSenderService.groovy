@@ -6,9 +6,11 @@ import net.gpedro.integrations.slack.SlackAttachment
 import net.gpedro.integrations.slack.SlackException
 import net.gpedro.integrations.slack.SlackMessage
 import org.apache.commons.lang3.StringUtils
+import org.owasp.dependencycheck.utils.Settings
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+@groovy.transform.CompileStatic
 class SlackNotificationSenderService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SlackNotificationSenderService.class);
     public static final String SLACK__WEBHOOK__ENABLED = "SLACK_WEBHOOK_ENABLED"
@@ -17,7 +19,7 @@ class SlackNotificationSenderService {
     private boolean enabled = false
     private String webhookUrl
 
-    SlackNotificationSenderService(def settings) {
+    SlackNotificationSenderService(Settings settings) {
         def enabled = settings.getBoolean(SLACK__WEBHOOK__ENABLED)
         def webhookUrl = settings.getString(SLACK__WEBHOOK__URL)
         if (enabled) {

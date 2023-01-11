@@ -18,12 +18,18 @@
 
 package org.owasp.dependencycheck.gradle.tasks
 
+import com.github.packageurl.PackageURL
+import com.github.packageurl.PackageURLBuilder
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.gradle.api.artifacts.ResolvedArtifact
+import org.gradle.api.artifacts.component.ModuleComponentIdentifier
+import org.gradle.api.artifacts.result.DependencyResult
 import org.gradle.api.artifacts.result.ResolvedArtifactResult
+import org.gradle.api.artifacts.result.ResolvedComponentResult
+import org.gradle.api.artifacts.result.ResolvedDependencyResult
 import org.gradle.api.attributes.Attribute
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
@@ -34,20 +40,20 @@ import org.owasp.dependencycheck.data.nexus.MavenArtifact
 import org.owasp.dependencycheck.data.nvdcve.DatabaseException
 import org.owasp.dependencycheck.dependency.Confidence
 import org.owasp.dependencycheck.dependency.Dependency
+import org.owasp.dependencycheck.dependency.IncludedByReference
 import org.owasp.dependencycheck.exception.ExceptionCollection
 import org.owasp.dependencycheck.exception.ReportException
 import org.owasp.dependencycheck.gradle.service.SlackNotificationSenderService
 import org.owasp.dependencycheck.utils.SeverityUtil
 
-import java.util.stream.Collectors
-
-import static org.owasp.dependencycheck.dependency.EvidenceType.*
+import static org.owasp.dependencycheck.dependency.EvidenceType.PRODUCT
+import static org.owasp.dependencycheck.dependency.EvidenceType.VENDOR
 import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
 import static org.owasp.dependencycheck.utils.Checksum.*
-
 /**
  * Checks the projects dependencies for known vulnerabilities.
  */
+//@groovy.transform.CompileStatic
 abstract class AbstractAnalyze extends ConfiguredTask {
 
     @Internal
@@ -70,7 +76,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         }
         verifySettings()
         initializeSettings()
-        def engine = null
+        Engine engine = null
         try {
             engine = new Engine(settings)
         } catch (DatabaseException ex) {
@@ -98,12 +104,13 @@ abstract class AbstractAnalyze extends ConfiguredTask {
 
             logger.lifecycle("Generating report for project ${currentProjectName}")
             try {
-                def name = project.getName()
-                def displayName = determineDisplayName()
-                def groupId = project.getGroup()
+                String name = project.getName()
+                String displayName = determineDisplayName()
+                String groupId = project.getGroup()
+                String version = project.getVersion().toString()
                 File output = project.file(config.outputDirectory)
-                for (String f : getReportFormats(config.format, config.formats)) {
-                    engine.writeReports(displayName, groupId, name.toString(), project.getVersion().toString(), output, f, exCol)
+                for (Format f : getReportFormats(config.format, config.formats)) {
+                    engine.writeReports(displayName, groupId, name, version, output, f.toString(), exCol)
                 }
                 showSummary(engine)
                 def result = checkForFailure(engine)
@@ -115,7 +122,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                 if (config.failOnError) {
                     if (exCol != null) {
                         exCol.addException(ex)
-                        throw new GradleException(exCol)
+                        throw new GradleException("Error generating the report", exCol)
                     } else {
                         throw new GradleException("Error generating the report", ex)
                     }
@@ -145,6 +152,9 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * Verifies aspects of the configuration to ensure dependency-check can run correctly.
      */
     def verifySettings() {
+        if (!config.scanDependencies && !config.scanBuildEnv) {
+            throw new IllegalArgumentException("At least one of scanDependencies or scanBuildEnv must be set to true")
+        }
         if (config.scanConfigurations && config.skipConfigurations) {
             throw new IllegalArgumentException("you can only specify one of scanConfigurations or skipConfigurations")
         }
@@ -162,10 +172,10 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      */
     private Set<Format> getReportFormats(Format format, List<Format> formats) {
         def mapFormat = { fmt -> fmt.toString() }
-        Set<String> selectedFormats = formats == null || formats.isEmpty() ? new HashSet<>() :
-                formats.stream().map(mapFormat).collect(Collectors.toSet());
+        Set<Format> selectedFormats = formats == null || formats.isEmpty() ? new HashSet<Format>() :
+                new HashSet<>(formats)
         if (format != null && !selectedFormats.contains(format.toString())) {
-            selectedFormats.add(format.toString());
+            selectedFormats.add(format);
         }
         return selectedFormats;
     }
@@ -173,7 +183,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     /**
      * Releases resources and removes temporary files used.
      */
-    def cleanup(engine) {
+    def cleanup(Engine engine) {
         if (engine != null) {
             engine.close()
         }
@@ -185,7 +195,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     /**
      * Loads the projects dependencies into the dependency-check analysis engine.
      */
-    abstract scanDependencies(engine)
+    abstract scanDependencies(Engine engine)
 
     /**
      * Displays a summary of the dependency-check results to the build console.
@@ -288,14 +298,14 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * Checks whether the given configuration should be skipped
      * because skipConfigurations contains the configuration's name.
      */
-    def shouldBeSkipped(configuration) {
+    def shouldBeSkipped(Configuration configuration) {
         ((IGNORE_NON_RESOLVABLE_SCOPES_GRADLE_VERSION.compareTo(GradleVersion.current()) <= 0 && (
-            "archives".equals(configuration.name) ||
-            "default".equals(configuration.name) ||
-            "runtime".equals(configuration.name) ||
-            "compile".equals(configuration.name) ||
-            "compileOnly".equals(configuration.name)))
-        || config.skipConfigurations.contains(configuration.name))
+                "archives".equals(configuration.name) ||
+                        "default".equals(configuration.name) ||
+                        "runtime".equals(configuration.name) ||
+                        "compile".equals(configuration.name) ||
+                        "compileOnly".equals(configuration.name)))
+                || config.skipConfigurations.contains(configuration.name))
     }
 
     /**
@@ -320,7 +330,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * @param configuration the configuration to insepct
      * @return true if the configuration is considered a tet configuration; otherwise false
      */
-    def isTestConfiguration(configuration) {
+    def isTestConfiguration(Configuration configuration) {
         def isTestConfiguration = isTestConfigurationCheck(configuration)
 
         def hierarchy = configuration.hierarchy.collect({ it.name }).join(" --> ")
@@ -363,6 +373,24 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * @param project the project to analyze
      * @param engine the dependency-check engine
      */
+    protected void processBuildEnvironment(Project project, Engine engine) {
+        project.getBuildscript().configurations.findAll { Configuration configuration ->
+            shouldBeScanned(configuration) && !(shouldBeSkipped(configuration)
+                    || shouldBeSkippedAsTest(configuration)) && canBeResolved(configuration)
+        }.each { Configuration configuration ->
+            if (CUTOVER_GRADLE_VERSION.compareTo(GradleVersion.current()) > 0) {
+                processConfigLegacy configuration, engine
+            } else {
+                processConfigV4 project, configuration, engine, true
+            }
+        }
+    }
+
+    /**
+     * Process the incoming artifacts for the given project's configurations.
+     * @param project the project to analyze
+     * @param engine the dependency-check engine
+     */
     protected void processConfigurations(Project project, Engine engine) {
         project.configurations.findAll { Configuration configuration ->
             shouldBeScanned(configuration) && !(shouldBeSkipped(configuration)
@@ -374,21 +402,24 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                 processConfigV4 project, configuration, engine
             }
         }
-        boolean customScanSet = false
-        List<String> toScan = ['src/main/resources', 'src/main/webapp',
-                               './package.json', './package-lock.json',
-                               './npm-shrinkwrap.json', './yarn.lock',
-                               './pnpm.lock', './Gopkg.lock', './go.mod']
-        if (config.scanSet != null) {
-            toScan = config.scanSet
-            customScanSet = true
-        }
-        toScan.each {
-            File f = project.file it
-            if (f.exists()) {
-                engine.scan(f, project.name)
-            } else if (customScanSet) {
-                logger.warn("ScanSet file `${it}` does not exist in ${project.name}")
+        if (config.scanSet == null) {
+            List<String> toScan = ['src/main/resources', 'src/main/webapp',
+                                   './package.json', './package-lock.json',
+                                   './npm-shrinkwrap.json', './yarn.lock',
+                                   './pnpm.lock', './Gopkg.lock', './go.mod']
+            toScan.each {
+                File f = project.file it
+                if (f.exists()) {
+                    engine.scan(f, project.name)
+                }
+            }
+        } else {
+            config.scanSet.each {
+                if (it.exists()) {
+                    engine.scan(it, project.name)
+                } else {
+                    logger.warn("ScanSet file `${it}` does not exist in ${project.name}")
+                }
             }
         }
     }
@@ -402,7 +433,57 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         configuration.getResolvedConfiguration().getResolvedArtifacts().collect { ResolvedArtifact artifact ->
             def dependencies = engine.scan(artifact.getFile())
             addInfoToDependencies(dependencies, configuration.name,
-                    artifact.moduleVersion.getId())
+                    artifact.moduleVersion.getId(), null)
+        }
+    }
+
+    //todo add project as an arg for the root node
+    private Map<PackageURL, Set<IncludedByReference>> buildIncludedByMap(Project project, Configuration configuration, boolean scanningBuildEnv) {
+        Map<PackageURL, Set<IncludedByReference>> includedByMap = new HashMap<>()
+        String type = null
+        if (scanningBuildEnv) {
+            type = 'buildEnv'
+        }
+        IncludedByReference parent = new IncludedByReference(convertIdentifier(project).toString(), type)
+
+        configuration.incoming.resolutionResult.root.getDependencies().each {
+            if (it instanceof ResolvedDependencyResult) {
+                ResolvedDependencyResult dr = (ResolvedDependencyResult) it
+                ResolvedComponentResult current = dr.selected
+                PackageURL purl = convertIdentifier(current.id)
+                if (includedByMap.containsKey(purl)) {
+                    includedByMap.get(purl).add(parent)
+                } else {
+                    Set<String> rootParent = new HashSet<>()
+                    rootParent.add(parent)
+                    includedByMap.put(purl, rootParent)
+                }
+                IncludedByReference root = new IncludedByReference(convertIdentifier(current.id).toString(), type)
+                collectDependencyMap(includedByMap, root, current.getDependencies(), 0)
+            } else {
+                //TODO logging?
+            }
+        }
+        return includedByMap
+    }
+
+    private static void collectDependencyMap(Map<PackageURL, Set<IncludedByReference>> includedByMap, IncludedByReference root, Set<DependencyResult> dependencies, int depth) {
+        dependencies.each {
+            if (it instanceof ResolvedDependencyResult) {
+                ResolvedDependencyResult rdr = (ResolvedDependencyResult) it
+                ResolvedComponentResult current = rdr.selected
+                PackageURL purl = convertIdentifier(current.id)
+                if (includedByMap.containsKey(purl)) {
+                    includedByMap.get(purl).add(root)
+                } else {
+                    Set<String> rootParent = new HashSet<>()
+                    rootParent.add(root)
+                    includedByMap.put(purl, rootParent);
+                }
+                if (current.getDependencies() != null && !current.getDependencies().isEmpty() && depth < 1000) {
+                    collectDependencyMap(includedByMap, root, current.getDependencies(), depth + 1)
+                }
+            }
         }
     }
 
@@ -411,11 +492,14 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * @param project the project to analyze
      * @param configuration a particular configuration of the project to analyze
      * @param engine the dependency-check engine
+     * @param scanningBuildEnv true if scanning the build environment; otherwise false
      */
-    protected void processConfigV4(Project project, Configuration configuration, Engine engine) {
+    protected void processConfigV4(Project project, Configuration configuration, Engine engine, boolean scanningBuildEnv = false) {
         String projectName = project.name
         String scope = "$projectName:$configuration.name"
-
+        if (scanningBuildEnv) {
+            scope += " (buildEnv)"
+        }
         logger.info "- Analyzing ${scope}"
 
         Map<String, ModuleVersionIdentifier> componentVersions = [:]
@@ -428,9 +512,9 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                 logger.warn("Unable to resolve: ${it}")
             }
         }
+        Map<PackageURL, Set<String>> includedByMap = buildIncludedByMap(project, configuration, scanningBuildEnv)
 
         def types = config.analyzedTypes
-
         types.each { type ->
             configuration.incoming.artifactView {
                 lenient true
@@ -440,23 +524,26 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             }.artifacts.findAll {
                 !shouldBeSkipped(it)
             }.each {
+
                 ModuleVersionIdentifier id = componentVersions[it.id.componentIdentifier]
                 if (id == null) {
                     logger.debug "Could not find dependency {'artifact': '${it.id.componentIdentifier}', " +
                             "'file':'${it.file}'}"
                 } else {
                     def deps = engine.scan(it.file, scope)
-                    //if null ODC doesn't have an analyzer for the dependency type - maybe add anyway?
-                    if (deps == null) {
-                        if (it.file.isFile()) {
-                            addDependency(engine, projectName, configuration.name,
-                                    id, it.id.displayName, it.file)
-                        } else {
-                            addDependency(engine, projectName, configuration.name,
-                                    id, it.id.displayName)
-                        }
-                    } else {
-                        addInfoToDependencies(deps, scope, id)
+
+                    //why would we add something we can't analyze?
+//                    if (deps == null) {
+//                        if (it.file.isFile()) {
+//                            addDependency(engine, projectName, configuration.name,
+//                                    id, it.id.displayName, it.file)
+//                        } else {
+//                            addDependency(engine, projectName, configuration.name,
+//                                    id, it.id.displayName)
+//                        }
+//                    } else {s
+                    if (deps != null) {
+                        addInfoToDependencies(deps, scope, id, includedByMap.get(convertIdentifier(id)))
                     }
                 }
             }
@@ -472,19 +559,49 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * @param version the version number for the artifact coordinates
      */
     protected void addInfoToDependencies(List<Dependency> deps, String configurationName,
-                                         ModuleVersionIdentifier id) {
+                                         ModuleVersionIdentifier id, Set<String> includedBy) {
         if (deps != null) {
             if (deps.size() == 1) {
                 def d = deps.get(0)
                 MavenArtifact mavenArtifact = new MavenArtifact(id.group, id.name, id.version)
                 d.addAsEvidence("gradle", mavenArtifact, Confidence.HIGHEST)
                 d.addProjectReference(configurationName)
+                if (includedBy != null) {
+                    d.addAllIncludedBy(includedBy)
+                }
             } else {
-                deps.forEach { it.addProjectReference(configurationName) }
+                deps.forEach {
+                    it.addProjectReference(configurationName)
+                    if (includedBy != null) {
+                        it.addAllIncludedBy(includedBy)
+                    }
+                }
             }
         }
     }
 
+    private static PackageURL convertIdentifier(Project project) {
+        final PackageURL p
+        if (project.group) {
+            p = new PackageURL("maven", project.group,
+                    project.name, project.version, null, null)
+        } else {
+            p = PackageURLBuilder.aPackageURL().withType("gradle")
+                    .withName(project.name).withVersion(project.version).build()
+        }
+        return p;
+    }
+    private static PackageURL convertIdentifier(ModuleComponentIdentifier id) {
+        final PackageURL p = new PackageURL("maven", id.moduleIdentifier.group,
+                id.moduleIdentifier.name, id.version, null, null);
+        return p;
+
+    }
+    private static PackageURL convertIdentifier(ModuleVersionIdentifier id) {
+        final PackageURL p = new PackageURL("maven", id.group,
+                id.name, id.version, null, null);
+        return p;
+    }
     /**
      * Adds a dependency to the engine. This is used when an artifact is scanned that is not
      * supported by dependency-check (different dependency type for possibly new language).
@@ -519,9 +636,9 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         dependency.addEvidence(VENDOR, "build.gradle", "displayName", display, Confidence.MEDIUM)
         dependency.addEvidence(PRODUCT, "build.gradle", "displayName", display, Confidence.HIGH)
         if (dependency.packagePath == null) {
-            dependency.name = name
-            dependency.version = version
-            dependency.packagePath = "${group}:${name}:${version}"
+            dependency.name = id.name
+            dependency.version = id.version
+            dependency.packagePath = "${id.group}:${id.name}:${id.version}"
         }
         MavenArtifact mavenArtifact = new MavenArtifact(id.group, id.name, id.version)
         dependency.addAsEvidence("gradle", mavenArtifact, Confidence.HIGHEST)
@@ -547,4 +664,5 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         Object[] methodArgs = ["The gradle-versions-plugin isn't compatible with the configuration cache"]
         metaClass.invokeMethod(this, methodName, methodArgs)
     }
+
 }

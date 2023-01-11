@@ -22,6 +22,7 @@ package org.owasp.dependencycheck.gradle.extension
  * https://docs.gradle.org/current/userguide/build_environment.html
  */
 @Deprecated
+@groovy.transform.CompileStatic
 class ProxyExtension {
     String server
     Integer port

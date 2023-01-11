@@ -20,6 +20,7 @@ package org.owasp.dependencycheck.gradle.extension
 /**
  * The configuration for the RetireJS Analyzer.
  */
+@groovy.transform.CompileStatic
 class RetireJSExtension {
     /**
      * Sets whether the RetireJS Analyzer should be used.
