@@ -39,6 +39,10 @@ class AnalyzerExtension {
      */
     Boolean archiveEnabled
     /**
+     * Sets whether the Known Exploited Vulnerability update and Analyzer will be used.
+     */
+    Boolean knownExploitedEnabled
+    /**
      * A comma-separated list of additional file extensions to be treated like a ZIP file, the contents will be extracted and analyzed.
      */
     String zipExtensions

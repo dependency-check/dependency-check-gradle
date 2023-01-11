@@ -125,7 +125,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
                     url = 'https://example.com/artifacgtory'
                     bearerToken = 'abc123=='
                 }
-
+                knownExploitedEnabled = false
                 retirejs {
                     filters = ['filter1', 'filter2']
                     filterNonVulnerable = true
@@ -177,6 +177,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.analyzers.artifactory.enabled == true
         project.dependencyCheck.analyzers.artifactory.url == 'https://example.com/artifacgtory'
         project.dependencyCheck.analyzers.artifactory.bearerToken == 'abc123=='
+        project.dependencyCheck.analyzers.knownExploitedEnabled == false
         project.dependencyCheck.analyzers.retirejs.filters == ['filter1', 'filter2']
         project.dependencyCheck.analyzers.retirejs.filterNonVulnerable == true
         project.dependencyCheck.slack.enabled == true
