@@ -38,4 +38,8 @@ class OssIndexExtension {
      * The OSS Index URL.
      */
     String url
+    /**
+     * Only output a warning message instead of failing when remote errors occur.
+     */
+    Boolean warnOnlyOnRemoteErrors
 }
