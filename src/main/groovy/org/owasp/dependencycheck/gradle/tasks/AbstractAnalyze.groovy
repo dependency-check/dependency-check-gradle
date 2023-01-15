@@ -583,11 +583,11 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     private static PackageURL convertIdentifier(Project project) {
         final PackageURL p
         if (project.group) {
-            p = new PackageURL("maven", project.group,
-                    project.name, project.version, null, null)
+            p = new PackageURL("maven", project.group.toString(),
+                    project.name, project.version.toString(), null, null)
         } else {
             p = PackageURLBuilder.aPackageURL().withType("gradle")
-                    .withName(project.name).withVersion(project.version).build()
+                    .withName(project.name).withVersion(project.version.toString()).build()
         }
         return p;
     }
