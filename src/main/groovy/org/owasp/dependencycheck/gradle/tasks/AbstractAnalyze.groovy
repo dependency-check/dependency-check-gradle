@@ -599,7 +599,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
 
     }
     private static PackageURL convertIdentifier(ProjectComponentIdentifier id) {
-        PackageURLBuilder.newInstance().withType("gradle").withName(id.projectPath).build();
+        PackageURLBuilder.aPackageURL().withType("gradle").withName(id.projectPath).build();
     }
     private static PackageURL convertIdentifier(ModuleVersionIdentifier id) {
         final PackageURL p = new PackageURL("maven", id.group,
