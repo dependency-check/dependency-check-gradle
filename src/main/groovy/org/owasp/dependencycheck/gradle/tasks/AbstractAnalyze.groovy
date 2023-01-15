@@ -26,6 +26,7 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
+import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.artifacts.result.DependencyResult
 import org.gradle.api.artifacts.result.ResolvedArtifactResult
 import org.gradle.api.artifacts.result.ResolvedComponentResult
@@ -596,6 +597,9 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                 id.moduleIdentifier.name, id.version, null, null);
         return p;
 
+    }
+    private static PackageURL convertIdentifier(ProjectComponentIdentifier id) {
+        PackageURLBuilder.newInstance().withType("gradle").withName(id.projectPath).build();
     }
     private static PackageURL convertIdentifier(ModuleVersionIdentifier id) {
         final PackageURL p = new PackageURL("maven", id.group,
