@@ -454,7 +454,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                 if (includedByMap.containsKey(purl)) {
                     includedByMap.get(purl).add(parent)
                 } else {
-                    Set<String> rootParent = new HashSet<>()
+                    Set<IncludedByReference> rootParent = new HashSet<>()
                     rootParent.add(parent)
                     includedByMap.put(purl, rootParent)
                 }
@@ -476,7 +476,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                 if (includedByMap.containsKey(purl)) {
                     includedByMap.get(purl).add(root)
                 } else {
-                    Set<String> rootParent = new HashSet<>()
+                    Set<IncludedByReference> rootParent = new HashSet<>()
                     rootParent.add(root)
                     includedByMap.put(purl, rootParent);
                 }
@@ -512,7 +512,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                 logger.warn("Unable to resolve: ${it}")
             }
         }
-        Map<PackageURL, Set<String>> includedByMap = buildIncludedByMap(project, configuration, scanningBuildEnv)
+        Map<PackageURL, Set<IncludedByReference>> includedByMap = buildIncludedByMap(project, configuration, scanningBuildEnv)
 
         def types = config.analyzedTypes
         types.each { type ->
@@ -559,7 +559,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * @param version the version number for the artifact coordinates
      */
     protected void addInfoToDependencies(List<Dependency> deps, String configurationName,
-                                         ModuleVersionIdentifier id, Set<String> includedBy) {
+                                         ModuleVersionIdentifier id, Set<IncludedByReference> includedBy) {
         if (deps != null) {
             if (deps.size() == 1) {
                 def d = deps.get(0)
@@ -583,11 +583,11 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     private static PackageURL convertIdentifier(Project project) {
         final PackageURL p
         if (project.group) {
-            p = new PackageURL("maven", project.group,
-                    project.name, project.version, null, null)
+            p = new PackageURL("maven", project.group.toString(),
+                    project.name, project.version.toString(), null, null)
         } else {
             p = PackageURLBuilder.aPackageURL().withType("gradle")
-                    .withName(project.name).withVersion(project.version).build()
+                    .withName(project.name).withVersion(project.version.toString()).build()
         }
         return p;
     }
