@@ -446,8 +446,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             type = 'buildEnv'
         }
         IncludedByReference parent = new IncludedByReference(convertIdentifier(project).toString(), type)
-
-        configuration.incoming.resolutionResult.root.getDependencies().each {
+        for (DependencyResult it : configuration.incoming.resolutionResult.root.getDependencies()) {
             if (it instanceof ResolvedDependencyResult) {
                 ResolvedDependencyResult dr = (ResolvedDependencyResult) it
                 ResolvedComponentResult current = dr.selected
@@ -469,19 +468,25 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     }
 
     private static void collectDependencyMap(Map<PackageURL, Set<IncludedByReference>> includedByMap, IncludedByReference root, Set<DependencyResult> dependencies, int depth) {
-        dependencies.each {
+        for (DependencyResult it : dependencies) {
             if (it instanceof ResolvedDependencyResult) {
                 ResolvedDependencyResult rdr = (ResolvedDependencyResult) it
                 ResolvedComponentResult current = rdr.selected
                 PackageURL purl = convertIdentifier(current.id)
                 if (includedByMap.containsKey(purl)) {
-                    includedByMap.get(purl).add(root)
+                    // jackson-bom ends up creating an infinite loop so check if we've been here before
+                    // https://github.com/dependency-check/dependency-check-gradle/issues/307
+                    Set<IncludedByReference> includedBy = includedByMap.get(purl)
+                    if (includedBy.contains(root)) {
+                        continue;
+                    }
+                    includedBy.add(root)
                 } else {
                     Set<IncludedByReference> rootParent = new HashSet<>()
                     rootParent.add(root)
                     includedByMap.put(purl, rootParent);
                 }
-                if (current.getDependencies() != null && !current.getDependencies().isEmpty() && depth < 1000) {
+                if (current.getDependencies() != null && !current.getDependencies().isEmpty() && depth < 500) {
                     collectDependencyMap(includedByMap, root, current.getDependencies(), depth + 1)
                 }
             }
