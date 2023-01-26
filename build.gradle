@@ -23,7 +23,7 @@ ext {
 }
 
 group = 'org.owasp'
-version = "${odcVersion}-RC1"
+version = "${odcVersion}-SNAPSHOT"
 
 buildscript {
     repositories {
