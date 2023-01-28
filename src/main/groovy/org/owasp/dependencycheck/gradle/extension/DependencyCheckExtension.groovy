@@ -107,6 +107,11 @@ class DependencyCheckExtension {
             suppressionFiles = Arrays.stream(files).map({ o -> o.toString() }).collect(Collectors.toSet())
         }
     }
+    public void setSuppressionFiles(Collection<String> files) {
+        if (files != null) {
+            suppressionFiles = files;
+        }
+    }
     /**
      * The username for downloading the suppression file(s)
      */

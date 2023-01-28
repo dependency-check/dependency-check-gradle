@@ -18,3 +18,11 @@ jobs:
         id: build
         run: |
           ./gradlew build
+      - name: Archive Test Report
+        id: archive-reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: it-test-logs
+          retention-days: 7
+          path: build/reports/tests/**

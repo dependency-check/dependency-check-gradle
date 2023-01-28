@@ -235,10 +235,12 @@ abstract class ConfiguredTask extends DefaultTask {
     private String[] determineSuppressions(Collection<String> suppressionFiles, String suppressionFile) {
         List<String> files = []
         if (suppressionFiles != null) {
-            files.addAll(suppressionFiles)
+            for (String sf : suppressionFiles) {
+                files.add(sf.toString())
+            }
         }
         if (suppressionFile != null) {
-            files << suppressionFile
+            files.add(suppressionFile)
         }
         return files.toArray(new String[0])
     }
