@@ -433,10 +433,11 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             }
         } else {
             config.scanSet.each {
-                if (it.exists()) {
-                    engine.scan(it, project.name)
+                File f = project.file it
+                if (f.exists()) {
+                    engine.scan(f, project.name)
                 } else {
-                    logger.warn("ScanSet file `${it}` does not exist in ${project.name}")
+                    logger.warn("ScanSet file `${f}` does not exist in ${project.name}")
                 }
             }
         }
