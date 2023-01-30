@@ -17,13 +17,13 @@
  */
 
 ext {
-    odcVersion = '8.0.1'
+    odcVersion = '8.0.2'
     slackWebhookVersion = '1.4.0'
     spockCoreVersion = '1.1-groovy-2.4'
 }
 
 group = 'org.owasp'
-version = "${odcVersion}-SNAPSHOT"
+version = "${odcVersion}"
 
 buildscript {
     repositories {
