@@ -113,8 +113,8 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                 String groupId = project.getGroup()
                 String version = project.getVersion().toString()
                 File output = project.file(config.outputDirectory)
-                for (Format f : getReportFormats(config.format, config.formats)) {
-                    engine.writeReports(displayName, groupId, name, version, output, f.toString(), exCol)
+                for (String f : getReportFormats(config.format, config.formats)) {
+                    engine.writeReports(displayName, groupId, name, version, output, f, exCol)
                 }
                 showSummary(engine)
                 def result = checkForFailure(engine)
@@ -175,14 +175,29 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * @return an array of suppression file paths
      */
     @groovy.transform.CompileStatic
-    private Set<Format> getReportFormats(Format format, List<Format> formats) {
-        def mapFormat = { fmt -> fmt.toString() }
-        Set<Format> selectedFormats = formats == null || formats.isEmpty() ? new HashSet<Format>() :
-                new HashSet<>(formats)
-        if (format != null && !selectedFormats.contains(format.toString())) {
+    private Set<String> getReportFormats(String format, List<String> formats) {
+        Set<String> selectedFormats = new HashSet<>();
+        if (formats != null && !formats.isEmpty()) {
+            for (String f : formats) {
+                addFormat(f, selectedFormats)
+            }
+        }
+        addFormat(format, selectedFormats)
+        return selectedFormats;
+    }
+
+    @groovy.transform.CompileStatic
+    private void addFormat(String format, HashSet<String> selectedFormats) {
+        if (format != null && !format.trim().isEmpty()) {
+            for (Format f : Format.values()) {
+                if (f.toString().equalsIgnoreCase(format)) {
+                    selectedFormats.add(f.toString())
+                    return;
+                }
+            }
+            //could be a custom report template...
             selectedFormats.add(format);
         }
-        return selectedFormats;
     }
 
     /**
@@ -250,12 +265,14 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             return CheckForFailureResult.createSuccess()
         }
     }
+
     @groovy.transform.CompileStatic
     void sendSlackNotification(CheckForFailureResult checkForFailureResult) {
         if (checkForFailureResult.failed) {
             new SlackNotificationSenderService(settings).send(getCurrentProjectName(), checkForFailureResult.msg)
         }
     }
+
     @groovy.transform.CompileStatic
     def static class CheckForFailureResult {
         private Boolean failed
@@ -465,7 +482,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             type = 'buildEnv'
         }
         IncludedByReference parent = new IncludedByReference(convertIdentifier(project).toString(), type)
-        configuration.incoming.resolutionResult.root.getDependencies().forEach( {
+        configuration.incoming.resolutionResult.root.getDependencies().forEach({
             if (it instanceof ResolvedDependencyResult) {
                 ResolvedDependencyResult dr = (ResolvedDependencyResult) it
                 ResolvedComponentResult current = dr.selected
@@ -588,7 +605,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                     d.addAllIncludedBy(includedBy)
                 }
             } else {
-                for (Dependency it: deps) {
+                for (Dependency it : deps) {
                     it.addProjectReference(configurationName)
                     if (includedBy != null) {
                         it.addAllIncludedBy(includedBy)
@@ -597,6 +614,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             }
         }
     }
+
     @groovy.transform.CompileStatic
     private static PackageURL convertIdentifier(Project project) {
         final PackageURL p
@@ -609,6 +627,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         }
         return p;
     }
+
     @groovy.transform.CompileStatic
     private static PackageURL convertIdentifier(ResolvedComponentResult result) {
         ModuleVersionIdentifier id = result.getModuleVersion()
@@ -626,16 +645,19 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         }
         return p;
     }
+
     @groovy.transform.CompileStatic
     private static PackageURL convertIdentifier(ModuleComponentIdentifier id) {
         final PackageURL p = new PackageURL("maven", id.moduleIdentifier.group,
                 id.moduleIdentifier.name, id.version, null, null);
         return p;
     }
+
     @groovy.transform.CompileStatic
     private static PackageURL convertIdentifier(ProjectComponentIdentifier id) {
         return PackageURLBuilder.aPackageURL().withType("gradle").withName(id.projectPath).build()
     }
+
     @groovy.transform.CompileStatic
     private static PackageURL convertIdentifier(ModuleVersionIdentifier id) {
         PackageURL p
