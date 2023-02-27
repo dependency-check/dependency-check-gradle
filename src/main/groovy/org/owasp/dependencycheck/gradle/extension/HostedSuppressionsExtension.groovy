@@ -5,6 +5,10 @@ package org.owasp.dependencycheck.gradle.extension
  */
 class HostedSuppressionsExtension {
     /**
+     * Whether the hosted suppressions fie will be used.
+     */
+    Boolean enabled
+    /**
      * The URL for a mirrored hosted suppressions file.
      */
     String url

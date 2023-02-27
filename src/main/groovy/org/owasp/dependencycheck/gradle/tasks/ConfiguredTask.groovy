@@ -110,6 +110,7 @@ abstract class ConfiguredTask extends DefaultTask {
                 throw new InvalidUserDataException('Invalid setting: `validForHours` must be 0 or greater')
             }
         }
+        settings.setBooleanIfNotNull(HOSTED_SUPPRESSIONS_ENABLED, config.hostedSuppressions.enabled)
         settings.setBooleanIfNotNull(HOSTED_SUPPRESSIONS_FORCEUPDATE, config.hostedSuppressions.forceupdate)
         settings.setStringIfNotNull(HOSTED_SUPPRESSIONS_URL, config.hostedSuppressions.url)
         if (config.hostedSuppressions.validForHours != null) {
