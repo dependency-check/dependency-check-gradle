@@ -100,7 +100,7 @@ class DependencyCheckExtension {
     /**
      * The list of paths to suppression files.
      */
-    Collection<String> suppressionFiles;
+    Collection<String> suppressionFiles = [];
 
     public void setSuppressionFiles(java.lang.Object[] files) {
         if (files != null) {
