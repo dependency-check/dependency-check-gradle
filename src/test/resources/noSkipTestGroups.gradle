@@ -16,12 +16,12 @@ sourceSets {
 }
 
 configurations {
-    intTestCompile.extendsFrom(testCompile)
+    intTestCompile.extendsFrom(testImplementation)
     intTestRuntime.extendsFrom(testRuntime)
 }
 
 dependencies {
-    testCompile group: 'commons-collections', name: 'commons-collections', version: '3.2'
+    testImplementation group: 'commons-collections', name: 'commons-collections', version: '3.2'
     intTestCompileOnly group: 'commons-beanutils', name: 'commons-beanutils-core', version: '1.8.3'
     intTestCompile group: 'commons-fileupload', name: 'commons-fileupload', version: '1.3.1'
     intTestRuntime group: 'commons-httpclient', name: 'commons-httpclient', version: '3.1'
