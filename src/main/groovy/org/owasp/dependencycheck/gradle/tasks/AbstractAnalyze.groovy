@@ -60,7 +60,7 @@ import static org.owasp.dependencycheck.utils.Checksum.*
 abstract class AbstractAnalyze extends ConfiguredTask {
 
     @Internal
-    String currentProjectName = project.getName()
+    transient String currentProjectName = project.getName()
     @Internal
     Attribute artifactType = Attribute.of('artifactType', String)
     // @Internal

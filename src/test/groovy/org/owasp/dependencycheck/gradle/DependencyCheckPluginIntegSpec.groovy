@@ -1,36 +1,36 @@
 package org.owasp.dependencycheck.gradle
 
 import org.gradle.testkit.runner.GradleRunner
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
+import spock.util.io.FileSystemFixture
 
-import static org.gradle.testkit.runner.TaskOutcome.*
+import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 
 class DependencyCheckPluginIntegSpec extends Specification {
 
-    @Rule final TemporaryFolder testProjectDir = new TemporaryFolder()
-    File buildFile
+    @TempDir
+    private FileSystemFixture fileSystemFixture
 
-    def setup() {
-        buildFile = testProjectDir.newFile('build.gradle')
-    }
 
     def "Plugin can be added"() {
         given:
-        buildFile << """
-            plugins {
-                id 'org.owasp.dependencycheck'
+        fileSystemFixture.create {
+            dir("app") {
+                file("build.gradle").text = """
+                        plugins {
+                            id 'org.owasp.dependencycheck'
+                        }
+                    """.stripIndent()
             }
-        """
-    
+        }
         when:
         def result = GradleRunner.create()
-            .withProjectDir(testProjectDir.root)
-            .withArguments('tasks')
-            .withPluginClasspath()
-            .forwardOutput()
-            .build()
+                .withProjectDir(fileSystemFixture.resolve("app").toFile())
+                .withArguments('tasks')
+                .withPluginClasspath()
+                .forwardOutput()
+                .build()
 
         then:
         result.output.contains("$DependencyCheckPlugin.ANALYZE_TASK")
@@ -38,28 +38,32 @@ class DependencyCheckPluginIntegSpec extends Specification {
 
     def "custom configurations are skipped when only scanning whitelisted configurations"() {
         given:
-        buildFile << """
-            plugins {
-                id 'org.owasp.dependencycheck'
+        fileSystemFixture.create {
+            dir("custom") {
+                file("build.gradle").text = """
+                    plugins {
+                        id 'org.owasp.dependencycheck'
+                    }
+                    apply plugin: 'java'
+                    
+                    sourceCompatibility = 1.5
+                    version = '1.0'
+                    
+                    repositories {
+                        mavenLocal()
+                        mavenCentral()
+                    }
+                    
+                    dependencies {
+                        implementation group: 'commons-collections', name: 'commons-collections', version: '3.2'
+                    }
+                """.stripIndent()
             }
-            apply plugin: 'java'
-            
-            sourceCompatibility = 1.5
-            version = '1.0'
-            
-            repositories {
-                mavenLocal()
-                mavenCentral()
-            }
-            
-            dependencies {
-                compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
-            }
-        """
+        }
 
         when:
         def result = GradleRunner.create()
-                .withProjectDir(testProjectDir.root)
+                .withProjectDir(fileSystemFixture.resolve("custom").toFile())
                 .withArguments(DependencyCheckPlugin.ANALYZE_TASK)
                 .withPluginClasspath()
                 .withDebug(true)
@@ -72,29 +76,32 @@ class DependencyCheckPluginIntegSpec extends Specification {
 
     def "task completes successfully when configuration cache is enabled in Gradle 7.4"() {
         given:
-        buildFile << """
-            plugins {
-                id 'org.owasp.dependencycheck'
+        fileSystemFixture.create {
+            dir("configCache") {
+                file("build.gradle").text = """
+                    plugins {
+                        id 'org.owasp.dependencycheck'
+                    }
+                    apply plugin: 'java'
+                    
+                    sourceCompatibility = 1.5
+                    version = '1.0'
+                    
+                    repositories {
+                        mavenLocal()
+                        mavenCentral()
+                    }
+                    
+                    dependencies {
+                        implementation group: 'commons-collections', name: 'commons-collections', version: '3.2'
+                    }
+                """.stripIndent()
             }
-            apply plugin: 'java'
-            
-            sourceCompatibility = 1.5
-            version = '1.0'
-            
-            repositories {
-                mavenLocal()
-                mavenCentral()
-            }
-            
-            dependencies {
-                implementation group: 'commons-collections', name: 'commons-collections', version: '3.2'
-            }
-        """
+        }
 
         when:
         def result = GradleRunner.create()
-                .withGradleVersion("7.4")
-                .withProjectDir(testProjectDir.root)
+                .withProjectDir(fileSystemFixture.resolve("configCache").toFile())
                 .withArguments(DependencyCheckPlugin.ANALYZE_TASK, "--configuration-cache")
                 .withPluginClasspath()
                 .withDebug(true)

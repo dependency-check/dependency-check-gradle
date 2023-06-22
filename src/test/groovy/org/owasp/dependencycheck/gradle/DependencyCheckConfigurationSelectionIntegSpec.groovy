@@ -2,17 +2,17 @@ package org.owasp.dependencycheck.gradle
 
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
+
 import spock.lang.Specification
+import spock.lang.TempDir
+
 import static org.gradle.testkit.runner.TaskOutcome.*
 import static org.owasp.dependencycheck.gradle.DependencyCheckPlugin.*
 
 class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
 
-    @Rule
-    final TemporaryFolder testProjectDir = new TemporaryFolder()
-
+    @TempDir
+    File testProjectDir
 
     def 'test dependencies are ignored by default'() {
         given:
@@ -34,7 +34,7 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         //println "-----------------"
         //println result.output
         //println "-----------------"
-        //String fileContents = new File(new File(testProjectDir.root, 'build/reports'), 'dependency-check-report.html').text
+        //String fileContents = new File(new File(testProjectDir, 'build/reports'), 'dependency-check-report.html').text
         //println fileContents
 
         then:
@@ -126,15 +126,15 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
 
     private void copyResourceFileIntoProjectDir(String resourceFileName, String targetFileName) {
         def resourceFileContent = new File(getClass().getClassLoader().getResource(resourceFileName).toURI()).text
-        def targetDirectory = new File(testProjectDir.root, targetFileName).parentFile
+        def targetDirectory = new File(testProjectDir, targetFileName).parentFile
         targetDirectory.mkdirs()
-        def targetFile = testProjectDir.newFile(targetFileName)
+        def targetFile = new File(testProjectDir, targetFileName)
         targetFile << resourceFileContent
     }
 
     private BuildResult executeTaskAndGetResult(String taskName, boolean isBuildExpectedToPass) {
         def build = GradleRunner.create()
-                .withProjectDir(testProjectDir.root)
+                .withProjectDir(testProjectDir)
                 .withArguments(taskName,"--stacktrace")
                 .forwardOutput()
                 .withDebug(true)
