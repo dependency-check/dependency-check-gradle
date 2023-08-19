@@ -1,6 +1,6 @@
 # Dependency-Check-Gradle
 
-![Build and Deploy](https://github.com/jeremylong/dependency-check-gradle/workflows/Build%20and%20Deploy/badge.svg)
+[![Build](https://github.com/dependency-check/dependency-check-gradle/actions/workflows/build.yml/badge.svg)](https://github.com/dependency-check/dependency-check-gradle/actions/workflows/build.yml)
 
 The dependency-check gradle plugin allows projects to monitor dependent libraries for
 known, published vulnerabilities.
