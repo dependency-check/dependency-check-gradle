@@ -37,9 +37,9 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.*
 abstract class ConfiguredTask extends DefaultTask {
 
     @Internal
-    transient DependencyCheckExtension config = (DependencyCheckExtension) project.getExtensions().findByName('dependencyCheck')
+    DependencyCheckExtension config = (DependencyCheckExtension) project.getExtensions().findByName('dependencyCheck')
     @Internal
-    transient Settings settings
+    Settings settings
     @Internal
     String PROPERTIES_FILE = 'task.properties'
 
