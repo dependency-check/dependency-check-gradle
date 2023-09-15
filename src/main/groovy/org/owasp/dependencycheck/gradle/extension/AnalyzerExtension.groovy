@@ -157,7 +157,9 @@ class AnalyzerExtension {
     Boolean cpanEnabled
     /**
      * Sets whether the Node.js Analyzer should be used.
+     * @deprecated Use nodePackage { enabled = true }
      */
+    @Deprecated
     Boolean nodeEnabled
     /**
      * Sets whether the NSP Analyzer should be used.
@@ -185,6 +187,11 @@ class AnalyzerExtension {
      * The configuration extension for the node audit settings.
      */
     NodeAuditExtension nodeAudit = new NodeAuditExtension()
+
+    /**
+     * The configuration extension for the node package settings.
+     */
+    NodePackageExtension nodePackage = new NodePackageExtension()
 
     /**
      * The configuration extension for artifactory settings.
@@ -230,5 +237,14 @@ class AnalyzerExtension {
      */
     def nodeAudit(Closure configClosure) {
         return project.configure(nodeAudit, configClosure)
+    }
+
+    /**
+     * Allows programmatic configuration of the node package extension
+     * @param configClosure the closure to configure the node extension
+     * @return the node extension
+     */
+    def nodePackage(Closure configClosure) {
+        return project.configure(nodePackage, configClosure)
     }
 }

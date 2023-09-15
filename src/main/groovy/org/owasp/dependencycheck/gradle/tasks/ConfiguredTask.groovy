@@ -165,7 +165,8 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setBooleanIfNotNull(ANALYZER_NUGETCONF_ENABLED, config.analyzers.nugetconfEnabled)
 
 
-        settings.setBooleanIfNotNull(ANALYZER_NODE_PACKAGE_ENABLED, config.analyzers.nodeEnabled)
+        settings.setBooleanIfNotNull(ANALYZER_NODE_PACKAGE_ENABLED, select(config.analyzers.nodePackage.enabled, config.analyzers.nodeEnabled))
+        settings.setBooleanIfNotNull(ANALYZER_NODE_PACKAGE_SKIPDEV, config.analyzers.nodePackage.skipDevDependencies)
         settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_ENABLED, select(config.analyzers.nodeAudit.enabled, config.analyzers.nodeAuditEnabled))
         settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_USE_CACHE, config.analyzers.nodeAudit.useCache)
         settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_SKIPDEV, config.analyzers.nodeAudit.skipDevDependencies)
