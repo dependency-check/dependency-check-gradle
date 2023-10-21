@@ -127,6 +127,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
                 }
                 knownExploitedEnabled = false
                 knownExploitedURL = "https://example.com"
+                knownExploitedValidForHours = 12
                 retirejs {
                     filters = ['filter1', 'filter2']
                     filterNonVulnerable = true

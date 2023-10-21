@@ -47,6 +47,10 @@ class AnalyzerExtension {
      */
     String knownExploitedURL
     /**
+     * Controls the skipping of the check for Known Exploited Vulnerabilities updates.
+     */
+    Integer knownExploitedValidForHours
+    /**
      * A comma-separated list of additional file extensions to be treated like a ZIP file, the contents will be extracted and analyzed.
      */
     String zipExtensions
