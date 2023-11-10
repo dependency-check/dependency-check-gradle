@@ -148,6 +148,23 @@ class DependencyCheckGradlePluginSpec extends Specification {
             suppressionFiles = ['./src/config/suppression1.xml', './src/config/suppression2.xml']
             suppressionFileUser = 'suppressionFileUsername'
             suppressionFilePassword = 'suppressionFilePassword'
+
+            additionalCpes {
+                additional1 {
+                    description = "Additional1"
+                    cpe = "cpe:2.3:a:aGroup1:aPackage1:123:*:*:*:*:*:*:*"
+                }
+
+                additional2 {
+                    description = "Additional2"
+                    cpe = "cpe:2.3:a:aGroup2:aPackage2:123:*:*:*:*:*:*:*"
+                }
+
+                additional3 {
+                    description = "Additional3"
+                    cpe = "cpe:2.3:a:aGroup3:aPackage3:123:*:*:*:*:*:*:*"
+                }
+            }
         }
 
         then:
@@ -185,6 +202,10 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.analyzers.retirejs.filterNonVulnerable == true
         project.dependencyCheck.slack.enabled == true
         project.dependencyCheck.slack.webhookUrl == slackWebhookUrl
+        project.dependencyCheck.additionalCpes.size() == 3
+        project.dependencyCheck.additionalCpes.getByName('additional1').description == 'Additional1'
+        project.dependencyCheck.additionalCpes.getByName('additional1').cpe == 'cpe:2.3:a:aGroup1:aPackage1:123:*:*:*:*:*:*:*'
+
     }
 
     def 'scanConfigurations and skipConfigurations are mutually exclusive'() {

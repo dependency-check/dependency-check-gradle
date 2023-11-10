@@ -43,10 +43,12 @@ import org.owasp.dependencycheck.dependency.Confidence
 import org.owasp.dependencycheck.dependency.Dependency
 import org.owasp.dependencycheck.dependency.IncludedByReference
 import org.owasp.dependencycheck.dependency.Vulnerability
+import org.owasp.dependencycheck.dependency.naming.CpeIdentifier
 import org.owasp.dependencycheck.exception.ExceptionCollection
 import org.owasp.dependencycheck.exception.ReportException
 import org.owasp.dependencycheck.gradle.service.SlackNotificationSenderService
 import org.owasp.dependencycheck.utils.SeverityUtil
+import us.springett.parsers.cpe.CpeParser
 
 import static org.owasp.dependencycheck.dependency.EvidenceType.PRODUCT
 import static org.owasp.dependencycheck.dependency.EvidenceType.VENDOR
@@ -457,6 +459,15 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                     logger.warn("ScanSet file `${f}` does not exist in ${project.name}")
                 }
             }
+        }
+
+        config.additionalCpes.each {
+            var dep = new Dependency(true);
+            dep.setDescription(it.description)
+            dep.addVulnerableSoftwareIdentifier(new CpeIdentifier(CpeParser.parse(it.cpe), Confidence.HIGHEST))
+            dep.setFileName("")
+            dep.setActualFilePath("")
+            engine.addDependency(dep)
         }
     }
 

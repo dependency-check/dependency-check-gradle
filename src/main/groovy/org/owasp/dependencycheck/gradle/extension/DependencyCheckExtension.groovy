@@ -18,6 +18,8 @@
 
 package org.owasp.dependencycheck.gradle.extension
 
+import org.gradle.api.Action
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 
 import java.util.stream.Collectors
@@ -210,11 +212,17 @@ class DependencyCheckExtension {
      * A set of files or folders to scan.
      */
     List<File> scanSet
+    /**
+     * Additional CPE to be analyzed.
+     */
+    NamedDomainObjectContainer<AdditionalCpe> additionalCpes =
+            project.objects.domainObjectContainer(AdditionalCpe.class)
 
     /**
      * The configuration extension for cache settings.
      */
     CacheExtension cache = new CacheExtension()
+
 
     /**
      * Allows programmatic configuration of the proxy extension
@@ -277,5 +285,13 @@ class DependencyCheckExtension {
      */
     def cache(Closure configClosure) {
         return project.configure(cache, configClosure)
+    }
+
+    /**
+     * Allows programmatic configuration of additional CPEs to be analyzed
+     * @param action the action used to add entries to additional CPEs container.
+     */
+    def additionalCpes(Action<NamedDomainObjectContainer<AdditionalCpe>> action) {
+        action.execute(additionalCpes)
     }
 }
