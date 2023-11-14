@@ -226,7 +226,7 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setStringIfNotEmpty(PROXY_PORT, "${config.proxy.port}")
         settings.setStringIfNotEmpty(PROXY_USERNAME, config.proxy.username)
         settings.setStringIfNotEmpty(PROXY_PASSWORD, config.proxy.password)
-        settings.setArrayIfNotEmpty(PROXY_NON_PROXY_HOSTS, config.proxy.nonProxyHosts)
+        settings.setStringIfNotEmpty(PROXY_NON_PROXY_HOSTS, config.proxy.nonProxyHosts.join("|"))
     }
 
     /**
