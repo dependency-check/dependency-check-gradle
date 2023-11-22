@@ -61,7 +61,7 @@ class DependencyCheckExtension {
     /**
      * The configuration extension that defines the location of the NVD CVE data.
      */
-    CveExtension cve = new CveExtension()
+    NvdExtension nvd = new NvdExtension()
 
     /**
      * The configuration extension that configures the hosted suppressions file.
@@ -81,10 +81,6 @@ class DependencyCheckExtension {
      * Set to false if the proxy does not support HEAD requests. The default is true.
      */
     Boolean quickQueryTimestamp
-    /**
-     * The number of hours to wait before checking for additional updates from the NVD.
-     */
-    Integer cveValidForHours
     /**
      * The directory where the reports will be written. Defaults to 'build/reports'.
      */
@@ -235,12 +231,12 @@ class DependencyCheckExtension {
     }
 
     /**
-     * Allows programmatic configuration of the cve extension
-     * @param configClosure the closure to configure the cve extension
-     * @return the cve extension
+     * Allows programmatic configuration of the nvd extension
+     * @param configClosure the closure to configure the nvd extension
+     * @return the nvd extension
      */
-    def cve(Closure configClosure) {
-        return project.configure(cve, configClosure)
+    def nvd(Closure configClosure) {
+        return project.configure(nvd, configClosure)
     }
 
     /**

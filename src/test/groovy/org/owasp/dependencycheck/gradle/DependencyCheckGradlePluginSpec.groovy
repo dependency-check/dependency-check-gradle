@@ -78,8 +78,8 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.proxy.port == null
         project.dependencyCheck.proxy.username == null
         project.dependencyCheck.proxy.password == null
-        project.dependencyCheck.cve.urlModified == null
-        project.dependencyCheck.cve.urlBase == null
+        project.dependencyCheck.nvd.apiKey == null
+        project.dependencyCheck.nvd.delay == null
         project.dependencyCheck.outputDirectory == "${project.buildDir}/reports"
         project.dependencyCheck.quickQueryTimestamp == null
         project.dependencyCheck.scanConfigurations == []
@@ -103,9 +103,9 @@ class DependencyCheckGradlePluginSpec extends Specification {
                 password = 'proxyPassword'
                 nonProxyHosts = ['localhost']
             }
-            cve {
-                urlBase = 'urlBase'
-                urlModified = 'urlModified'
+            nvd {
+                apiKey = 'apiKey'
+                delay = 5000
             }
 
             hostedSuppressions {
@@ -157,8 +157,8 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.proxy.password == 'proxyPassword'
         project.dependencyCheck.proxy.nonProxyHosts == ['localhost']
 
-        project.dependencyCheck.cve.urlModified == 'urlModified'
-        project.dependencyCheck.cve.urlBase == 'urlBase'
+        project.dependencyCheck.nvd.apiKey == 'apiKey'
+        project.dependencyCheck.nvd.delay == 5000
         project.dependencyCheck.hostedSuppressions.url == 'suppressionsurl'
         project.dependencyCheck.hostedSuppressions.validForHours == 5
         project.dependencyCheck.hostedSuppressions.forceupdate == true

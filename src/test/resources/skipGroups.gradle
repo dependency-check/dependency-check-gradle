@@ -20,4 +20,7 @@ dependencies {
 dependencyCheck {
     skipGroups = ['commons-collections', 'commons-httpclient', 'commons-io', 'commons-file']
     failBuildOnCVSS = 0
+    nvd {
+        datafeedUrl = 'https://jeremylong.github.io/DependencyCheck/hb_nvd/'
+    }
 }
