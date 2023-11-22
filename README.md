@@ -5,6 +5,11 @@
 The dependency-check gradle plugin allows projects to monitor dependent libraries for
 known, published vulnerabilities.
 
+## 9.0.0 Upgrade Notice
+
+**Breaking Changes** are included in the 9.0.0 release. Please see the [9.0.0 Upgrade Notice](https://github.com/jeremylong/DependencyCheck#900-upgrade-notice)
+on the primary dependency-check site for more information.
+
 ## Current Release
 
 The latest version is 
@@ -25,7 +30,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'org.owasp:dependency-check-gradle:8.4.3'
+        classpath 'org.owasp:dependency-check-gradle:9.0.0'
     }
 }
 
@@ -62,7 +67,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'org.owasp:dependency-check-gradle:8.4.3'
+    classpath 'org.owasp:dependency-check-gradle:9.0.0'
   }
 }
 
@@ -79,7 +84,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'org.owasp:dependency-check-gradle:8.4.3'
+    classpath 'org.owasp:dependency-check-gradle:9.0.0'
   }
 }
 
@@ -108,7 +113,7 @@ subprojects {
 
 ```kotlin
 plugins {
-    id("org.owasp.dependencycheck") version "8.4.3" apply false 
+    id("org.owasp.dependencycheck") version "9.0.0" apply false 
 }
 
 allprojects {

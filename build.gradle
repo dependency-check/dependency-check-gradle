@@ -17,7 +17,8 @@
  */
 
 ext {
-    odcVersion = '8.4.3'
+    odcVersion = '9.0.0'
+    openVulnClientVersion = '5.0.1'
     slackWebhookVersion = '1.4.0'
     spockCoreVersion = '2.3-groovy-3.0'
 }
@@ -64,6 +65,7 @@ dependencies {
     api(
             "org.owasp:dependency-check-core:$odcVersion",
             "org.owasp:dependency-check-utils:$odcVersion",
+            "io.github.jeremylong:open-vulnerability-clients:$openVulnClientVersion",
             "net.gpedro.integrations.slack:slack-webhook:$slackWebhookVersion"
     )
 

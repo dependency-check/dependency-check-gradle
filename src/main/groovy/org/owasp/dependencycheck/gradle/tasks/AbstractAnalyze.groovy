@@ -246,8 +246,8 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         Set<String> vulnerabilities = new HashSet<>();
         for (Dependency d : engine.getDependencies()) {
             for (Vulnerability v : d.getVulnerabilities()) {
-                if ((v.getCvssV2() != null && v.getCvssV2().getScore() >= config.failBuildOnCVSS)
-                        || (v.getCvssV3() != null && v.getCvssV3().getBaseScore() >= config.failBuildOnCVSS)
+                if ((v.getCvssV2() != null && v.getCvssV2().getCvssData() != null && v.getCvssV2().getCvssData().getBaseScore() >= config.failBuildOnCVSS)
+                        || (v.getCvssV3() != null && v.getCvssV3().getCvssData() != null && v.getCvssV3().getCvssData().getBaseScore() >= config.failBuildOnCVSS)
                         || (v.getUnscoredSeverity() != null && SeverityUtil.estimateCvssV2(v.getUnscoredSeverity()) >= config.failBuildOnCVSS)
                         //safety net to fail on any if for some reason the above misses on 0
                         || (config.failBuildOnCVSS <= 0.0f)) {

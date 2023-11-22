@@ -86,30 +86,20 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setStringIfNotEmpty(DB_CONNECTION_STRING, config.data.connectionString)
         settings.setStringIfNotEmpty(DB_USER, config.data.username)
         settings.setStringIfNotEmpty(DB_PASSWORD, config.data.password)
-        settings.setStringIfNotEmpty(CVE_MODIFIED_JSON, config.cve.urlModified)
-        settings.setStringIfNotEmpty(CVE_BASE_JSON, config.cve.urlBase)
-        settings.setIntIfNotNull(CVE_DOWNLOAD_WAIT_TIME, config.cve.waitTime)
-        if (config.cve.startYear != null) {
-            if (config.cve.startYear >= 2002) {
-                settings.setInt(CVE_START_YEAR, config.cve.startYear)
-            } else {
-                throw new InvalidUserDataException('Invalid setting: `cve.startYear` must be 2002 or greater')
-            }
-        }
-        if (config.cve.user && config.cve.password) {
-            settings.setStringIfNotEmpty(CVE_USER, config.cve.user)
-            settings.setStringIfNotEmpty(CVE_PASSWORD, config.cve.password)
+
+
+        settings.setStringIfNotEmpty(NVD_API_KEY, config.nvd.apiKey)
+        settings.setIntIfNotNull(NVD_API_DELAY, config.nvd.delay)
+        settings.setIntIfNotNull(NVD_API_VALID_FOR_HOURS, config.nvd.validForHours);
+
+        settings.setStringIfNotEmpty(NVD_API_DATAFEED_URL, config.nvd.datafeedUrl)
+        if (config.nvd.datafeedUser && config.nvd.datafeedPassword) {
+            settings.setStringIfNotEmpty(NVD_API_DATAFEED_USER, config.nvd.datafeedUser)
+            settings.setStringIfNotEmpty(NVD_API_DATAFEED_PASSWORD, config.nvd.datafeedPassword)
         }
 
         settings.setBooleanIfNotNull(DOWNLOADER_QUICK_QUERY_TIMESTAMP, config.quickQueryTimestamp)
         settings.setFloat(JUNIT_FAIL_ON_CVSS, config.junitFailOnCVSS)
-        if (config.cveValidForHours != null) {
-            if (config.cveValidForHours >= 0) {
-                settings.setInt(CVE_CHECK_VALID_FOR_HOURS, config.cveValidForHours)
-            } else {
-                throw new InvalidUserDataException('Invalid setting: `validForHours` must be 0 or greater')
-            }
-        }
         settings.setBooleanIfNotNull(HOSTED_SUPPRESSIONS_ENABLED, config.hostedSuppressions.enabled)
         settings.setBooleanIfNotNull(HOSTED_SUPPRESSIONS_FORCEUPDATE, config.hostedSuppressions.forceupdate)
         settings.setStringIfNotNull(HOSTED_SUPPRESSIONS_URL, config.hostedSuppressions.url)

@@ -6,6 +6,9 @@ plugins {
 dependencyCheck {
     failOnError=true
     format="ALL"
+    nvd {
+        datafeedUrl = 'https://jeremylong.github.io/DependencyCheck/hb_nvd/'
+    }
 }
 
 subprojects {

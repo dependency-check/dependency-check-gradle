@@ -57,6 +57,11 @@ class DependencyCheckPluginIntegSpec extends Specification {
                     dependencies {
                         implementation group: 'commons-collections', name: 'commons-collections', version: '3.2'
                     }
+                    dependencyCheck {
+                        nvd {
+                            datafeedUrl = 'https://jeremylong.github.io/DependencyCheck/hb_nvd/'
+                        }
+                    }
                 """.stripIndent()
             }
         }
@@ -94,6 +99,11 @@ class DependencyCheckPluginIntegSpec extends Specification {
                     
                     dependencies {
                         implementation group: 'commons-collections', name: 'commons-collections', version: '3.2'
+                    }
+                    dependencyCheck {
+                        nvd {
+                            datafeedUrl = 'https://jeremylong.github.io/DependencyCheck/hb_nvd/'
+                        }
                     }
                 """.stripIndent()
             }
