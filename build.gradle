@@ -59,14 +59,14 @@ repositories {
 
 dependencies {
     implementation(
-            localGroovy(),
-            gradleApi()
+        localGroovy(),
+        gradleApi()
     )
     api(
-            "org.owasp:dependency-check-core:$odcVersion",
-            "org.owasp:dependency-check-utils:$odcVersion",
-            "io.github.jeremylong:open-vulnerability-clients:$openVulnClientVersion",
-            "net.gpedro.integrations.slack:slack-webhook:$slackWebhookVersion"
+        "org.owasp:dependency-check-core:$odcVersion",
+        "org.owasp:dependency-check-utils:$odcVersion",
+        "io.github.jeremylong:open-vulnerability-clients:$openVulnClientVersion",
+        "net.gpedro.integrations.slack:slack-webhook:$slackWebhookVersion"
     )
 
     testImplementation gradleTestKit()
