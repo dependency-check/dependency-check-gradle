@@ -90,6 +90,7 @@ abstract class ConfiguredTask extends DefaultTask {
 
         settings.setStringIfNotEmpty(NVD_API_KEY, config.nvd.apiKey)
         settings.setIntIfNotNull(NVD_API_DELAY, config.nvd.delay)
+        settings.setIntIfNotNull(NVD_API_MAX_RETRY_COUNT, config.nvd.maxRetryCount)
         settings.setIntIfNotNull(NVD_API_VALID_FOR_HOURS, config.nvd.validForHours);
 
         settings.setStringIfNotEmpty(NVD_API_DATAFEED_URL, config.nvd.datafeedUrl)

@@ -80,6 +80,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.proxy.password == null
         project.dependencyCheck.nvd.apiKey == null
         project.dependencyCheck.nvd.delay == null
+        project.dependencyCheck.nvd.maxRetryCount == null
         project.dependencyCheck.outputDirectory == "${project.buildDir}/reports"
         project.dependencyCheck.quickQueryTimestamp == null
         project.dependencyCheck.scanConfigurations == []
@@ -106,6 +107,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
             nvd {
                 apiKey = 'apiKey'
                 delay = 5000
+                maxRetryCount = 20
             }
 
             hostedSuppressions {
@@ -159,6 +161,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
 
         project.dependencyCheck.nvd.apiKey == 'apiKey'
         project.dependencyCheck.nvd.delay == 5000
+        project.dependencyCheck.nvd.maxRetryCount == 20
         project.dependencyCheck.hostedSuppressions.url == 'suppressionsurl'
         project.dependencyCheck.hostedSuppressions.validForHours == 5
         project.dependencyCheck.hostedSuppressions.forceupdate == true
