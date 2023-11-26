@@ -17,8 +17,8 @@
  */
 
 ext {
-    odcVersion = '9.0.0'
-    openVulnClientVersion = '5.0.1'
+    odcVersion = '9.0.1'
+    openVulnClientVersion = '5.0.2'
     slackWebhookVersion = '1.4.0'
     spockCoreVersion = '2.3-groovy-3.0'
 }

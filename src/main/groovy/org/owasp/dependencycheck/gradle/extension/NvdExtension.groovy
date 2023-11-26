@@ -29,6 +29,10 @@ class NvdExtension {
      */
     Integer delay
     /**
+     * The maximum number of retry requests for a single call to the NVD API.
+     */
+    Integer maxRetryCount
+    /**
      * The URL for the NVD API Data feed that can be generated using https://github.com/jeremylong/Open-Vulnerability-Project/tree/main/vulnz#caching-the-nvd-cve-data.
      */
     String datafeedUrl
