@@ -48,4 +48,8 @@ class NvdExtension {
      * The number of hours to wait before checking for new updates from the NVD. The default is 4 hours.
      */
     Integer validForHours
+    /**
+     * The NVD API endpoint URL; configuring this is uncommon.
+     */
+    String endpoint;
 }
