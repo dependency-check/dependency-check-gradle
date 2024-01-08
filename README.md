@@ -10,6 +10,25 @@ known, published vulnerabilities.
 **Breaking Changes** are included in the 9.0.0 release. Please see the [9.0.0 Upgrade Notice](https://github.com/jeremylong/DependencyCheck#900-upgrade-notice)
 on the primary dependency-check site for more information.
 
+### Gradle Build Environment
+
+With 9.0.0 users may encounter issues with `NoSuchMethodError` exceptions due to
+dependency resolution. If you encounter this issue you will need to pin some of
+the transitive dependencies of dependency-check to specific versions. For example:
+
+/buildSrc/build.gradle
+```groovy
+dependencies {
+    constraints {
+        // org.owasp.dependencycheck needs at least this version of jackson. Other plugins pull in older versions..
+        add("implementation", "com.fasterxml.jackson:jackson-bom:2.16.0")
+        // org.owasp.dependencycheck needs these versions. Other plugins pull in older versions..
+        add("implementation", "org.apache.commons:commons-lang3:3.14.0")
+        add("implementation", "org.apache.commons:commons-text:1.11.0")
+    }
+}
+```
+
 ## Current Release
 
 The latest version is 
