@@ -48,6 +48,7 @@ import org.owasp.dependencycheck.exception.ExceptionCollection
 import org.owasp.dependencycheck.exception.ReportException
 import org.owasp.dependencycheck.gradle.service.SlackNotificationSenderService
 import org.owasp.dependencycheck.utils.SeverityUtil
+import org.owasp.dependencycheck.utils.Checksum
 import us.springett.parsers.cpe.CpeParser
 
 import static org.owasp.dependencycheck.dependency.EvidenceType.PRODUCT
@@ -464,6 +465,10 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         config.additionalCpes.each {
             var dep = new Dependency(true);
             dep.setDescription(it.description)
+            dependency.setDisplayFileName(it.cpe);
+            dependency.setSha1sum(Checksum.getSHA1Checksum(it.cpe));
+            dependency.setSha256sum(Checksum.getSHA256Checksum(it.cpe));
+            dependency.setMd5sum(Checksum.getMD5Checksum(it.cpe));
             dep.addVulnerableSoftwareIdentifier(new CpeIdentifier(CpeParser.parse(it.cpe), Confidence.HIGHEST))
             dep.setFileName("")
             dep.setActualFilePath("")
