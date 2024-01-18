@@ -463,16 +463,16 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         }
 
         config.additionalCpes.each {
-            var dep = new Dependency(true);
-            dep.setDescription(it.description)
+            var dependency = new Dependency(true);
+            dependency.setDescription(it.description)
             dependency.setDisplayFileName(it.cpe);
             dependency.setSha1sum(Checksum.getSHA1Checksum(it.cpe));
             dependency.setSha256sum(Checksum.getSHA256Checksum(it.cpe));
             dependency.setMd5sum(Checksum.getMD5Checksum(it.cpe));
-            dep.addVulnerableSoftwareIdentifier(new CpeIdentifier(CpeParser.parse(it.cpe), Confidence.HIGHEST))
-            dep.setFileName("")
-            dep.setActualFilePath("")
-            engine.addDependency(dep)
+            dependency.addVulnerableSoftwareIdentifier(new CpeIdentifier(CpeParser.parse(it.cpe), Confidence.HIGHEST))
+            dependency.setFileName("")
+            dependency.setActualFilePath("")
+            engine.addDependency(dependency)
         }
     }
 
