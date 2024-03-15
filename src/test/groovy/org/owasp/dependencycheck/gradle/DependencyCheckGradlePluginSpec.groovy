@@ -43,7 +43,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
         DependencyCheckExtension extension = project.extensions.findByName('dependencyCheck') as DependencyCheckExtension
 
         expect:
-        extension.data.directory == "${project.gradle.gradleUserHomeDir}/dependency-check-data/7.0"
+        extension.data.directory == "${project.gradle.gradleUserHomeDir}/dependency-check-data/9.0"
     }
 
     def "dependencyCheckAnalyze task exists"() {
