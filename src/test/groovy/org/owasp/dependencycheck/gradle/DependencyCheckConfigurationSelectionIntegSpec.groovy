@@ -46,6 +46,19 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         //result.output.contains('CVE-2015-5262')
     }
 
+    def "additional CPEs are scanned when present"() {
+        given:
+        copyBuildFileIntoProjectDir('scanAdditionalCpesConfiguration.gradle')
+
+        when:
+        def result = executeTaskAndGetResult(ANALYZE_TASK, false)
+
+        then:
+        result.task(":$ANALYZE_TASK").outcome == FAILED
+        result.output.contains('CVE-2015-6420')
+        result.output.contains('CVE-2016-3092')
+    }
+
     def "custom configurations are scanned by default"() {
         given:
         copyBuildFileIntoProjectDir('scanCustomConfiguration.gradle')
