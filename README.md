@@ -21,7 +21,7 @@ the transitive dependencies of dependency-check to specific versions. For exampl
 dependencies {
     constraints {
         // org.owasp.dependencycheck needs at least this version of jackson. Other plugins pull in older versions..
-        add("implementation", "com.fasterxml.jackson:jackson-bom:2.16.0")
+        add("implementation", "com.fasterxml.jackson:jackson-bom:2.16.1")
         // org.owasp.dependencycheck needs these versions. Other plugins pull in older versions..
         add("implementation", "org.apache.commons:commons-lang3:3.14.0")
         add("implementation", "org.apache.commons:commons-text:1.11.0")
@@ -49,7 +49,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'org.owasp:dependency-check-gradle:9.0.9'
+        classpath 'org.owasp:dependency-check-gradle:9.1.0'
     }
 }
 
@@ -86,7 +86,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'org.owasp:dependency-check-gradle:9.0.9'
+    classpath 'org.owasp:dependency-check-gradle:9.1.0'
   }
 }
 
@@ -103,7 +103,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'org.owasp:dependency-check-gradle:9.0.9'
+    classpath 'org.owasp:dependency-check-gradle:9.1.0'
   }
 }
 
@@ -132,7 +132,7 @@ subprojects {
 
 ```kotlin
 plugins {
-    id("org.owasp.dependencycheck") version "9.0.9" apply false 
+    id("org.owasp.dependencycheck") version "9.1.0" apply false 
 }
 
 allprojects {
