@@ -377,18 +377,15 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * Checks whether a configuration is considered to be a test configuration in order to skip it.
      * A configuration is considered a test configuration if and only if any of the following conditions holds:
      * <ul>
-     *     <li>the name of the configuration or any of its parent configurations equals 'testCompile'</li>
-     *     <li>the name of the configuration or any of its parent configurations equals 'testImplementation'</li>
-     *     <li>the name of the configuration or any of its parent configurations equals 'androidTestCompile'</li>
-     *     <li>the configuration name starts with 'test'</li>
-     *     <li>the configuration name starts with 'androidTest'</li>
+     *     <li>the name of the configuration or any of its parent configurations matches /^(.*[a-z0-9_]T|_?t)est([A-Z0-9_].*)?$/</li>
      * </ul>
+     * The intent of the regular expression is to match `test` in a camel case or snake case configuration name.
      */
     @groovy.transform.CompileStatic
     static boolean isTestConfigurationCheck(Configuration configuration) {
-        boolean isTestConfiguration = configuration.name.startsWith("test") || configuration.name.startsWith("androidTest")
+        boolean isTestConfiguration = configuration.name.matches('^(.*[a-z0-9_]T|_?t)est([A-Z0-9_].*)?$')
         configuration.hierarchy.each {
-            isTestConfiguration |= (it.name == "testCompile" || it.name == "androidTestCompile" || it.name == "testImplementation")
+            isTestConfiguration |= it.name.matches('^(.*[a-z0-9_]T|_?t)est([A-Z0-9_].*)?$')
         }
         isTestConfiguration
     }
