@@ -383,9 +383,9 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      */
     @groovy.transform.CompileStatic
     static boolean isTestConfigurationCheck(Configuration configuration) {
-        boolean isTestConfiguration = configuration.name.matches('^(.*[a-z0-9_]T|_?t)est([A-Z0-9_].*)?$')
+        boolean isTestConfiguration = configuration.name =~ /((^|[a-z0-9_])T|(^|_)t)est([A-Z0-9_]|$)/
         configuration.hierarchy.each {
-            isTestConfiguration |= it.name.matches('^(.*[a-z0-9_]T|_?t)est([A-Z0-9_].*)?$')
+            isTestConfiguration |= it.name =~ /((^|[a-z0-9_])T|(^|_)t)est([A-Z0-9_]|$)/
         }
         isTestConfiguration
     }
