@@ -385,7 +385,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     static boolean isTestConfigurationCheck(Configuration configuration) {
         boolean isTestConfiguration = configuration.name =~ /((^|[a-z0-9_])T|(^|_)t)est([A-Z0-9_]|$)/
         configuration.hierarchy.each {
-            isTestConfiguration |= it.name =~ /((^|[a-z0-9_])T|(^|_)t)est([A-Z0-9_]|$)/
+            isTestConfiguration |= it.name ==~ /((^|[a-z0-9_])T|(^|_)t)est([A-Z0-9_]|$)/
         }
         isTestConfiguration
     }
