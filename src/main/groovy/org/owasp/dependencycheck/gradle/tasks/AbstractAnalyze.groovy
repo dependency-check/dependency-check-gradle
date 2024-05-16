@@ -377,7 +377,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * Checks whether a configuration is considered to be a test configuration in order to skip it.
      * A configuration is considered a test configuration if and only if any of the following conditions holds:
      * <ul>
-     *     <li>the name of the configuration or any of its parent configurations matches /^(.*[a-z0-9_]T|_?t)est([A-Z0-9_].*)?$/</li>
+     *     <li>the name of the configuration or any of its parent configurations matches /((^|[a-z0-9_])T|(^|_)t)est([A-Z0-9_]|$)/</li>
      * </ul>
      * The intent of the regular expression is to match `test` in a camel case or snake case configuration name.
      */
