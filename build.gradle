@@ -17,7 +17,7 @@
  */
 
 ext {
-    odcVersion = '9.2.0'
+    odcVersion = '10.0.0'
     openVulnClientVersion = '5.1.1'
     slackWebhookVersion = '1.4.0'
     spockCoreVersion = '2.3-groovy-3.0'
@@ -168,8 +168,8 @@ publishing {
         maven {
             url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
             credentials {
-                username sonatypeUsername
-                password sonatypePassword
+                username project.findProperty('sonatypeUsernames') ?: System.getenv("SONATYPE_USER")
+                password project.findProperty('sonatypePasswords') ?: System.getenv("SONATYPE_PASSWORD")
             }
         }
     }
