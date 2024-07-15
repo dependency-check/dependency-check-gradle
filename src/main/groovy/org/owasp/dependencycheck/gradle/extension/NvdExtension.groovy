@@ -29,6 +29,10 @@ class NvdExtension {
      */
     Integer delay
     /**
+     * The number records for a single page from NVD API (must be <=2000).
+     */
+    Integer resultsPerPage
+    /**
      * The maximum number of retry requests for a single call to the NVD API.
      */
     Integer maxRetryCount
