@@ -16,67 +16,35 @@
  * Copyright (c) 2015 Wei Ma. All Rights Reserved.
  */
 
-ext {
-    odcVersion = '10.0.3'
-    openVulnClientVersion = '5.1.1'
-    slackWebhookVersion = '1.4.0'
-    spockCoreVersion = '2.3-groovy-3.0'
+plugins {
+    id('groovy')
+    id('idea')
+    id('eclipse')
+    id('signing')
+    id('project-report')
+    id('build-dashboard')
+    alias(libs.plugins.gradle.plugin.publish)
 }
 
 group = 'org.owasp'
-version = "${odcVersion}"
-
-buildscript {
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        maven {
-            url 'https://plugins.gradle.org/m2/'
-        }
-    }
-    dependencies {
-        classpath "com.gradle.publish:plugin-publish-plugin:0.11.0"
-    }
-}
-
-apply plugin: 'groovy'
-apply plugin: 'java-gradle-plugin'
-apply plugin: 'idea'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
-apply plugin: 'signing'
-apply plugin: 'project-report'
-apply plugin: 'build-dashboard'
-apply plugin: 'com.gradle.plugin-publish'
-
-repositories {
-    mavenLocal()
-    maven {
-        name 'OWASP dependency-check snapshot'
-        url 'https://oss.sonatype.org/content/repositories/snapshots'
-    }
-    mavenCentral()
-}
+version = libs.versions.odc.get()
 
 dependencies {
-    implementation(
-        localGroovy(),
-        gradleApi()
-    )
-    api(
-        "org.owasp:dependency-check-core:$odcVersion",
-        "org.owasp:dependency-check-utils:$odcVersion",
-        "io.github.jeremylong:open-vulnerability-clients:$openVulnClientVersion",
-        "net.gpedro.integrations.slack:slack-webhook:$slackWebhookVersion"
-    )
+    implementation localGroovy()
+    implementation gradleApi()
+
+    api libs.owasp.dependencyCheck.core
+    api libs.owasp.dependencyCheck.utils
+    api libs.openVuln.clients
+    api libs.slack.webhook
 
     testImplementation gradleTestKit()
-    testImplementation("org.spockframework:spock-core:$spockCoreVersion") {
+    testImplementation(libs.spock.core) {
         exclude module: 'groovy-all'
     }
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.3'
-    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.3'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.3'
+    testImplementation libs.junit.jupiter.api
+    testImplementation libs.junit.jupiter.params
+    testRuntimeOnly libs.junit.jupiter.engine
 }
 test {
     useJUnitPlatform()
@@ -86,13 +54,10 @@ test.onlyIf { !project.hasProperty('skipTests') }
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
-
-    withJavadocJar()
-    withSourcesJar()
 }
 
 javadoc {
-    if(JavaVersion.current().isJava9Compatible()) {
+    if (JavaVersion.current().isJava9Compatible()) {
         options.addBooleanOption('html5', true)
     }
 }
@@ -100,14 +65,13 @@ javadoc {
 publishing {
     publications {
         maven(MavenPublication) {
-            groupId "$group"
-            artifactId 'dependency-check-gradle'
-            version "$version"
+            groupId = project.group
+            artifactId = 'dependency-check-gradle'
+            version = project.version
             from components.java
             pom {
                 name = 'dependency-check-gradle'
-                description = 'OWASP dependency-check gradle plugin is a software ' +
-                        'composition analysis tool used to find known vulnerable dependencies.'
+                description = 'OWASP dependency-check gradle plugin is a software composition analysis tool used to find known vulnerable dependencies.'
 
                 url = 'https://jeremylong.github.io/DependencyCheck/'
 
@@ -131,15 +95,14 @@ publishing {
                 }
             }
         }
-        pluginPublication (MavenPublication) {
-            groupId "$group"
-            artifactId 'dependency-check-gradle'
-            version "$version"
+        pluginPublication(MavenPublication) {
+            groupId = project.group
+            artifactId = 'dependency-check-gradle'
+            version = project.version
             from components.java
             pom {
                 name = 'dependency-check-gradle'
-                description = 'OWASP dependency-check gradle plugin is a software ' +
-                        'composition analysis tool used to find known vulnerable dependencies.'
+                description = 'OWASP dependency-check gradle plugin is a software composition analysis tool used to find known vulnerable dependencies.'
 
                 url = 'https://jeremylong.github.io/DependencyCheck/'
 
@@ -179,20 +142,18 @@ signing {
     sign publishing.publications.pluginPublication
 }
 
-pluginBundle {
+gradlePlugin {
     website = 'http://jeremylong.github.io/DependencyCheck/dependency-check-gradle/index.html'
     vcsUrl = 'https://github.com/dependency-check/dependency-check-gradle/'
-    description = 'A software composition analysis plugin that identifies known vulnerable dependencies used by the project.'
-    tags = ['OWASP', 'dependency-check', 'gradle-plugin', 'software-composition-analysis', 'vulnerability-detection', 'security']
 
     plugins {
         dependencyCheck {
             id = 'org.owasp.dependencycheck'
             displayName = 'OWASP dependency-check-gradle plugin'
+            description = 'A software composition analysis plugin that identifies known vulnerable dependencies used by the project.'
+            tags.addAll('OWASP', 'dependency-check', 'gradle-plugin', 'software-composition-analysis', 'vulnerability-detection', 'security')
+            implementationClass = 'org.owasp.dependencycheck.gradle.DependencyCheckPlugin'
         }
-    }
-    mavenCoordinates {
-        groupId = "org.owasp"
     }
 }
 

@@ -16,4 +16,22 @@
  * Copyright (c) 2015 Wei Ma. All Rights Reserved.
  */
 
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement() {
+    repositories {
+        mavenLocal()
+        maven {
+            name 'OWASP dependency-check snapshot'
+            url 'https://oss.sonatype.org/content/repositories/snapshots'
+        }
+        mavenCentral()
+    }
+}
+
+
 rootProject.name = 'dependency-check-gradle'
