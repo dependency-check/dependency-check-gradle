@@ -17,6 +17,7 @@
  */
 package org.owasp.dependencycheck.gradle.extension
 
+import org.gradle.api.Action
 import org.gradle.api.Project
 
 /**
@@ -211,44 +212,104 @@ class AnalyzerExtension {
      * Allows programmatic configuration of the retirejs extension
      * @param configClosure the closure to configure the retirejs extension
      * @return the retirejs extension
+     * @deprecated Use the {@code Action} variant instead
      */
+    @Deprecated()
     def retirejs(Closure configClosure) {
         return project.configure(retirejs, configClosure)
+    }
+
+    /**
+     * Allows programmatic configuration of the retirejs extension
+     * @param config the action to configure the retirejs extension
+     * @return the retirejs extension
+     */
+    def retirejs(Action<RetireJSExtension> config) {
+        config.execute(retirejs)
+        return retirejs
     }
 
     /**
      * Allows programmatic configuration of the artifactory extension
      * @param configClosure the closure to configure the artifactory extension
      * @return the artifactory extension
+     * @deprecated Use the {@code Action} variant instead
      */
+    @Deprecated()
     def artifactory(Closure configClosure) {
         return project.configure(artifactory, configClosure)
+    }
+
+    /**
+     * Allows programmatic configuration of the artifactory extension
+     * @param config the action to configure the artifactory extension
+     * @return the artifactory extension
+     */
+    def artifactory(Action<ArtifactoryExtension> config) {
+        config.execute(artifactory)
+        return artifactory
     }
 
     /**
      * Allows programmatic configuration of the ossIndex extension
      * @param configClosure the closure to configure the ossIndex extension
      * @return the ossIndex extension
+     * @deprecated Use the {@code Action} variant instead
      */
+    @Deprecated()
     def ossIndex(Closure configClosure) {
         return project.configure(ossIndex, configClosure)
+    }
+
+    /**
+     * Allows programmatic configuration of the ossIndex extension
+     * @param config the action to configure the ossIndex extension
+     * @return the ossIndex extension
+     */
+    def ossIndex(Action<OssIndexExtension> config) {
+        config.execute(ossIndex)
+        return ossIndex
     }
 
     /**
      * Allows programmatic configuration of the nodeAudit extension
      * @param configClosure the closure to configure the ossIndex extension
      * @return the ossIndex extension
+     * @deprecated Use the {@code Action} variant instead
      */
+    @Deprecated()
     def nodeAudit(Closure configClosure) {
         return project.configure(nodeAudit, configClosure)
+    }
+
+    /**
+     * Allows programmatic configuration of the nodeAudit extension
+     * @param config the action to configure the ossIndex extension
+     * @return the ossIndex extension
+     */
+    def nodeAudit(Action<NodeAuditExtension> config) {
+        config.execute(nodeAudit)
+        return nodeAudit
     }
 
     /**
      * Allows programmatic configuration of the node package extension
      * @param configClosure the closure to configure the node extension
      * @return the node extension
+     * @deprecated Use the {@code Action} variant instead
      */
+    @Deprecated()
     def nodePackage(Closure configClosure) {
         return project.configure(nodePackage, configClosure)
+    }
+
+    /**
+     * Allows programmatic configuration of the node package extension
+     * @param config the action to configure the node extension
+     * @return the node extension
+     */
+    def nodePackage(Action<NodePackageExtension> config) {
+        config.execute(nodePackage)
+        return nodePackage
     }
 }
