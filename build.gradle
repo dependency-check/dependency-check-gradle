@@ -138,9 +138,9 @@ publishing {
     }
 }
 
-signing {
-    sign publishing.publications.pluginPublication
-}
+//signing {
+//    sign publishing.publications.pluginPublication
+//}
 
 gradlePlugin {
     website = 'http://jeremylong.github.io/DependencyCheck/dependency-check-gradle/index.html'
