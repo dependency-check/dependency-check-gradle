@@ -49,7 +49,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'org.owasp:dependency-check-gradle:10.0.3'
+        classpath 'org.owasp:dependency-check-gradle:10.0.4'
     }
 }
 
@@ -86,7 +86,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'org.owasp:dependency-check-gradle:10.0.3'
+    classpath 'org.owasp:dependency-check-gradle:10.0.4'
   }
 }
 
@@ -103,7 +103,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'org.owasp:dependency-check-gradle:10.0.3'
+    classpath 'org.owasp:dependency-check-gradle:10.0.4'
   }
 }
 
@@ -132,7 +132,7 @@ subprojects {
 
 ```kotlin
 plugins {
-    id("org.owasp.dependencycheck") version "10.0.3" apply false 
+    id("org.owasp.dependencycheck") version "10.0.4" apply false 
 }
 
 allprojects {

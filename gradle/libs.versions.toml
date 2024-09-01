@@ -1,5 +1,5 @@
 [versions]
-odc = '10.0.3'
+odc = '10.0.4'
 spock = '2.3-groovy-3.0'
 junit = '5.10.3'
 
