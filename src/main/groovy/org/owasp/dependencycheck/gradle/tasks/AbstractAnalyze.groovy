@@ -441,7 +441,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             List<String> toScan = ['src/main/resources', 'src/main/webapp',
                                    './package.json', './package-lock.json',
                                    './npm-shrinkwrap.json', './yarn.lock',
-                                   './pnpm.lock', './Gopkg.lock', './go.mod']
+                                   './pnpm.lock', 'pnpm-lock.yaml', './Gopkg.lock', './go.mod']
             toScan.each {
                 File f = project.file it
                 if (f.exists()) {
