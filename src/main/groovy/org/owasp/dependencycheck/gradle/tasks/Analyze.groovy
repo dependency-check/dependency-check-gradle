@@ -18,6 +18,7 @@
 
 package org.owasp.dependencycheck.gradle.tasks
 
+import org.gradle.api.tasks.Internal
 import org.owasp.dependencycheck.Engine
 
 /**
@@ -25,6 +26,9 @@ import org.owasp.dependencycheck.Engine
  */
 @groovy.transform.CompileStatic
 class Analyze extends AbstractAnalyze {
+
+    @Internal
+    String currentProjectPath = project.path
 
     Analyze() {
         group = 'OWASP dependency-check'
@@ -39,7 +43,7 @@ class Analyze extends AbstractAnalyze {
      * Loads the projects dependencies into the dependency-check analysis engine.
      */
     def scanDependencies(Engine engine) {
-        if (shouldBeScanned(project) && !shouldBeSkipped(project)) {
+        if (shouldBeScanned(currentProjectPath) && !shouldBeSkipped(currentProjectPath)) {
             logger.lifecycle("Verifying dependencies for project ${currentProjectName}")
             if (this.config.scanDependencies) {
                 processConfigurations(project, engine)
