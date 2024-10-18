@@ -65,6 +65,14 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     @Internal
     String currentProjectName = project.getName()
 
+    @Internal
+    String currentProjectGroup = project.getGroup()
+
+    @Internal
+    String currentProjectVersion = project.getVersion().toString()
+
+
+
     /**
      * Gets the projects display name. Project.getDisplayName() has been
      * introduced with Gradle 3.3, thus we need to check for the method's
@@ -123,8 +131,8 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             try {
                 String name = currentProjectName
                 String displayName = currentProjectDisplayName
-                String groupId = project.getGroup()
-                String version = project.getVersion().toString()
+                String groupId = currentProjectGroup
+                String version = currentProjectVersion
                 File output = new File(config.outputDirectory)
                 for (String f : getReportFormats(config.format, config.formats)) {
                     engine.writeReports(displayName, groupId, name, version, output, f, exCol)
@@ -219,6 +227,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
 
     /**
      * Loads the projects dependencies into the dependency-check analysis engine.
+     * Runs at execution time
      */
     abstract scanDependencies(Engine engine)
 
@@ -404,6 +413,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
 
     /**
      * Process the incoming artifacts for the given project's configurations.
+     * Runs at execution time.
      * @param project the project to analyze
      * @param engine the dependency-check engine
      */
@@ -416,7 +426,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             if (CUTOVER_GRADLE_VERSION.compareTo(GradleVersion.current()) > 0) {
                 processConfigLegacy configuration, engine
             } else {
-                processConfigV4 project.name, configuration, engine, true
+                processConfigV4 currentProjectName, configuration, engine, true
             }
         }
     }

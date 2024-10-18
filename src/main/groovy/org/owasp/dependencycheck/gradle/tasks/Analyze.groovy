@@ -41,6 +41,7 @@ class Analyze extends AbstractAnalyze {
 
     /**
      * Loads the projects dependencies into the dependency-check analysis engine.
+     * Runs at execution time
      */
     def scanDependencies(Engine engine) {
         if (shouldBeScanned(currentProjectPath) && !shouldBeSkipped(currentProjectPath)) {
