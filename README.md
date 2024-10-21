@@ -5,6 +5,11 @@
 The dependency-check gradle plugin allows projects to monitor dependent libraries for
 known, published vulnerabilities.
 
+## 11.0.0 Upgrade Notice
+- The dependency-check-gradle plugin now requires Java 11 or higher.
+- The dependency-check-gradle plugin will no longer be published to Maven Central; it 
+  will continue to be published to the Gradle plugin portal.
+
 ## 9.0.0 Upgrade Notice
 
 **Breaking Changes** are included in the 9.0.0 release. Please see the [9.0.0 Upgrade Notice](https://github.com/jeremylong/DependencyCheck#900-upgrade-notice)

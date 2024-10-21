@@ -52,8 +52,8 @@ test {
 test.onlyIf { !project.hasProperty('skipTests') }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 javadoc {
@@ -64,37 +64,6 @@ javadoc {
 
 publishing {
     publications {
-        maven(MavenPublication) {
-            groupId = project.group
-            artifactId = 'dependency-check-gradle'
-            version = project.version
-            from components.java
-            pom {
-                name = 'dependency-check-gradle'
-                description = 'OWASP dependency-check gradle plugin is a software composition analysis tool used to find known vulnerable dependencies.'
-
-                url = 'https://jeremylong.github.io/DependencyCheck/'
-
-                licenses {
-                    license {
-                        name = 'The Apache License, Version 2.0'
-                        url = 'https://github.com/dependency-check/dependency-check-gradle/blob/main/LICENSE.txt'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'jlong'
-                        name = 'Jeremy Long'
-                        email = 'jeremy.long@owasp.org'
-                    }
-                }
-                scm {
-                    url = 'https://github.com/dependency-check/dependency-check-gradle'
-                    connection = 'scm:git:https://github.com/dependency-check/dependency-check-gradle.git'
-                    developerConnection = 'scm:git:https://github.com/dependency-check/dependency-check-gradle.git'
-                }
-            }
-        }
         pluginPublication(MavenPublication) {
             groupId = project.group
             artifactId = 'dependency-check-gradle'
@@ -127,20 +96,7 @@ publishing {
             }
         }
     }
-    repositories {
-        maven {
-            url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
-            credentials {
-                username project.findProperty('sonatypeUsername') ?: System.getenv("SONATYPE_USER")
-                password project.findProperty('sonatypePassword') ?: System.getenv("SONATYPE_PASSWORD")
-            }
-        }
-    }
 }
-
-//signing {
-//    sign publishing.publications.pluginPublication
-//}
 
 gradlePlugin {
     website = 'http://jeremylong.github.io/DependencyCheck/dependency-check-gradle/index.html'
