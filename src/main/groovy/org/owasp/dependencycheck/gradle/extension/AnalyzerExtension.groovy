@@ -157,6 +157,10 @@ class AnalyzerExtension {
      */
     Boolean composerEnabled
     /**
+     * Sets whether the PHP Composer Lock File Analyzer should skip packages-dev dependencies.
+     */
+    Boolean composerSkipDev
+    /**
      * Sets whether the Perl CPAN File Analyzer should be used.
      */
     Boolean cpanEnabled

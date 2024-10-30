@@ -156,6 +156,7 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setBooleanIfNotNull(ANALYZER_CMAKE_ENABLED, config.analyzers.cmakeEnabled)
         settings.setBooleanIfNotNull(ANALYZER_AUTOCONF_ENABLED, config.analyzers.autoconfEnabled)
         settings.setBooleanIfNotNull(ANALYZER_COMPOSER_LOCK_ENABLED, config.analyzers.composerEnabled)
+        settings.setBooleanIfNotNull(ANALYZER_COMPOSER_LOCK_SKIP_DEV, config.analyzers.composerSkipDev)
         settings.setBooleanIfNotNull(ANALYZER_CPANFILE_ENABLED, config.analyzers.cpanEnabled)
         settings.setBooleanIfNotNull(ANALYZER_NUGETCONF_ENABLED, config.analyzers.nugetconfEnabled)
 
