@@ -36,8 +36,7 @@ dependencies {
 
 ## Current Release
 
-The latest version is 
-[![Maven Central](https://img.shields.io/maven-central/v/org.owasp/dependency-check-gradle.svg)](https://mvnrepository.com/artifact/org.owasp/dependency-check-gradle)
+The latest version is 11.1.0.
 
 ## Usage
 
@@ -46,19 +45,12 @@ for more detailed information on configuration and usage.
 
 ### Step 1, Apply dependency check gradle plugin
 
-Install from Maven central repo
+Add the plugin to your build.gradle file:
 
 ```groovy
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'org.owasp:dependency-check-gradle:11.1.0'
-    }
+plugins {
+  id "org.owasp.dependencycheck" version "11.1.0"
 }
-
-apply plugin: 'org.owasp.dependencycheck'
 ```
 
 ### Step 2, Run gradle task
@@ -88,10 +80,12 @@ Try put 'apply plugin: "dependency-check"' inside the 'allprojects' or 'subproje
 ```groovy
 buildscript {
   repositories {
-    mavenCentral()
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
   }
   dependencies {
-    classpath 'org.owasp:dependency-check-gradle:11.1.0'
+    classpath "org.owasp:dependency-check-gradle:11.1.0"
   }
 }
 
@@ -105,10 +99,12 @@ allprojects {
 ```groovy
 buildscript {
   repositories {
-    mavenCentral()
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
   }
   dependencies {
-    classpath 'org.owasp:dependency-check-gradle:11.1.0'
+    classpath "org.owasp:dependency-check-gradle:11.1.0"
   }
 }
 
