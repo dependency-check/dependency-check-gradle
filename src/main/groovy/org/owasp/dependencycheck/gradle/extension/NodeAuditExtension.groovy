@@ -50,4 +50,8 @@ class NodeAuditExtension {
      * The path to `pnpm`.
      */
     String pnpmPath
+    /**
+     * The URL to the NPM Audit API.
+     */
+    String url
 }
