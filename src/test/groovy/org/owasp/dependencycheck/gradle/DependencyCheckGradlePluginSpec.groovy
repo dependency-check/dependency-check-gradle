@@ -127,9 +127,11 @@ class DependencyCheckGradlePluginSpec extends Specification {
                     url = 'https://example.com/artifacgtory'
                     bearerToken = 'abc123=='
                 }
-                knownExploitedEnabled = false
-                knownExploitedURL = "https://example.com"
-                knownExploitedValidForHours = 12
+                kev {
+                    enabled = false
+                    url = "https://example.com"
+                    validForHours = 12
+                }
                 retirejs {
                     filters = ['filter1', 'filter2']
                     filterNonVulnerable = true
@@ -199,8 +201,8 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.analyzers.artifactory.enabled == true
         project.dependencyCheck.analyzers.artifactory.url == 'https://example.com/artifacgtory'
         project.dependencyCheck.analyzers.artifactory.bearerToken == 'abc123=='
-        project.dependencyCheck.analyzers.knownExploitedEnabled == false
-        project.dependencyCheck.analyzers.knownExploitedURL == "https://example.com"
+        project.dependencyCheck.analyzers.kev.enabled == false
+        project.dependencyCheck.analyzers.kev.url == "https://example.com"
         project.dependencyCheck.analyzers.retirejs.filters == ['filter1', 'filter2']
         project.dependencyCheck.analyzers.retirejs.filterNonVulnerable == true
         project.dependencyCheck.slack.enabled == true

@@ -40,18 +40,6 @@ class AnalyzerExtension {
      */
     Boolean archiveEnabled
     /**
-     * Sets whether the Known Exploited Vulnerability update and Analyzer will be used.
-     */
-    Boolean knownExploitedEnabled
-    /**
-     * URL to the CISA Known Exploited Vulnerabilities JSON data feed.
-     */
-    String knownExploitedURL
-    /**
-     * Controls the skipping of the check for Known Exploited Vulnerabilities updates.
-     */
-    Integer knownExploitedValidForHours
-    /**
      * A comma-separated list of additional file extensions to be treated like a ZIP file, the contents will be extracted and analyzed.
      */
     String zipExtensions
@@ -188,6 +176,11 @@ class AnalyzerExtension {
     Boolean ossIndexEnabled
 
     /**
+     * The configuration extension for known exploited vulnerabilities settings.
+     */
+    KEVExtension kev = new KEVExtension()
+
+    /**
      * The configuration extension for retirejs settings.
      */
     RetireJSExtension retirejs = new RetireJSExtension()
@@ -211,6 +204,27 @@ class AnalyzerExtension {
      * The configuration extension for artifactory settings.
      */
     OssIndexExtension ossIndex = new OssIndexExtension()
+
+    /**
+     * Allows programmatic configuration of the KEV extension
+     * @param configClosure the closure to configure the KEV extension
+     * @return the KEV extension
+     * @deprecated Use the {@code Action} variant instead
+     */
+    @Deprecated
+    def kev(Closure configClosure) {
+        return project.configure(kev, configClosure)
+    }
+
+    /**
+     * Allows programmatic configuration of the KEV extension
+     * @param config the action to configure the KEV extension
+     * @return the KEV extension
+     */
+    def kev(Action<KEVExtension> config) {
+        config.execute(kev)
+        return kev
+    }
 
     /**
      * Allows programmatic configuration of the retirejs extension

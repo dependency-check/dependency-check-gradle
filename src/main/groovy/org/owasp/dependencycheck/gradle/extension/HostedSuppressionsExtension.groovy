@@ -13,6 +13,18 @@ class HostedSuppressionsExtension {
      */
     String url
     /**
+     * Credentials used for basic authentication for a mirrored hosted suppressions file.
+     */
+    String user
+    /**
+     * Credentials used for basic authentication for a mirrored hosted suppressions file.
+     */
+    String password
+    /**
+     * Credentials used for bearer authentication for a mirrored hosted suppressions file.
+     */
+    String bearerToken
+    /**
      * Whether the hosted suppressions file should be updated regardless of the `autoupdate` setting.
      */
     Boolean forceupdate

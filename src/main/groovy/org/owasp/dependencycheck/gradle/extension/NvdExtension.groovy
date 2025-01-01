@@ -49,6 +49,10 @@ class NvdExtension {
      */
     String datafeedPassword
     /**
+     * Credentials used for bearer authentication for the NVD API Data feed.
+     */
+    String datafeedBearerToken
+    /**
      * The number of hours to wait before checking for new updates from the NVD. The default is 4 hours.
      */
     Integer validForHours
