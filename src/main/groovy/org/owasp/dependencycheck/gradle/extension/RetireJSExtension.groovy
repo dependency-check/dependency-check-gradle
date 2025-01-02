@@ -40,6 +40,18 @@ class RetireJSExtension {
      */
     String retireJsUrl
     /**
+     * Credentials used for basic authentication for the Retire JS Repository URL.
+     */
+    String user
+    /**
+     * Credentials used for basic authentication for the Retire JS Repository URL.
+     */
+    String password
+    /**
+     * Credentials used for bearer authentication for the Retire JS Repository URL.
+     */
+    String bearerToken
+    /**
      * Whether the Retire JS analyzer should be updated regardless of the `autoupdate` setting.
      */
     Boolean forceupdate

@@ -74,6 +74,7 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setArrayIfNotEmpty(SUPPRESSION_FILE, suppressionLists)
         settings.setStringIfNotEmpty(SUPPRESSION_FILE_USER, config.suppressionFileUser)
         settings.setStringIfNotEmpty(SUPPRESSION_FILE_PASSWORD, config.suppressionFilePassword)
+        settings.setStringIfNotEmpty(SUPPRESSION_FILE_BEARER_TOKEN, config.suppressionFileBearerToken)
         settings.setStringIfNotEmpty(HINTS_FILE, config.hintsFile)
 
         configureProxy(settings)
@@ -101,12 +102,16 @@ abstract class ConfiguredTask extends DefaultTask {
             settings.setStringIfNotEmpty(NVD_API_DATAFEED_USER, config.nvd.datafeedUser)
             settings.setStringIfNotEmpty(NVD_API_DATAFEED_PASSWORD, config.nvd.datafeedPassword)
         }
+        settings.setStringIfNotEmpty(NVD_API_DATAFEED_BEARER_TOKEN, config.nvd.datafeedBearerToken)
 
         settings.setBooleanIfNotNull(DOWNLOADER_QUICK_QUERY_TIMESTAMP, config.quickQueryTimestamp)
         settings.setFloat(JUNIT_FAIL_ON_CVSS, config.junitFailOnCVSS)
         settings.setBooleanIfNotNull(HOSTED_SUPPRESSIONS_ENABLED, config.hostedSuppressions.enabled)
         settings.setBooleanIfNotNull(HOSTED_SUPPRESSIONS_FORCEUPDATE, config.hostedSuppressions.forceupdate)
         settings.setStringIfNotNull(HOSTED_SUPPRESSIONS_URL, config.hostedSuppressions.url)
+        settings.setStringIfNotNull(HOSTED_SUPPRESSIONS_USER, config.hostedSuppressions.user)
+        settings.setStringIfNotNull(HOSTED_SUPPRESSIONS_PASSWORD, config.hostedSuppressions.password)
+        settings.setStringIfNotNull(HOSTED_SUPPRESSIONS_BEARER_TOKEN, config.hostedSuppressions.bearerToken)
         if (config.hostedSuppressions.validForHours != null) {
             if (config.hostedSuppressions.validForHours >= 0) {
                 settings.setInt(HOSTED_SUPPRESSIONS_VALID_FOR_HOURS, config.hostedSuppressions.validForHours)
@@ -131,9 +136,12 @@ abstract class ConfiguredTask extends DefaultTask {
 
         settings.setBooleanIfNotNull(ANALYZER_EXPERIMENTAL_ENABLED, config.analyzers.experimentalEnabled)
         settings.setBooleanIfNotNull(ANALYZER_ARCHIVE_ENABLED, config.analyzers.archiveEnabled)
-        settings.setBooleanIfNotNull(ANALYZER_KNOWN_EXPLOITED_ENABLED, config.analyzers.knownExploitedEnabled)
-        settings.setStringIfNotNull(KEV_URL, config.analyzers.knownExploitedURL)
-        settings.setIntIfNotNull(KEV_CHECK_VALID_FOR_HOURS, config.analyzers.knownExploitedValidForHours)
+        settings.setBooleanIfNotNull(ANALYZER_KNOWN_EXPLOITED_ENABLED, config.analyzers.kev.enabled)
+        settings.setStringIfNotNull(KEV_URL, config.analyzers.kev.url)
+        settings.setIntIfNotNull(KEV_CHECK_VALID_FOR_HOURS, config.analyzers.kev.validForHours)
+        settings.setStringIfNotNull(KEV_USER, config.analyzers.kev.user)
+        settings.setStringIfNotNull(KEV_PASSWORD, config.analyzers.kev.password)
+        settings.setStringIfNotNull(KEV_BEARER_TOKEN, config.analyzers.kev.bearerToken)
         settings.setStringIfNotEmpty(ADDITIONAL_ZIP_EXTENSIONS, config.analyzers.zipExtensions)
         settings.setBooleanIfNotNull(ANALYZER_ASSEMBLY_ENABLED, config.analyzers.assemblyEnabled)
         settings.setBooleanIfNotNull(ANALYZER_MSBUILD_PROJECT_ENABLED, config.analyzers.msbuildEnabled)
@@ -173,6 +181,9 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setBooleanIfNotNull(ANALYZER_RETIREJS_ENABLED, config.analyzers.retirejs.enabled)
         settings.setBooleanIfNotNull(ANALYZER_RETIREJS_FORCEUPDATE, config.analyzers.retirejs.forceupdate)
         settings.setStringIfNotNull(ANALYZER_RETIREJS_REPO_JS_URL, config.analyzers.retirejs.retireJsUrl)
+        settings.setStringIfNotNull(ANALYZER_RETIREJS_REPO_JS_USER, config.analyzers.retirejs.user)
+        settings.setStringIfNotNull(ANALYZER_RETIREJS_REPO_JS_PASSWORD, config.analyzers.retirejs.password)
+        settings.setStringIfNotNull(ANALYZER_RETIREJS_REPO_JS_BEARER_TOKEN, config.analyzers.retirejs.bearerToken)
         settings.setBooleanIfNotNull(ANALYZER_RETIREJS_FILTER_NON_VULNERABLE, config.analyzers.retirejs.filterNonVulnerable)
         settings.setArrayIfNotEmpty(ANALYZER_RETIREJS_FILTERS, config.analyzers.retirejs.filters)
 

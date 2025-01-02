@@ -111,13 +111,17 @@ class DependencyCheckExtension {
         }
     }
     /**
-     * The username for downloading the suppression file(s)
+     * The username for downloading the suppression file(s) from HTTP Basic protected locations
      */
     String suppressionFileUser
     /**
-     * The password for downloading the suppression file(s)
+     * The password for downloading the suppression file(s) from HTTP Basic protected locations
      */
     String suppressionFilePassword
+    /**
+     * The token for downloading the suppression file(s) from HTTP Bearer protected locations
+     */
+    String suppressionFileBearerToken
     /**
      * The path to the hints file.
      */
