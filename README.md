@@ -36,7 +36,7 @@ dependencies {
 
 ## Current Release
 
-The latest version is 11.1.1.
+The latest version is 12.0.0.
 
 ## Usage
 
@@ -49,7 +49,7 @@ Add the plugin to your build.gradle file:
 
 ```groovy
 plugins {
-  id "org.owasp.dependencycheck" version "11.1.1"
+  id "org.owasp.dependencycheck" version "12.0.0"
 }
 ```
 
@@ -85,7 +85,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "org.owasp:dependency-check-gradle:11.1.1"
+    classpath "org.owasp:dependency-check-gradle:12.0.0"
   }
 }
 
@@ -104,7 +104,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "org.owasp:dependency-check-gradle:11.1.1"
+    classpath "org.owasp:dependency-check-gradle:12.0.0"
   }
 }
 
@@ -133,7 +133,7 @@ subprojects {
 
 ```kotlin
 plugins {
-    id("org.owasp.dependencycheck") version "11.1.1" apply false
+    id("org.owasp.dependencycheck") version "12.0.0" apply false
 }
 
 allprojects {
