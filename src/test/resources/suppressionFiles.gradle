@@ -13,12 +13,9 @@ dependencies {
 }
 
 dependencyCheck {
-    analyzers {
-        ossIndexEnabled = false
-    }
+    analyzers.ossIndexEnabled = false
+
     failBuildOnCVSS = 0
     suppressionFiles = ["${project.rootDir}/suppressions.xml"]
-    nvd {
-        datafeedUrl = 'https://jeremylong.github.io/DependencyCheck/hb_nvd/'
-    }
+    nvd.datafeedUrl = 'https://jeremylong.github.io/DependencyCheck/hb_nvd/'
 }

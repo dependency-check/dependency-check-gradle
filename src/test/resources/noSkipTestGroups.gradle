@@ -30,7 +30,5 @@ dependencies {
 dependencyCheck {
     failBuildOnCVSS = 0
     skipTestGroups = false
-    nvd {
-        datafeedUrl = 'https://jeremylong.github.io/DependencyCheck/hb_nvd/'
-    }
+    nvd.datafeedUrl = 'https://jeremylong.github.io/DependencyCheck/hb_nvd/'
 }

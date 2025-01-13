@@ -20,7 +20,5 @@ dependencies {
 }
 
 dependencyCheck {
-    nvd {
-        datafeedUrl = 'https://jeremylong.github.io/DependencyCheck/hb_nvd/'
-    }
+    nvd.datafeedUrl = 'https://jeremylong.github.io/DependencyCheck/hb_nvd/'
 }
