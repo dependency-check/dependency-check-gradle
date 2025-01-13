@@ -132,6 +132,20 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         result.task(":$ANALYZE_TASK").outcome == SUCCESS
     }
 
+    def "analysis fails when unused suppression rule is present"() {
+        given:
+        copyBuildFileIntoProjectDir('suppressionFilesFailOnUnusedRule.gradle')
+        copyResourceFileIntoProjectDir('suppressions.xml', 'suppressions.xml')
+
+        when:
+        def result = executeTaskAndGetResult(ANALYZE_TASK, false)
+
+        then:
+        result.task(":$ANALYZE_TASK").outcome == FAILED
+        result.output.contains('Suppression Rule had zero matches')
+        result.output.contains('commons-collections')
+    }
+
 
     private void copyBuildFileIntoProjectDir(String buildFileName) {
         copyResourceFileIntoProjectDir(buildFileName, 'build.gradle')

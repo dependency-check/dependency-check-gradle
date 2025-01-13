@@ -1,0 +1,22 @@
+plugins {
+    id 'org.owasp.dependencycheck'
+}
+apply plugin: 'java'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'commons-lang:commons-lang:2.6' // EOL dependency which has no vulnerabilities and unlikely to obtain any
+}
+
+dependencyCheck {
+    analyzers.ossIndexEnabled = false
+
+    failBuildOnCVSS = 0
+    suppressionFiles = ["${project.rootDir}/suppressions.xml"]
+    failBuildOnUnusedSuppressionRule = true
+    nvd.datafeedUrl = 'https://jeremylong.github.io/DependencyCheck/hb_nvd/'
+}
