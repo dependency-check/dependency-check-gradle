@@ -97,46 +97,31 @@ class DependencyCheckGradlePluginSpec extends Specification {
         def slackWebhookUrl = 'https://slack.com/webhook'
         when:
         project.dependencyCheck {
-            proxy {
-                server = '127.0.0.1'
-                port = 3128
-                username = 'proxyUsername'
-                password = 'proxyPassword'
-                nonProxyHosts = ['localhost']
-            }
-            nvd {
-                apiKey = 'apiKey'
-                delay = 5000
-                maxRetryCount = 20
-            }
+            proxy.server = '127.0.0.1'
+            proxy.port = 3128
+            proxy.username = 'proxyUsername'
+            proxy.password = 'proxyPassword'
+            proxy.nonProxyHosts = ['localhost']
 
-            hostedSuppressions {
-                url = 'suppressionsurl'
-                validForHours = 5
-                forceupdate = true
-            }
+            nvd.apiKey = 'apiKey'
+            nvd.delay = 5000
+            nvd.maxRetryCount = 20
 
-            slack {
-                enabled = true
-                webhookUrl = slackWebhookUrl
-            }
+            hostedSuppressions.url = 'suppressionsurl'
+            hostedSuppressions.validForHours = 5
+            hostedSuppressions.forceupdate = true
 
-            analyzers {
-                artifactory {
-                    enabled = true
-                    url = 'https://example.com/artifacgtory'
-                    bearerToken = 'abc123=='
-                }
-                kev {
-                    enabled = false
-                    url = "https://example.com"
-                    validForHours = 12
-                }
-                retirejs {
-                    filters = ['filter1', 'filter2']
-                    filterNonVulnerable = true
-                }
-            }
+            slack.enabled = true
+            slack.webhookUrl = slackWebhookUrl
+
+            analyzers.artifactory.enabled = true
+            analyzers.artifactory.url = 'https://example.com/artifacgtory'
+            analyzers.artifactory.bearerToken = 'abc123=='
+            analyzers.kev.enabled = false
+            analyzers.kev.url = "https://example.com"
+            analyzers.kev.validForHours = 12
+            analyzers.retirejs.filters = ['filter1', 'filter2']
+            analyzers.retirejs.filterNonVulnerable = true
 
             outputDirectory = 'outputDirectory'
             quickQueryTimestamp = false

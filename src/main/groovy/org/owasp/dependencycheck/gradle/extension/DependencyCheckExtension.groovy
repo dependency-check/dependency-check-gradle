@@ -167,6 +167,10 @@ class DependencyCheckExtension {
      */
     Float junitFailOnCVSS = 0.0f
     /**
+     * Specifies that if any unused suppression rule is found, the build will fail.
+     */
+    Boolean failBuildOnUnusedSuppressionRule = false
+    /**
      * Displays a summary of the findings. Defaults to true.
      */
     Boolean showSummary = true

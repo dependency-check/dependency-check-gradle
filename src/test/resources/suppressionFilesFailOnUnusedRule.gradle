@@ -9,7 +9,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'commons-collections:commons-collections:3.2'
+    implementation 'commons-lang:commons-lang:2.6' // EOL dependency which has no vulnerabilities and unlikely to obtain any
 }
 
 dependencyCheck {
@@ -17,5 +17,6 @@ dependencyCheck {
 
     failBuildOnCVSS = 0
     suppressionFiles = ["${project.rootDir}/suppressions.xml"]
+    failBuildOnUnusedSuppressionRule = true
     nvd.datafeedUrl = 'https://jeremylong.github.io/DependencyCheck/hb_nvd/'
 }
