@@ -73,6 +73,8 @@ If your project includes multiple sub-projects, the report will be generated for
 
 ### What if my project includes multiple sub-project? How can I use this plugin for each of them including the root project?
 
+#### For non-aggregate scans
+
 Try put 'apply plugin: "dependency-check"' inside the 'allprojects' or 'subprojects' if you'd like to check all sub-projects only, see below:
 
 (1) For all projects including root project:
@@ -114,6 +116,10 @@ subprojects {
 ```
 
 In this way, the dependency check will be executed for all projects (including root project) or just sub projects.
+
+#### For aggregate scans
+
+For aggregate scan, apply the plugin either on the root project or alternatively if you multi-project build is libraries and an application you can apply the plugin on the application.
 
 ### How to customize the report directory?
 
