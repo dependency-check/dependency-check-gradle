@@ -53,6 +53,10 @@ class NvdExtension {
      */
     String datafeedBearerToken
     /**
+     * The starting year for the NVD CVE Data feed cache.
+     */
+    Integer datafeedStartYear
+    /**
      * The number of hours to wait before checking for new updates from the NVD. The default is 4 hours.
      */
     Integer validForHours
