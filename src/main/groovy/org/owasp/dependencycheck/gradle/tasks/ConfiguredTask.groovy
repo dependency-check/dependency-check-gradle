@@ -103,6 +103,7 @@ abstract class ConfiguredTask extends DefaultTask {
             settings.setStringIfNotEmpty(NVD_API_DATAFEED_PASSWORD, config.nvd.datafeedPassword)
         }
         settings.setStringIfNotEmpty(NVD_API_DATAFEED_BEARER_TOKEN, config.nvd.datafeedBearerToken)
+        settings.setIntIfNotNull(NVD_API_DATAFEED_START_YEAR, config.nvd.datafeedStartYear)
 
         settings.setBooleanIfNotNull(DOWNLOADER_QUICK_QUERY_TIMESTAMP, config.quickQueryTimestamp)
         settings.setFloat(JUNIT_FAIL_ON_CVSS, config.junitFailOnCVSS)
