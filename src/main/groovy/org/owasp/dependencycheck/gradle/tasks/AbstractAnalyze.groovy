@@ -249,9 +249,18 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         Set<String> vulnerabilities = new HashSet<>();
         for (Dependency d : engine.getDependencies()) {
             for (Vulnerability v : d.getVulnerabilities()) {
-                if ((v.getCvssV2() != null && v.getCvssV2().getCvssData() != null && v.getCvssV2().getCvssData().getBaseScore() >= config.failBuildOnCVSS)
-                        || (v.getCvssV3() != null && v.getCvssV3().getCvssData() != null && v.getCvssV3().getCvssData().getBaseScore() >= config.failBuildOnCVSS)
-                        || (v.getUnscoredSeverity() != null && SeverityUtil.estimateCvssV2(v.getUnscoredSeverity()) >= config.failBuildOnCVSS)
+                final double cvssV2 = v.getCvssV2() != null && v.getCvssV2().getCvssData() != null
+                        && v.getCvssV2().getCvssData().getBaseScore() != null ? v.getCvssV2().getCvssData().getBaseScore() : -1;
+                final double cvssV3 = v.getCvssV3() != null && v.getCvssV3().getCvssData() != null
+                        && v.getCvssV3().getCvssData().getBaseScore() != null ? v.getCvssV3().getCvssData().getBaseScore() : -1;
+                final double cvssV4 = v.getCvssV4() != null && v.getCvssV4().getCvssData() != null
+                        && v.getCvssV4().getCvssData().getBaseScore() != null ? v.getCvssV4().getCvssData().getBaseScore() : -1;
+                final boolean useUnscored = cvssV2 == -1 && cvssV3 == -1 && cvssV4 == -1;
+                final double unscoredCvss = (useUnscored && v.getUnscoredSeverity() != null) ? SeverityUtil.estimateCvssV2(v.getUnscoredSeverity()) : -1;
+                if (cvssV2 >= config.failBuildOnCVSS
+                        || cvssV3 >= config.failBuildOnCVSS
+                        || cvssV4 >= config.failBuildOnCVSS
+                        || useUnscored && unscoredCvss >= config.failBuildOnCVSS
                         //safety net to fail on any if for some reason the above misses on 0
                         || (config.failBuildOnCVSS <= 0.0f)) {
                     vulnerabilities.add(v.getName());
