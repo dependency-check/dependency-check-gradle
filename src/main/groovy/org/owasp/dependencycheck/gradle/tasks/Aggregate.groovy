@@ -39,6 +39,7 @@ class Aggregate extends AbstractAnalyze {
 
     /**
      * Loads the projects dependencies into the dependency-check analysis engine.
+     * Runs at execution time
      */
     def scanDependencies(Engine engine) {
         logger.lifecycle("Verifying dependencies for project ${currentProjectName}")
@@ -51,7 +52,7 @@ class Aggregate extends AbstractAnalyze {
 
     private def scanProject(Set<Project> projects, Engine engine) {
         projects.each { Project project ->
-            if (shouldBeScanned(project) && !shouldBeSkipped(project)) {
+            if (shouldBeScanned(project.path) && !shouldBeSkipped(project.path)) {
                 if (this.config.scanDependencies) {
                     processConfigurations(project, engine)
                 }
