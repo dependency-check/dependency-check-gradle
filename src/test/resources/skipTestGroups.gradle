@@ -16,6 +16,7 @@ dependencies {
 }
 
 dependencyCheck {
+    analyzers.ossIndexEnabled = false
     failBuildOnCVSS = 0
     nvd.datafeedUrl = 'https://jeremylong.github.io/DependencyCheck/hb_nvd/'
 }

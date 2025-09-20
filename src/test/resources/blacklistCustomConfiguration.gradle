@@ -21,6 +21,7 @@ dependencies {
 
 dependencyCheck {
     failBuildOnCVSS = 0
+    analyzers.ossIndexEnabled = false
     skipConfigurations = ['foo']
     nvd.datafeedUrl = 'https://jeremylong.github.io/DependencyCheck/hb_nvd/'
 }

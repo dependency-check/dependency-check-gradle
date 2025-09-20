@@ -13,6 +13,7 @@ repositories {
 
 dependencyCheck {
     failBuildOnCVSS = 0
+    analyzers.ossIndexEnabled = false
     additionalCpes {
         commonsCollections {
             description = "Commons Collections 3.2"
