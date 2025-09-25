@@ -64,6 +64,24 @@ abstract class AbstractAnalyze extends ConfiguredTask {
 
     @Internal
     String currentProjectName = project.getName()
+
+    @Internal
+    String currentProjectGroup = project.getGroup()
+
+    @Internal
+    String currentProjectVersion = project.getVersion().toString()
+
+
+
+    /**
+     * Gets the projects display name. Project.getDisplayName() has been
+     * introduced with Gradle 3.3, thus we need to check for the method's
+     * existence first. Fallback: use project NAME
+     * @return the display name
+     */
+    @Internal
+    String currentProjectDisplayName = project.metaClass.respondsTo(project, "getDisplayName") ? project.getDisplayName() : project.getName()
+
     @Internal
     Attribute artifactType = Attribute.of('artifactType', String)
     // @Internal
@@ -111,11 +129,11 @@ abstract class AbstractAnalyze extends ConfiguredTask {
 
             logger.lifecycle("Generating report for project ${currentProjectName}")
             try {
-                String name = project.getName()
-                String displayName = determineDisplayName()
-                String groupId = project.getGroup()
-                String version = project.getVersion().toString()
-                File output = project.file(config.outputDirectory)
+                String name = currentProjectName
+                String displayName = currentProjectDisplayName
+                String groupId = currentProjectGroup
+                String version = currentProjectVersion
+                File output = new File(config.outputDirectory)
                 for (String f : getReportFormats(config.format, config.formats)) {
                     engine.writeReports(displayName, groupId, name, version, output, f, exCol)
                 }
@@ -145,15 +163,6 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         }
     }
 
-    /**
-     * Gets the projects display name. Project.getDisplayName() has been
-     * introduced with Gradle 3.3, thus we need to check for the method's
-     * existence first. Fallback: use project NAME
-     * @return the display name
-     */
-    String determineDisplayName() {
-        return project.metaClass.respondsTo(project, "getDisplayName") ? project.getDisplayName() : project.getName()
-    }
     /**
      * Verifies aspects of the configuration to ensure dependency-check can run correctly.
      */
@@ -218,6 +227,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
 
     /**
      * Loads the projects dependencies into the dependency-check analysis engine.
+     * Runs at execution time
      */
     abstract scanDependencies(Engine engine)
 
@@ -232,7 +242,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
 
         logger.warn("Found ${vulnerabilities.size()} vulnerabilities in project ${currentProjectName}")
         if (config.showSummary) {
-            DependencyCheckScanAgent.showSummary(project.name, engine.getDependencies());
+            DependencyCheckScanAgent.showSummary(currentProjectName, engine.getDependencies());
         }
     }
 
@@ -310,8 +320,8 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * project's path.
      */
     @groovy.transform.CompileStatic
-    def shouldBeScanned(Project project) {
-        !config.scanProjects || config.scanProjects.contains(project.path)
+    def shouldBeScanned(String projectPath) {
+        !config.scanProjects || config.scanProjects.contains(projectPath)
     }
 
     /**
@@ -319,8 +329,8 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * because skipProjects contains the project's path.
      */
     @groovy.transform.CompileStatic
-    def shouldBeSkipped(Project project) {
-        config.skipProjects.contains(project.path)
+    def shouldBeSkipped(String projectPath) {
+        config.skipProjects.contains(projectPath)
     }
 
     /**
@@ -412,6 +422,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
 
     /**
      * Process the incoming artifacts for the given project's configurations.
+     * Runs at execution time.
      * @param project the project to analyze
      * @param engine the dependency-check engine
      */
@@ -424,7 +435,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             if (CUTOVER_GRADLE_VERSION.compareTo(GradleVersion.current()) > 0) {
                 processConfigLegacy configuration, engine
             } else {
-                processConfigV4 project, configuration, engine, true
+                processConfigV4 currentProjectName, configuration, engine, true
             }
         }
     }
@@ -443,7 +454,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             if (CUTOVER_GRADLE_VERSION.compareTo(GradleVersion.current()) > 0) {
                 processConfigLegacy configuration, engine
             } else {
-                processConfigV4 project, configuration, engine
+                processConfigV4 currentProjectName, configuration, engine
             }
         }
         if (config.scanSet == null) {
@@ -452,18 +463,18 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                                    './npm-shrinkwrap.json', './yarn.lock',
                                    './pnpm.lock', 'pnpm-lock.yaml', './Gopkg.lock', './go.mod']
             toScan.each {
-                File f = project.file it
+                File f = new File(it)
                 if (f.exists()) {
-                    engine.scan(f, project.name)
+                    engine.scan(f, currentProjectName)
                 }
             }
         } else {
             config.scanSet.each {
-                File f = project.file it
+                File f = it
                 if (f.exists()) {
-                    engine.scan(f, project.name)
+                    engine.scan(f, currentProjectName)
                 } else {
-                    logger.warn("ScanSet file `${f}` does not exist in ${project.name}")
+                    logger.warn("ScanSet file `${f}` does not exist in ${currentProjectName}")
                 }
             }
         }
@@ -559,8 +570,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * @param engine the dependency-check engine
      * @param scanningBuildEnv true if scanning the build environment; otherwise false
      */
-    protected void processConfigV4(Project project, Configuration configuration, Engine engine, boolean scanningBuildEnv = false) {
-        String projectName = project.name
+    protected void processConfigV4(String projectName, Configuration configuration, Engine engine, boolean scanningBuildEnv = false) {
         String scope = "$projectName:$configuration.name"
         if (scanningBuildEnv) {
             scope += " (buildEnv)"
