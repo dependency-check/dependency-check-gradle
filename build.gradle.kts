@@ -37,6 +37,7 @@ dependencies {
     api(libs.owasp.dependencyCheck.utils)
     api(libs.openVuln.clients)
     api(libs.slack.webhook)
+    implementation(libs.jcs3.slf4j)
 
     testImplementation(gradleTestKit())
     testImplementation(libs.spock.core) {
