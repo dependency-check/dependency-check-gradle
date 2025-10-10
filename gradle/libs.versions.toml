@@ -19,4 +19,4 @@ spock-core = { module = 'org.spockframework:spock-core', version.ref = 'spock' }
 [bundles]
 
 [plugins]
-gradle-plugin-publish = { id = 'com.gradle.plugin-publish', version = '1.3.0' }
+gradle-plugin-publish = { id = 'com.gradle.plugin-publish', version = '1.3.1' }
