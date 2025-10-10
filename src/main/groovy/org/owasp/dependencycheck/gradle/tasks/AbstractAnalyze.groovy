@@ -27,10 +27,13 @@ import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier
+import org.gradle.api.artifacts.result.ComponentArtifactsResult
 import org.gradle.api.artifacts.result.DependencyResult
 import org.gradle.api.artifacts.result.ResolvedArtifactResult
 import org.gradle.api.artifacts.result.ResolvedComponentResult
 import org.gradle.api.artifacts.result.ResolvedDependencyResult
+import org.gradle.maven.MavenModule
+import org.gradle.maven.MavenPomArtifact
 import org.gradle.api.attributes.Attribute
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
@@ -49,6 +52,7 @@ import org.owasp.dependencycheck.exception.ReportException
 import org.owasp.dependencycheck.gradle.service.SlackNotificationSenderService
 import org.owasp.dependencycheck.utils.SeverityUtil
 import org.owasp.dependencycheck.utils.Checksum
+import org.owasp.dependencycheck.xml.pom.PomUtils
 import us.springett.parsers.cpe.CpeParser
 
 import static org.owasp.dependencycheck.dependency.EvidenceType.PRODUCT
@@ -69,6 +73,8 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     // @Internal
     private static final GradleVersion CUTOVER_GRADLE_VERSION = GradleVersion.version("4.0")
     private static final GradleVersion IGNORE_NON_RESOLVABLE_SCOPES_GRADLE_VERSION = GradleVersion.version("7.0")
+    
+    private final Map<ModuleComponentIdentifier, File> pomCache = new HashMap<>()
 
     /**
      * Calls dependency-check-core's analysis engine to scan
@@ -411,6 +417,41 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     }
 
     /**
+     * Resolves the Maven POM file for a given module component.
+     * Uses caching to avoid redundant network calls.
+     * @param project the project context
+     * @param mci the module component identifier
+     * @return the resolved POM file, or null if resolution fails
+     */
+    @groovy.transform.CompileStatic
+    private File resolvePomFor(Project project, ModuleComponentIdentifier mci) {
+        if (pomCache.containsKey(mci)) {
+            return pomCache.get(mci)
+        }
+        try {
+            def query = project.dependencies.createArtifactResolutionQuery()
+                    .forComponents(mci)
+                    .withArtifacts(MavenModule, MavenPomArtifact)
+                    .execute()
+
+            for (ComponentArtifactsResult comp : query.resolvedComponents) {
+                for (def ar : comp.getArtifacts(MavenPomArtifact)) {
+                    if (ar instanceof ResolvedArtifactResult) {
+                        File pomFile = ((ResolvedArtifactResult) ar).getFile()
+                        pomCache.put(mci, pomFile)
+                        logger.debug("Resolved POM for ${mci}: ${pomFile}")
+                        return pomFile
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            logger.debug("POM resolution failed for ${mci}: ${t.message}")
+        }
+        pomCache.put(mci, null)
+        return null
+    }
+
+    /**
      * Process the incoming artifacts for the given project's configurations.
      * @param project the project to analyze
      * @param engine the dependency-check engine
@@ -598,6 +639,25 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                             "'file':'${resolvedArtifactResult.file}'}"
                 } else {
                     def deps = engine.scan(resolvedArtifactResult.file, scope)
+                    
+                    // Resolve and analyze POM for maven modules to extract additional evidence
+                    def compId = resolvedArtifactResult.id.componentIdentifier
+                    if (compId instanceof ModuleComponentIdentifier) {
+                        // Honor offline mode to avoid network calls when --offline is used
+                        if (!project.gradle.startParameter.offline) {
+                            File pomFile = resolvePomFor(project, (ModuleComponentIdentifier) compId)
+                            if (pomFile != null && deps != null) {
+                                for (Dependency d : deps) {
+                                    try {
+                                        PomUtils.analyzePOM(d, pomFile)
+                                    } catch (Throwable t) {
+                                        logger.debug("Failed to analyze POM for ${id.group}:${id.name}:${id.version}: ${t.message}")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
                     if (deps != null) {
                         addInfoToDependencies(deps, scope, id, includedByMap.get(convertIdentifier(id)))
                     }
