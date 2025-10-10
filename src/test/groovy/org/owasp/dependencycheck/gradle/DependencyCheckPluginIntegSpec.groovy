@@ -57,7 +57,7 @@ class DependencyCheckPluginIntegSpec extends Specification {
                         implementation group: 'commons-collections', name: 'commons-collections', version: '3.2'
                     }
                     dependencyCheck {
-                        analyzers.ossIndexEnabled = false
+                        analyzers.ossIndex.enabled = false
                         nvd.datafeedUrl = 'https://jeremylong.github.io/DependencyCheck/hb_nvd/'
                     }
                 """.stripIndent()
@@ -99,7 +99,7 @@ class DependencyCheckPluginIntegSpec extends Specification {
                         implementation group: 'commons-collections', name: 'commons-collections', version: '3.2'
                     }
                     dependencyCheck {
-                        analyzers.ossIndexEnabled = false
+                        analyzers.ossIndex.enabled = false
                         nvd.datafeedUrl = 'https://jeremylong.github.io/DependencyCheck/hb_nvd/'
                     }
                 """.stripIndent()
