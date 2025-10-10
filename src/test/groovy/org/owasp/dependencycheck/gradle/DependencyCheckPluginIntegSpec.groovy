@@ -58,7 +58,7 @@ class DependencyCheckPluginIntegSpec extends Specification {
                     }
                     dependencyCheck {
                         analyzers.ossIndex.enabled = false
-                        nvd.datafeedUrl = 'https://jeremylong.github.io/DependencyCheck/hb_nvd/'
+                        nvd.datafeedUrl = 'https://dependency-check.github.io/DependencyCheck/hb_nvd/'
                     }
                 """.stripIndent()
             }
@@ -100,7 +100,7 @@ class DependencyCheckPluginIntegSpec extends Specification {
                     }
                     dependencyCheck {
                         analyzers.ossIndex.enabled = false
-                        nvd.datafeedUrl = 'https://jeremylong.github.io/DependencyCheck/hb_nvd/'
+                        nvd.datafeedUrl = 'https://dependency-check.github.io/DependencyCheck/hb_nvd/'
                     }
                 """.stripIndent()
             }

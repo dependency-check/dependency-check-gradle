@@ -31,5 +31,5 @@ dependencyCheck {
     failBuildOnCVSS = 0
     analyzers.ossIndex.enabled = false
     skipTestGroups = false
-    nvd.datafeedUrl = 'https://jeremylong.github.io/DependencyCheck/hb_nvd/'
+    nvd.datafeedUrl = 'https://dependency-check.github.io/DependencyCheck/hb_nvd/'
 }

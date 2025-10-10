@@ -40,7 +40,7 @@ The latest version is 12.1.6.
 
 ## Usage
 
-Below are the quick start instructions. Please see the [documentation site](http://jeremylong.github.io/DependencyCheck/dependency-check-gradle/index.html)
+Below are the quick start instructions. Please see the [documentation site](http://dependency-check.github.io/DependencyCheck/dependency-check-gradle/index.html)
 for more detailed information on configuration and usage.
 
 ### Step 1, Apply dependency check gradle plugin

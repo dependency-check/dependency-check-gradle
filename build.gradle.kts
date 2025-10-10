@@ -74,7 +74,7 @@ publishing {
                 name.set("dependency-check-gradle")
                 description.set("OWASP dependency-check gradle plugin is a software composition analysis tool used to find known vulnerable dependencies.")
 
-                url.set("https://jeremylong.github.io/DependencyCheck/")
+                url.set("https://dependency-check.github.io/DependencyCheck/")
 
                 licenses {
                     license {
@@ -100,7 +100,7 @@ publishing {
 }
 
 gradlePlugin {
-    website.set("http://jeremylong.github.io/DependencyCheck/dependency-check-gradle/index.html")
+    website.set("http://dependency-check.github.io/DependencyCheck/dependency-check-gradle/index.html")
     vcsUrl.set("https://github.com/dependency-check/dependency-check-gradle/")
 
     plugins {
