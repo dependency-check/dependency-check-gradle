@@ -532,6 +532,24 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     protected void processConfigLegacy(Configuration configuration, Engine engine) {
         configuration.getResolvedConfiguration().getResolvedArtifacts().collect { ResolvedArtifact artifact ->
             def dependencies = engine.scan(artifact.getFile())
+            if (!project.gradle.startParameter.offline && dependencies != null && dependencies.size() == 1) {
+                // Resolve and analyze POM for maven modules to extract additional evidence
+                ModuleVersionIdentifier id = artifact.moduleVersion.getId()
+                if (id.group && id.name && id.version) {
+                    // Create a ModuleComponentIdentifier from the artifact's module version
+                    def compId = artifact.id.componentIdentifier
+                    if (compId instanceof ModuleComponentIdentifier) {
+                        File pomFile = resolvePomFor(project, (ModuleComponentIdentifier) compId)
+                        if (pomFile != null) {
+                            try {
+                                PomUtils.analyzePOM(dependencies[0], pomFile)
+                            } catch (Throwable t) {
+                                logger.debug("Failed to analyze POM for ${id.group}:${id.name}:${id.version}: ${t.message}")
+                            }
+                        }
+                    }
+                }
+            }
             addInfoToDependencies(dependencies, configuration.name,
                     artifact.moduleVersion.getId(), null)
         }
@@ -639,19 +657,16 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                             "'file':'${resolvedArtifactResult.file}'}"
                 } else {
                     def deps = engine.scan(resolvedArtifactResult.file, scope)
-                    if (deps != null && deps.size() == 1) {
+                    if (!project.gradle.startParameter.offline && deps != null && deps.size() == 1) {
                         // Resolve and analyze POM for maven modules to extract additional evidence
                         def compId = resolvedArtifactResult.id.componentIdentifier
                         if (compId instanceof ModuleComponentIdentifier) {
-                            // Honor offline mode to avoid network calls when --offline is used
-                            if (!project.gradle.startParameter.offline) {
-                                File pomFile = resolvePomFor(project, (ModuleComponentIdentifier) compId)
-                                if (pomFile != null) {
-                                    try {
-                                        PomUtils.analyzePOM(deps[0], pomFile)
-                                    } catch (Throwable t) {
-                                        logger.debug("Failed to analyze POM for ${id.group}:${id.name}:${id.version}: ${t.message}")
-                                    }
+                            File pomFile = resolvePomFor(project, (ModuleComponentIdentifier) compId)
+                            if (pomFile != null) {
+                                try {
+                                    PomUtils.analyzePOM(deps[0], pomFile)
+                                } catch (Throwable t) {
+                                    logger.debug("Failed to analyze POM for ${id.group}:${id.name}:${id.version}: ${t.message}")
                                 }
                             }
                         }
