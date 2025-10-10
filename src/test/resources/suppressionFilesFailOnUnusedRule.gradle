@@ -18,5 +18,5 @@ dependencyCheck {
     failBuildOnCVSS = 0
     suppressionFiles = ["${project.rootDir}/suppressions.xml"]
     failBuildOnUnusedSuppressionRule = true
-    nvd.datafeedUrl = 'https://jeremylong.github.io/DependencyCheck/hb_nvd/'
+    nvd.datafeedUrl = 'https://dependency-check.github.io/DependencyCheck/hb_nvd/'
 }

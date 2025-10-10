@@ -23,5 +23,5 @@ dependencyCheck {
     analyzers.ossIndex.enabled = false
     failBuildOnCVSS = 0
     scanConfigurations = ['runtime']
-    nvd.datafeedUrl = 'https://jeremylong.github.io/DependencyCheck/hb_nvd/'
+    nvd.datafeedUrl = 'https://dependency-check.github.io/DependencyCheck/hb_nvd/'
 }

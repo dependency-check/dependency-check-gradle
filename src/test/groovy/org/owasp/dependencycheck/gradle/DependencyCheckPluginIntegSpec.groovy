@@ -57,8 +57,13 @@ class DependencyCheckPluginIntegSpec extends Specification {
                         implementation group: 'commons-collections', name: 'commons-collections', version: '3.2'
                     }
                     dependencyCheck {
+<<<<<<< Updated upstream
                         analyzers.ossIndex.enabled = false
                         nvd.datafeedUrl = 'https://jeremylong.github.io/DependencyCheck/hb_nvd/'
+=======
+                        analyzers.ossIndexEnabled = false
+                        nvd.datafeedUrl = 'https://dependency-check.github.io/DependencyCheck/hb_nvd/'
+>>>>>>> Stashed changes
                     }
                 """.stripIndent()
             }
@@ -100,7 +105,7 @@ class DependencyCheckPluginIntegSpec extends Specification {
                     }
                     dependencyCheck {
                         analyzers.ossIndex.enabled = false
-                        nvd.datafeedUrl = 'https://jeremylong.github.io/DependencyCheck/hb_nvd/'
+                        nvd.datafeedUrl = 'https://dependency-check.github.io/DependencyCheck/hb_nvd/'
                     }
                 """.stripIndent()
             }
