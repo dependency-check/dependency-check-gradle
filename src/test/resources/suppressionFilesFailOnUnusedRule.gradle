@@ -13,7 +13,7 @@ dependencies {
 }
 
 dependencyCheck {
-    analyzers.ossIndexEnabled = false
+    analyzers.ossIndex.enabled = false
 
     failBuildOnCVSS = 0
     suppressionFiles = ["${project.rootDir}/suppressions.xml"]
