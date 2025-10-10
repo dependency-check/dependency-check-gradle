@@ -73,7 +73,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     // @Internal
     private static final GradleVersion CUTOVER_GRADLE_VERSION = GradleVersion.version("4.0")
     private static final GradleVersion IGNORE_NON_RESOLVABLE_SCOPES_GRADLE_VERSION = GradleVersion.version("7.0")
-    
+
     private final Map<ModuleComponentIdentifier, File> pomCache = new HashMap<>()
 
     /**
@@ -639,17 +639,16 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                             "'file':'${resolvedArtifactResult.file}'}"
                 } else {
                     def deps = engine.scan(resolvedArtifactResult.file, scope)
-                    
-                    // Resolve and analyze POM for maven modules to extract additional evidence
-                    def compId = resolvedArtifactResult.id.componentIdentifier
-                    if (compId instanceof ModuleComponentIdentifier) {
-                        // Honor offline mode to avoid network calls when --offline is used
-                        if (!project.gradle.startParameter.offline) {
-                            File pomFile = resolvePomFor(project, (ModuleComponentIdentifier) compId)
-                            if (pomFile != null && deps != null) {
-                                for (Dependency d : deps) {
+                    if (deps != null && deps.size() == 1) {
+                        // Resolve and analyze POM for maven modules to extract additional evidence
+                        def compId = resolvedArtifactResult.id.componentIdentifier
+                        if (compId instanceof ModuleComponentIdentifier) {
+                            // Honor offline mode to avoid network calls when --offline is used
+                            if (!project.gradle.startParameter.offline) {
+                                File pomFile = resolvePomFor(project, (ModuleComponentIdentifier) compId)
+                                if (pomFile != null) {
                                     try {
-                                        PomUtils.analyzePOM(d, pomFile)
+                                        PomUtils.analyzePOM(deps[0], pomFile)
                                     } catch (Throwable t) {
                                         logger.debug("Failed to analyze POM for ${id.group}:${id.name}:${id.version}: ${t.message}")
                                     }
@@ -657,7 +656,6 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                             }
                         }
                     }
-                    
                     if (deps != null) {
                         addInfoToDependencies(deps, scope, id, includedByMap.get(convertIdentifier(id)))
                     }
