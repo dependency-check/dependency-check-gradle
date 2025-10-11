@@ -444,8 +444,8 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                     }
                 }
             }
-        } catch (Throwable t) {
-            logger.debug("POM resolution failed for ${mci}: ${t.message}")
+        } catch (Exception e) {
+            logger.debug("POM resolution failed for ${mci}: ${e.message}")
         }
         pomCache.put(mci, null)
         return null
