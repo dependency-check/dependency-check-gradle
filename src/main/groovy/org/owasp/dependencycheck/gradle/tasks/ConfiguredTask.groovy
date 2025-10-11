@@ -67,68 +67,68 @@ abstract class ConfiguredTask extends DefaultTask {
                 }
             }
         }
-        settings.setBooleanIfNotNull(AUTO_UPDATE, config.autoUpdate)
+        settings.setBooleanIfNotNull(AUTO_UPDATE, config.autoUpdate.getOrNull())
 
-        String[] suppressionLists = determineSuppressions(config.suppressionFiles, config.suppressionFile)
+        String[] suppressionLists = determineSuppressions(config.suppressionFiles.getOrElse([]), config.suppressionFile.getOrNull())
 
         settings.setArrayIfNotEmpty(SUPPRESSION_FILE, suppressionLists)
-        settings.setStringIfNotEmpty(SUPPRESSION_FILE_USER, config.suppressionFileUser)
-        settings.setStringIfNotEmpty(SUPPRESSION_FILE_PASSWORD, config.suppressionFilePassword)
-        settings.setStringIfNotEmpty(SUPPRESSION_FILE_BEARER_TOKEN, config.suppressionFileBearerToken)
-        settings.setStringIfNotEmpty(HINTS_FILE, config.hintsFile)
+        settings.setStringIfNotEmpty(SUPPRESSION_FILE_USER, config.suppressionFileUser.getOrNull())
+        settings.setStringIfNotEmpty(SUPPRESSION_FILE_PASSWORD, config.suppressionFilePassword.getOrNull())
+        settings.setStringIfNotEmpty(SUPPRESSION_FILE_BEARER_TOKEN, config.suppressionFileBearerToken.getOrNull())
+        settings.setStringIfNotEmpty(HINTS_FILE, config.hintsFile.getOrNull())
 
         configureProxy(settings)
 
         configureSlack(settings)
 
         //settings.setStringIfNotEmpty(CONNECTION_TIMEOUT, connectionTimeout)
-        settings.setStringIfNotNull(DATA_DIRECTORY, config.data.directory)
-        settings.setStringIfNotEmpty(DB_DRIVER_NAME, config.data.driver)
-        settings.setStringIfNotEmpty(DB_DRIVER_PATH, config.data.driverPath)
-        settings.setStringIfNotEmpty(DB_CONNECTION_STRING, config.data.connectionString)
-        settings.setStringIfNotEmpty(DB_USER, config.data.username)
-        settings.setStringIfNotEmpty(DB_PASSWORD, config.data.password)
+        settings.setStringIfNotNull(DATA_DIRECTORY, config.data.directory.getOrNull())
+        settings.setStringIfNotEmpty(DB_DRIVER_NAME, config.data.driver.getOrNull())
+        settings.setStringIfNotEmpty(DB_DRIVER_PATH, config.data.driverPath.getOrNull())
+        settings.setStringIfNotEmpty(DB_CONNECTION_STRING, config.data.connectionString.getOrNull())
+        settings.setStringIfNotEmpty(DB_USER, config.data.username.getOrNull())
+        settings.setStringIfNotEmpty(DB_PASSWORD, config.data.password.getOrNull())
 
 
-        settings.setStringIfNotEmpty(NVD_API_KEY, config.nvd.apiKey)
-        settings.setStringIfNotEmpty(NVD_API_ENDPOINT, config.nvd.endpoint)
-        settings.setIntIfNotNull(NVD_API_DELAY, config.nvd.delay)
-        settings.setIntIfNotNull(NVD_API_RESULTS_PER_PAGE, config.nvd.resultsPerPage)
-        settings.setIntIfNotNull(NVD_API_MAX_RETRY_COUNT, config.nvd.maxRetryCount)
-        settings.setIntIfNotNull(NVD_API_VALID_FOR_HOURS, config.nvd.validForHours);
+        settings.setStringIfNotEmpty(NVD_API_KEY, config.nvd.apiKey.getOrNull())
+        settings.setStringIfNotEmpty(NVD_API_ENDPOINT, config.nvd.endpoint.getOrNull())
+        settings.setIntIfNotNull(NVD_API_DELAY, config.nvd.delay.getOrNull())
+        settings.setIntIfNotNull(NVD_API_RESULTS_PER_PAGE, config.nvd.resultsPerPage.getOrNull())
+        settings.setIntIfNotNull(NVD_API_MAX_RETRY_COUNT, config.nvd.maxRetryCount.getOrNull())
+        settings.setIntIfNotNull(NVD_API_VALID_FOR_HOURS, config.nvd.validForHours.getOrNull());
 
-        settings.setStringIfNotEmpty(NVD_API_DATAFEED_URL, config.nvd.datafeedUrl)
-        if (config.nvd.datafeedUser && config.nvd.datafeedPassword) {
-            settings.setStringIfNotEmpty(NVD_API_DATAFEED_USER, config.nvd.datafeedUser)
-            settings.setStringIfNotEmpty(NVD_API_DATAFEED_PASSWORD, config.nvd.datafeedPassword)
+        settings.setStringIfNotEmpty(NVD_API_DATAFEED_URL, config.nvd.datafeedUrl.getOrNull())
+        if (config.nvd.datafeedUser.getOrNull() && config.nvd.datafeedPassword.getOrNull()) {
+            settings.setStringIfNotEmpty(NVD_API_DATAFEED_USER, config.nvd.datafeedUser.getOrNull())
+            settings.setStringIfNotEmpty(NVD_API_DATAFEED_PASSWORD, config.nvd.datafeedPassword.getOrNull())
         }
-        settings.setStringIfNotEmpty(NVD_API_DATAFEED_BEARER_TOKEN, config.nvd.datafeedBearerToken)
-        settings.setIntIfNotNull(NVD_API_DATAFEED_START_YEAR, config.nvd.datafeedStartYear)
+        settings.setStringIfNotEmpty(NVD_API_DATAFEED_BEARER_TOKEN, config.nvd.datafeedBearerToken.getOrNull())
+        settings.setIntIfNotNull(NVD_API_DATAFEED_START_YEAR, config.nvd.datafeedStartYear.getOrNull())
 
-        settings.setBooleanIfNotNull(DOWNLOADER_QUICK_QUERY_TIMESTAMP, config.quickQueryTimestamp)
-        settings.setFloat(JUNIT_FAIL_ON_CVSS, config.junitFailOnCVSS)
-        settings.setBooleanIfNotNull(FAIL_ON_UNUSED_SUPPRESSION_RULE, config.failBuildOnUnusedSuppressionRule)
-        settings.setBooleanIfNotNull(HOSTED_SUPPRESSIONS_ENABLED, config.hostedSuppressions.enabled)
-        settings.setBooleanIfNotNull(HOSTED_SUPPRESSIONS_FORCEUPDATE, config.hostedSuppressions.forceupdate)
-        settings.setStringIfNotNull(HOSTED_SUPPRESSIONS_URL, config.hostedSuppressions.url)
-        settings.setStringIfNotNull(HOSTED_SUPPRESSIONS_USER, config.hostedSuppressions.user)
-        settings.setStringIfNotNull(HOSTED_SUPPRESSIONS_PASSWORD, config.hostedSuppressions.password)
-        settings.setStringIfNotNull(HOSTED_SUPPRESSIONS_BEARER_TOKEN, config.hostedSuppressions.bearerToken)
-        if (config.hostedSuppressions.validForHours != null) {
-            if (config.hostedSuppressions.validForHours >= 0) {
-                settings.setInt(HOSTED_SUPPRESSIONS_VALID_FOR_HOURS, config.hostedSuppressions.validForHours)
+        settings.setBooleanIfNotNull(DOWNLOADER_QUICK_QUERY_TIMESTAMP, config.quickQueryTimestamp.getOrNull())
+        settings.setFloat(JUNIT_FAIL_ON_CVSS, config.junitFailOnCVSS.get())
+        settings.setBooleanIfNotNull(FAIL_ON_UNUSED_SUPPRESSION_RULE, config.failBuildOnUnusedSuppressionRule.getOrNull())
+        settings.setBooleanIfNotNull(HOSTED_SUPPRESSIONS_ENABLED, config.hostedSuppressions.enabled.getOrNull())
+        settings.setBooleanIfNotNull(HOSTED_SUPPRESSIONS_FORCEUPDATE, config.hostedSuppressions.forceupdate.getOrNull())
+        settings.setStringIfNotNull(HOSTED_SUPPRESSIONS_URL, config.hostedSuppressions.url.getOrNull())
+        settings.setStringIfNotNull(HOSTED_SUPPRESSIONS_USER, config.hostedSuppressions.user.getOrNull())
+        settings.setStringIfNotNull(HOSTED_SUPPRESSIONS_PASSWORD, config.hostedSuppressions.password.getOrNull())
+        settings.setStringIfNotNull(HOSTED_SUPPRESSIONS_BEARER_TOKEN, config.hostedSuppressions.bearerToken.getOrNull())
+        if (config.hostedSuppressions.validForHours.getOrNull() != null) {
+            if (config.hostedSuppressions.validForHours.getOrNull() >= 0) {
+                settings.setInt(HOSTED_SUPPRESSIONS_VALID_FOR_HOURS, config.hostedSuppressions.validForHours.getOrNull())
             } else {
                 throw new InvalidUserDataException('Invalid setting: `validForHours` must be 0 or greater')
             }
         }
         settings.setBooleanIfNotNull(ANALYZER_JAR_ENABLED, config.analyzers.jarEnabled)
         settings.setBooleanIfNotNull(ANALYZER_NUSPEC_ENABLED, config.analyzers.nuspecEnabled)
-        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_ENABLED, select(config.analyzers.ossIndex.enabled, config.analyzers.ossIndexEnabled))
-        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_WARN_ONLY_ON_REMOTE_ERRORS, config.analyzers.ossIndex.warnOnlyOnRemoteErrors)
-        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_ENABLED, config.analyzers.ossIndex.enabled)
-        settings.setStringIfNotEmpty(ANALYZER_OSSINDEX_USER, config.analyzers.ossIndex.username)
-        settings.setStringIfNotEmpty(ANALYZER_OSSINDEX_PASSWORD, config.analyzers.ossIndex.password)
-        settings.setStringIfNotEmpty(ANALYZER_OSSINDEX_URL, config.analyzers.ossIndex.url)
+        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_ENABLED, select(config.analyzers.ossIndex.enabled.getOrNull(), config.analyzers.ossIndexEnabled))
+        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_WARN_ONLY_ON_REMOTE_ERRORS, config.analyzers.ossIndex.warnOnlyOnRemoteErrors.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_ENABLED, config.analyzers.ossIndex.enabled.getOrNull())
+        settings.setStringIfNotEmpty(ANALYZER_OSSINDEX_USER, config.analyzers.ossIndex.username.getOrNull())
+        settings.setStringIfNotEmpty(ANALYZER_OSSINDEX_PASSWORD, config.analyzers.ossIndex.password.getOrNull())
+        settings.setStringIfNotEmpty(ANALYZER_OSSINDEX_URL, config.analyzers.ossIndex.url.getOrNull())
 
         settings.setBooleanIfNotNull(ANALYZER_CENTRAL_ENABLED, config.analyzers.centralEnabled)
 
@@ -138,12 +138,12 @@ abstract class ConfiguredTask extends DefaultTask {
 
         settings.setBooleanIfNotNull(ANALYZER_EXPERIMENTAL_ENABLED, config.analyzers.experimentalEnabled)
         settings.setBooleanIfNotNull(ANALYZER_ARCHIVE_ENABLED, config.analyzers.archiveEnabled)
-        settings.setBooleanIfNotNull(ANALYZER_KNOWN_EXPLOITED_ENABLED, config.analyzers.kev.enabled)
-        settings.setStringIfNotNull(KEV_URL, config.analyzers.kev.url)
-        settings.setIntIfNotNull(KEV_CHECK_VALID_FOR_HOURS, config.analyzers.kev.validForHours)
-        settings.setStringIfNotNull(KEV_USER, config.analyzers.kev.user)
-        settings.setStringIfNotNull(KEV_PASSWORD, config.analyzers.kev.password)
-        settings.setStringIfNotNull(KEV_BEARER_TOKEN, config.analyzers.kev.bearerToken)
+        settings.setBooleanIfNotNull(ANALYZER_KNOWN_EXPLOITED_ENABLED, config.analyzers.kev.enabled.getOrNull())
+        settings.setStringIfNotNull(KEV_URL, config.analyzers.kev.url.getOrNull())
+        settings.setIntIfNotNull(KEV_CHECK_VALID_FOR_HOURS, config.analyzers.kev.validForHours.getOrNull())
+        settings.setStringIfNotNull(KEV_USER, config.analyzers.kev.user.getOrNull())
+        settings.setStringIfNotNull(KEV_PASSWORD, config.analyzers.kev.password.getOrNull())
+        settings.setStringIfNotNull(KEV_BEARER_TOKEN, config.analyzers.kev.bearerToken.getOrNull())
         settings.setStringIfNotEmpty(ADDITIONAL_ZIP_EXTENSIONS, config.analyzers.zipExtensions)
         settings.setBooleanIfNotNull(ANALYZER_ASSEMBLY_ENABLED, config.analyzers.assemblyEnabled)
         settings.setBooleanIfNotNull(ANALYZER_MSBUILD_PROJECT_ENABLED, config.analyzers.msbuildEnabled)
@@ -170,43 +170,43 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setBooleanIfNotNull(ANALYZER_CPANFILE_ENABLED, config.analyzers.cpanEnabled)
         settings.setBooleanIfNotNull(ANALYZER_NUGETCONF_ENABLED, config.analyzers.nugetconfEnabled)
 
-        settings.setBooleanIfNotNull(ANALYZER_NODE_PACKAGE_ENABLED, select(config.analyzers.nodePackage.enabled, config.analyzers.nodeEnabled))
-        settings.setBooleanIfNotNull(ANALYZER_NODE_PACKAGE_SKIPDEV, config.analyzers.nodePackage.skipDevDependencies)
-        settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_ENABLED, select(config.analyzers.nodeAudit.enabled, config.analyzers.nodeAuditEnabled))
-        settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_USE_CACHE, config.analyzers.nodeAudit.useCache)
-        settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_SKIPDEV, config.analyzers.nodeAudit.skipDevDependencies)
-        settings.setStringIfNotEmpty(ANALYZER_NODE_AUDIT_URL, config.analyzers.nodeAudit.url)
-        settings.setBooleanIfNotNull(ANALYZER_YARN_AUDIT_ENABLED, config.analyzers.nodeAudit.yarnEnabled)
-        settings.setStringIfNotNull(ANALYZER_YARN_PATH, config.analyzers.nodeAudit.yarnPath);
-        settings.setBooleanIfNotNull(ANALYZER_PNPM_AUDIT_ENABLED, config.analyzers.nodeAudit.pnpmEnabled)
-        settings.setStringIfNotNull(ANALYZER_PNPM_PATH, config.analyzers.nodeAudit.pnpmPath);
-        settings.setBooleanIfNotNull(ANALYZER_RETIREJS_ENABLED, config.analyzers.retirejs.enabled)
-        settings.setBooleanIfNotNull(ANALYZER_RETIREJS_FORCEUPDATE, config.analyzers.retirejs.forceupdate)
-        settings.setStringIfNotNull(ANALYZER_RETIREJS_REPO_JS_URL, config.analyzers.retirejs.retireJsUrl)
-        settings.setStringIfNotNull(ANALYZER_RETIREJS_REPO_JS_USER, config.analyzers.retirejs.user)
-        settings.setStringIfNotNull(ANALYZER_RETIREJS_REPO_JS_PASSWORD, config.analyzers.retirejs.password)
-        settings.setStringIfNotNull(ANALYZER_RETIREJS_REPO_JS_BEARER_TOKEN, config.analyzers.retirejs.bearerToken)
-        settings.setBooleanIfNotNull(ANALYZER_RETIREJS_FILTER_NON_VULNERABLE, config.analyzers.retirejs.filterNonVulnerable)
-        settings.setArrayIfNotEmpty(ANALYZER_RETIREJS_FILTERS, config.analyzers.retirejs.filters)
+        settings.setBooleanIfNotNull(ANALYZER_NODE_PACKAGE_ENABLED, select(config.analyzers.nodePackage.enabled.getOrNull(), config.analyzers.nodeEnabled))
+        settings.setBooleanIfNotNull(ANALYZER_NODE_PACKAGE_SKIPDEV, config.analyzers.nodePackage.skipDevDependencies.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_ENABLED, select(config.analyzers.nodeAudit.enabled.getOrNull(), config.analyzers.nodeAuditEnabled))
+        settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_USE_CACHE, config.analyzers.nodeAudit.useCache.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_SKIPDEV, config.analyzers.nodeAudit.skipDevDependencies.getOrNull())
+        settings.setStringIfNotEmpty(ANALYZER_NODE_AUDIT_URL, config.analyzers.nodeAudit.url.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_YARN_AUDIT_ENABLED, config.analyzers.nodeAudit.yarnEnabled.getOrNull())
+        settings.setStringIfNotNull(ANALYZER_YARN_PATH, config.analyzers.nodeAudit.yarnPath.getOrNull());
+        settings.setBooleanIfNotNull(ANALYZER_PNPM_AUDIT_ENABLED, config.analyzers.nodeAudit.pnpmEnabled.getOrNull())
+        settings.setStringIfNotNull(ANALYZER_PNPM_PATH, config.analyzers.nodeAudit.pnpmPath.getOrNull());
+        settings.setBooleanIfNotNull(ANALYZER_RETIREJS_ENABLED, config.analyzers.retirejs.enabled.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_RETIREJS_FORCEUPDATE, config.analyzers.retirejs.forceupdate.getOrNull())
+        settings.setStringIfNotNull(ANALYZER_RETIREJS_REPO_JS_URL, config.analyzers.retirejs.retireJsUrl.getOrNull())
+        settings.setStringIfNotNull(ANALYZER_RETIREJS_REPO_JS_USER, config.analyzers.retirejs.user.getOrNull())
+        settings.setStringIfNotNull(ANALYZER_RETIREJS_REPO_JS_PASSWORD, config.analyzers.retirejs.password.getOrNull())
+        settings.setStringIfNotNull(ANALYZER_RETIREJS_REPO_JS_BEARER_TOKEN, config.analyzers.retirejs.bearerToken.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_RETIREJS_FILTER_NON_VULNERABLE, config.analyzers.retirejs.filterNonVulnerable.getOrNull())
+        settings.setArrayIfNotEmpty(ANALYZER_RETIREJS_FILTERS, config.analyzers.retirejs.filters.getOrElse([]))
 
-        settings.setBooleanIfNotNull(ANALYZER_ARTIFACTORY_ENABLED, config.analyzers.artifactory.enabled)
-        settings.setBooleanIfNotNull(ANALYZER_ARTIFACTORY_PARALLEL_ANALYSIS, config.analyzers.artifactory.parallelAnalysis)
-        settings.setBooleanIfNotNull(ANALYZER_ARTIFACTORY_USES_PROXY, config.analyzers.artifactory.usesProxy)
-        settings.setStringIfNotNull(ANALYZER_ARTIFACTORY_URL, config.analyzers.artifactory.url)
-        settings.setStringIfNotNull(ANALYZER_ARTIFACTORY_API_TOKEN, config.analyzers.artifactory.apiToken)
-        settings.setStringIfNotNull(ANALYZER_ARTIFACTORY_API_USERNAME, config.analyzers.artifactory.username)
-        settings.setStringIfNotNull(ANALYZER_ARTIFACTORY_BEARER_TOKEN, config.analyzers.artifactory.bearerToken)
+        settings.setBooleanIfNotNull(ANALYZER_ARTIFACTORY_ENABLED, config.analyzers.artifactory.enabled.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_ARTIFACTORY_PARALLEL_ANALYSIS, config.analyzers.artifactory.parallelAnalysis.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_ARTIFACTORY_USES_PROXY, config.analyzers.artifactory.usesProxy.getOrNull())
+        settings.setStringIfNotNull(ANALYZER_ARTIFACTORY_URL, config.analyzers.artifactory.url.getOrNull())
+        settings.setStringIfNotNull(ANALYZER_ARTIFACTORY_API_TOKEN, config.analyzers.artifactory.apiToken.getOrNull())
+        settings.setStringIfNotNull(ANALYZER_ARTIFACTORY_API_USERNAME, config.analyzers.artifactory.username.getOrNull())
+        settings.setStringIfNotNull(ANALYZER_ARTIFACTORY_BEARER_TOKEN, config.analyzers.artifactory.bearerToken.getOrNull())
 
-        settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_USE_CACHE, config.cache.nodeAudit)
-        settings.setBooleanIfNotNull(ANALYZER_CENTRAL_USE_CACHE, config.cache.central)
-        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_USE_CACHE, config.cache.ossIndex)
+        settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_USE_CACHE, config.cache.nodeAudit.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_CENTRAL_USE_CACHE, config.cache.central.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_USE_CACHE, config.cache.ossIndex.getOrNull())
 
         Downloader.getInstance().configure(settings);
     }
 
     private void configureSlack(Settings settings) {
-        settings.setBooleanIfNotNull(SlackNotificationSenderService.SLACK__WEBHOOK__ENABLED, config.slack.enabled)
-        settings.setStringIfNotEmpty(SlackNotificationSenderService.SLACK__WEBHOOK__URL, config.slack.webhookUrl)
+        settings.setBooleanIfNotNull(SlackNotificationSenderService.SLACK__WEBHOOK__ENABLED, config.slack.enabled.getOrNull())
+        settings.setStringIfNotEmpty(SlackNotificationSenderService.SLACK__WEBHOOK__URL, config.slack.webhookUrl.getOrNull())
     }
 
     private void configureProxy(Settings settings) {
@@ -216,27 +216,28 @@ abstract class ConfiguredTask extends DefaultTask {
             String nonProxyHosts = System.getProperty("https.nonProxyHosts", System.getProperty("http.nonProxyHosts"))
             String proxyUser = System.getProperty("https.proxyUser", System.getProperty("http.proxyUser"))
             String proxyPassword = System.getProperty("https.proxyPassword", System.getProperty("http.proxyPassword"))
-            config.proxy.server = proxyHost
+            config.proxy.server.set(proxyHost)
             try {
-                config.proxy.port = Integer.parseInt(proxyPort)
+                config.proxy.port.set(Integer.parseInt(proxyPort))
             } catch (NumberFormatException nfe) {
                 logger.warn("Unable to convert the configured `http.proxyPort` to a number: ${proxyPort}");
             }
             if (!Strings.isNullOrEmpty(proxyUser)) {
-                config.proxy.username = proxyUser
+                config.proxy.username.set(proxyUser)
             }
             if (!Strings.isNullOrEmpty(proxyPassword)) {
-                config.proxy.password = proxyPassword
+                config.proxy.password.set(proxyPassword)
             }
             if (!Strings.isNullOrEmpty(nonProxyHosts)) {
-                config.proxy.nonProxyHosts = nonProxyHosts.tokenize("|")
+                config.proxy.nonProxyHosts.set(nonProxyHosts.tokenize("|"))
             }
         }
-        settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server)
-        settings.setStringIfNotEmpty(PROXY_PORT, "${config.proxy.port}")
-        settings.setStringIfNotEmpty(PROXY_USERNAME, config.proxy.username)
-        settings.setStringIfNotEmpty(PROXY_PASSWORD, config.proxy.password)
-        settings.setStringIfNotEmpty(PROXY_NON_PROXY_HOSTS, config.proxy.nonProxyHosts.join("|"))
+        settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server.getOrNull())
+        settings.setStringIfNotEmpty(PROXY_PORT, config.proxy.port.getOrNull()?.toString())
+        settings.setStringIfNotEmpty(PROXY_USERNAME, config.proxy.username.getOrNull())
+        settings.setStringIfNotEmpty(PROXY_PASSWORD, config.proxy.password.getOrNull())
+        def nonProxyHostsList = config.proxy.nonProxyHosts.getOrElse([])
+        settings.setStringIfNotEmpty(PROXY_NON_PROXY_HOSTS, nonProxyHostsList ? nonProxyHostsList.join("|") : null)
     }
 
     /**

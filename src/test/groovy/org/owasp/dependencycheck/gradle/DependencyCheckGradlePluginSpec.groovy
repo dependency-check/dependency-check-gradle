@@ -43,7 +43,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
         DependencyCheckExtension extension = project.extensions.findByName('dependencyCheck') as DependencyCheckExtension
 
         expect:
-        extension.data.directory == "${project.gradle.gradleUserHomeDir}/dependency-check-data/11.0"
+        extension.data.directory.get() == "${project.gradle.gradleUserHomeDir}/dependency-check-data/11.0"
     }
 
     def "dependencyCheckAnalyze task exists"() {
@@ -74,22 +74,22 @@ class DependencyCheckGradlePluginSpec extends Specification {
         task.group == 'OWASP dependency-check'
         task.description == 'Identifies and reports known vulnerabilities (CVEs) in project dependencies.'
 
-        project.dependencyCheck.proxy.server == null
-        project.dependencyCheck.proxy.port == null
-        project.dependencyCheck.proxy.username == null
-        project.dependencyCheck.proxy.password == null
-        project.dependencyCheck.nvd.apiKey == null
-        project.dependencyCheck.nvd.delay == null
-        project.dependencyCheck.nvd.maxRetryCount == null
-        project.dependencyCheck.outputDirectory == "${project.buildDir}/reports"
-        project.dependencyCheck.quickQueryTimestamp == null
-        project.dependencyCheck.scanConfigurations == []
-        project.dependencyCheck.skipConfigurations == []
-        project.dependencyCheck.scanProjects == []
-        project.dependencyCheck.skipProjects == []
-        project.dependencyCheck.skipGroups == []
-        project.dependencyCheck.skipTestGroups == true
-        project.dependencyCheck.suppressionFile == null
+        project.dependencyCheck.proxy.server.getOrNull() == null
+        project.dependencyCheck.proxy.port.getOrNull() == null
+        project.dependencyCheck.proxy.username.getOrNull() == null
+        project.dependencyCheck.proxy.password.getOrNull() == null
+        project.dependencyCheck.nvd.apiKey.getOrNull() == null
+        project.dependencyCheck.nvd.delay.getOrNull() == null
+        project.dependencyCheck.nvd.maxRetryCount.getOrNull() == null
+        project.dependencyCheck.outputDirectory.get().asFile == project.file("${project.buildDir}/reports")
+        project.dependencyCheck.quickQueryTimestamp.getOrNull() == null
+        project.dependencyCheck.scanConfigurations.get() == []
+        project.dependencyCheck.skipConfigurations.get() == []
+        project.dependencyCheck.scanProjects.get() == []
+        project.dependencyCheck.skipProjects.get() == []
+        project.dependencyCheck.skipGroups.get() == []
+        project.dependencyCheck.skipTestGroups.get() == true
+        project.dependencyCheck.suppressionFile.getOrNull() == null
     }
 
     def 'tasks use correct values when extension is used'() {
@@ -157,44 +157,44 @@ class DependencyCheckGradlePluginSpec extends Specification {
         }
 
         then:
-        project.dependencyCheck.proxy.server == '127.0.0.1'
-        project.dependencyCheck.proxy.port == 3128
-        project.dependencyCheck.proxy.username == 'proxyUsername'
-        project.dependencyCheck.proxy.password == 'proxyPassword'
-        project.dependencyCheck.proxy.nonProxyHosts == ['localhost']
+        project.dependencyCheck.proxy.server.get() == '127.0.0.1'
+        project.dependencyCheck.proxy.port.get() == 3128
+        project.dependencyCheck.proxy.username.get() == 'proxyUsername'
+        project.dependencyCheck.proxy.password.get() == 'proxyPassword'
+        project.dependencyCheck.proxy.nonProxyHosts.get() == ['localhost']
 
-        project.dependencyCheck.nvd.apiKey == 'apiKey'
-        project.dependencyCheck.nvd.delay == 5000
-        project.dependencyCheck.nvd.maxRetryCount == 20
-        project.dependencyCheck.hostedSuppressions.url == 'suppressionsurl'
-        project.dependencyCheck.hostedSuppressions.validForHours == 5
-        project.dependencyCheck.hostedSuppressions.forceupdate == true
-        project.dependencyCheck.outputDirectory == 'outputDirectory'
-        project.dependencyCheck.quickQueryTimestamp == false
-        project.dependencyCheck.scanConfigurations == ['a']
-        project.dependencyCheck.skipConfigurations == ['b']
-        project.dependencyCheck.scanProjects == ['a']
-        project.dependencyCheck.skipProjects == ['b']
-        project.dependencyCheck.skipGroups == ['b']
-        project.dependencyCheck.skipTestGroups == false
-        project.dependencyCheck.suppressionFile == './src/config/suppression.xml'
-        project.dependencyCheck.suppressionFiles.getAt(0) == './src/config/suppression1.xml'
-        project.dependencyCheck.suppressionFiles.getAt(1) == './src/config/suppression2.xml'
+        project.dependencyCheck.nvd.apiKey.get() == 'apiKey'
+        project.dependencyCheck.nvd.delay.get() == 5000
+        project.dependencyCheck.nvd.maxRetryCount.get() == 20
+        project.dependencyCheck.hostedSuppressions.url.get() == 'suppressionsurl'
+        project.dependencyCheck.hostedSuppressions.validForHours.get() == 5
+        project.dependencyCheck.hostedSuppressions.forceupdate.get() == true
+        project.dependencyCheck.outputDirectory.get().asFile == project.file('outputDirectory')
+        project.dependencyCheck.quickQueryTimestamp.get() == false
+        project.dependencyCheck.scanConfigurations.get() == ['a']
+        project.dependencyCheck.skipConfigurations.get() == ['b']
+        project.dependencyCheck.scanProjects.get() == ['a']
+        project.dependencyCheck.skipProjects.get() == ['b']
+        project.dependencyCheck.skipGroups.get() == ['b']
+        project.dependencyCheck.skipTestGroups.get() == false
+        project.dependencyCheck.suppressionFile.get() == './src/config/suppression.xml'
+        project.dependencyCheck.suppressionFiles.get().getAt(0) == './src/config/suppression1.xml'
+        project.dependencyCheck.suppressionFiles.get().getAt(1) == './src/config/suppression2.xml'
         //project.dependencyCheck.suppressionFiles == ['./src/config/suppression1.xml', './src/config/suppression2.xml']
-        project.dependencyCheck.suppressionFileUser == 'suppressionFileUsername'
-        project.dependencyCheck.suppressionFilePassword == 'suppressionFilePassword'
-        project.dependencyCheck.analyzers.artifactory.enabled == true
-        project.dependencyCheck.analyzers.artifactory.url == 'https://example.com/artifacgtory'
-        project.dependencyCheck.analyzers.artifactory.bearerToken == 'abc123=='
-        project.dependencyCheck.analyzers.kev.enabled == false
-        project.dependencyCheck.analyzers.kev.url == "https://example.com"
-        project.dependencyCheck.analyzers.retirejs.filters == ['filter1', 'filter2']
-        project.dependencyCheck.analyzers.retirejs.filterNonVulnerable == true
-        project.dependencyCheck.slack.enabled == true
-        project.dependencyCheck.slack.webhookUrl == slackWebhookUrl
+        project.dependencyCheck.suppressionFileUser.get() == 'suppressionFileUsername'
+        project.dependencyCheck.suppressionFilePassword.get() == 'suppressionFilePassword'
+        project.dependencyCheck.analyzers.artifactory.enabled.get() == true
+        project.dependencyCheck.analyzers.artifactory.url.get() == 'https://example.com/artifacgtory'
+        project.dependencyCheck.analyzers.artifactory.bearerToken.get() == 'abc123=='
+        project.dependencyCheck.analyzers.kev.enabled.get() == false
+        project.dependencyCheck.analyzers.kev.url.get() == "https://example.com"
+        project.dependencyCheck.analyzers.retirejs.filters.get() == ['filter1', 'filter2']
+        project.dependencyCheck.analyzers.retirejs.filterNonVulnerable.get() == true
+        project.dependencyCheck.slack.enabled.get() == true
+        project.dependencyCheck.slack.webhookUrl.get() == slackWebhookUrl
         project.dependencyCheck.additionalCpes.size() == 3
-        project.dependencyCheck.additionalCpes.getByName('additional1').description == 'Additional1'
-        project.dependencyCheck.additionalCpes.getByName('additional1').cpe == 'cpe:2.3:a:aGroup1:aPackage1:123:*:*:*:*:*:*:*'
+        project.dependencyCheck.additionalCpes.getByName('additional1').description.get() == 'Additional1'
+        project.dependencyCheck.additionalCpes.getByName('additional1').cpe.get() == 'cpe:2.3:a:aGroup1:aPackage1:123:*:*:*:*:*:*:*'
 
     }
 

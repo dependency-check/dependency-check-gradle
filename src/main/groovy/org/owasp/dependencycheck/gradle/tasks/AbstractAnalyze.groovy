@@ -77,7 +77,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     @TaskAction
     @groovy.transform.CompileStatic
     analyze() {
-        if (config.skip) {
+        if (config.skip.get()) {
             logger.lifecycle("Skipping dependency-check-gradle")
             return
         }
@@ -88,7 +88,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             engine = new Engine(settings)
         } catch (DatabaseException ex) {
             String msg = "Unable to connect to the dependency-check database"
-            if (config.failOnError) {
+            if (config.failOnError.get()) {
                 cleanup(engine)
                 throw new GradleException(msg, ex)
             } else {
@@ -102,7 +102,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             try {
                 engine.analyzeDependencies()
             } catch (ExceptionCollection ex) {
-                if (config.failOnError || ex.isFatal()) {
+                if (config.failOnError.get() || ex.isFatal()) {
                     cleanup(engine)
                     throw new GradleException("Analysis failed.", ex)
                 }
@@ -115,8 +115,8 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                 String displayName = determineDisplayName()
                 String groupId = project.getGroup()
                 String version = project.getVersion().toString()
-                File output = project.file(config.outputDirectory)
-                for (String f : getReportFormats(config.format, config.formats)) {
+                File output = config.outputDirectory.get().asFile
+                for (String f : getReportFormats(config.format.get(), config.formats.get())) {
                     engine.writeReports(displayName, groupId, name, version, output, f, exCol)
                 }
                 showSummary(engine)
@@ -126,7 +126,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                     throw new GradleException(result.msg)
                 }
             } catch (ReportException ex) {
-                if (config.failOnError) {
+                if (config.failOnError.get()) {
                     if (exCol != null) {
                         exCol.addException(ex)
                         throw new GradleException("Error generating the report", exCol)
@@ -139,7 +139,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             } finally {
                 cleanup(engine)
             }
-            if (config.failOnError && exCol != null && exCol.getExceptions().size() > 0) {
+            if (config.failOnError.get() && exCol != null && exCol.getExceptions().size() > 0) {
                 throw new GradleException("One or more exceptions occurred during analysis", exCol)
             }
         }
@@ -159,13 +159,13 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      */
     @groovy.transform.CompileStatic
     def verifySettings() {
-        if (!config.scanDependencies && !config.scanBuildEnv) {
+        if (!config.scanDependencies.get() && !config.scanBuildEnv.get()) {
             throw new IllegalArgumentException("At least one of scanDependencies or scanBuildEnv must be set to true")
         }
-        if (config.scanConfigurations && config.skipConfigurations) {
+        if (!config.scanConfigurations.get().isEmpty() && !config.skipConfigurations.get().isEmpty()) {
             throw new IllegalArgumentException("you can only specify one of scanConfigurations or skipConfigurations")
         }
-        if (config.scanProjects && config.skipProjects) {
+        if (!config.scanProjects.get().isEmpty() && !config.skipProjects.get().isEmpty()) {
             throw new IllegalArgumentException("you can only specify one of scanProjects or skipProjects")
         }
     }
@@ -231,7 +231,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         }.flatten()
 
         logger.warn("Found ${vulnerabilities.size()} vulnerabilities in project ${currentProjectName}")
-        if (config.showSummary) {
+        if (config.showSummary.get()) {
             DependencyCheckScanAgent.showSummary(project.name, engine.getDependencies());
         }
     }
@@ -242,7 +242,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      */
     @groovy.transform.CompileStatic
     CheckForFailureResult checkForFailure(Engine engine) {
-        if (config.failBuildOnCVSS > 10) {
+        if (config.failBuildOnCVSS.get() > 10) {
             return CheckForFailureResult.createSuccess()
         }
 
@@ -257,12 +257,12 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                         && v.getCvssV4().getCvssData().getBaseScore() != null ? v.getCvssV4().getCvssData().getBaseScore() : -1;
                 final boolean useUnscored = cvssV2 == -1 && cvssV3 == -1 && cvssV4 == -1;
                 final double unscoredCvss = (useUnscored && v.getUnscoredSeverity() != null) ? SeverityUtil.estimateCvssV2(v.getUnscoredSeverity()) : -1;
-                if (cvssV2 >= config.failBuildOnCVSS
-                        || cvssV3 >= config.failBuildOnCVSS
-                        || cvssV4 >= config.failBuildOnCVSS
-                        || useUnscored && unscoredCvss >= config.failBuildOnCVSS
+                if (cvssV2 >= config.failBuildOnCVSS.get()
+                        || cvssV3 >= config.failBuildOnCVSS.get()
+                        || cvssV4 >= config.failBuildOnCVSS.get()
+                        || useUnscored && unscoredCvss >= config.failBuildOnCVSS.get()
                         //safety net to fail on any if for some reason the above misses on 0
-                        || (config.failBuildOnCVSS <= 0.0f)) {
+                        || (config.failBuildOnCVSS.get() <= 0.0f)) {
                     vulnerabilities.add(v.getName());
                 }
             }
@@ -271,7 +271,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         if (vulnerabilities.size() > 0) {
             final String msg = String.format("%n%nDependency-Analyze Failure:%n"
                     + "One or more dependencies were identified with vulnerabilities that have a CVSS score greater than '%.1f': %s%n"
-                    + "See the dependency-check report for more details.%n%n", config.failBuildOnCVSS, vulnerabilities.join(", "))
+                    + "See the dependency-check report for more details.%n%n", config.failBuildOnCVSS.get(), vulnerabilities.join(", "))
             return CheckForFailureResult.createFailed(msg)
         } else {
             return CheckForFailureResult.createSuccess()
@@ -311,7 +311,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      */
     @groovy.transform.CompileStatic
     def shouldBeScanned(Project project) {
-        !config.scanProjects || config.scanProjects.contains(project.path)
+        config.scanProjects.get().isEmpty() || config.scanProjects.get().contains(project.path)
     }
 
     /**
@@ -320,7 +320,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      */
     @groovy.transform.CompileStatic
     def shouldBeSkipped(Project project) {
-        config.skipProjects.contains(project.path)
+        config.skipProjects.get().contains(project.path)
     }
 
     /**
@@ -330,7 +330,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      */
     @groovy.transform.CompileStatic
     boolean shouldBeScanned(Configuration configuration) {
-        !config.scanConfigurations || config.scanConfigurations.contains(configuration.name)
+        config.scanConfigurations.get().isEmpty() || config.scanConfigurations.get().contains(configuration.name)
     }
 
     /**
@@ -345,7 +345,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                         "runtime".equals(configuration.name) ||
                         "compile".equals(configuration.name) ||
                         "compileOnly".equals(configuration.name)))
-                || config.skipConfigurations.contains(configuration.name))
+                || config.skipConfigurations.get().contains(configuration.name))
     }
 
     /**
@@ -355,7 +355,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     @groovy.transform.CompileStatic
     def shouldBeSkipped(ResolvedArtifactResult artifact) {
         def name = artifact.id.componentIdentifier.displayName
-        config.skipGroups.any { name.startsWith(it) }
+        config.skipGroups.get().any { name.startsWith(it) }
     }
 
     /**
@@ -364,7 +364,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      */
     @groovy.transform.CompileStatic
     boolean shouldBeSkippedAsTest(Configuration configuration) {
-        config.skipTestGroups && isTestConfiguration(configuration)
+        config.skipTestGroups.get() && isTestConfiguration(configuration)
     }
 
     /**
@@ -446,7 +446,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                 processConfigV4 project, configuration, engine
             }
         }
-        if (config.scanSet == null) {
+        if (config.scanSet.isEmpty()) {
             List<String> toScan = ['src/main/resources', 'src/main/webapp',
                                    './package.json', './package-lock.json',
                                    './npm-shrinkwrap.json', './yarn.lock',
@@ -470,12 +470,12 @@ abstract class AbstractAnalyze extends ConfiguredTask {
 
         config.additionalCpes.each {
             var dependency = new Dependency(true);
-            dependency.setDescription(it.description)
-            dependency.setDisplayFileName(it.cpe);
-            dependency.setSha1sum(Checksum.getSHA1Checksum(it.cpe));
-            dependency.setSha256sum(Checksum.getSHA256Checksum(it.cpe));
-            dependency.setMd5sum(Checksum.getMD5Checksum(it.cpe));
-            dependency.addVulnerableSoftwareIdentifier(new CpeIdentifier(CpeParser.parse(it.cpe), Confidence.HIGHEST))
+            dependency.setDescription(it.description.getOrNull())
+            dependency.setDisplayFileName(it.cpe.getOrNull());
+            dependency.setSha1sum(Checksum.getSHA1Checksum(it.cpe.getOrNull()));
+            dependency.setSha256sum(Checksum.getSHA256Checksum(it.cpe.getOrNull()));
+            dependency.setMd5sum(Checksum.getMD5Checksum(it.cpe.getOrNull()));
+            dependency.addVulnerableSoftwareIdentifier(new CpeIdentifier(CpeParser.parse(it.cpe.getOrNull()), Confidence.HIGHEST))
             dependency.setFileName("")
             dependency.setActualFilePath("")
             engine.addDependency(dependency)
@@ -579,7 +579,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         }
         Map<PackageURL, Set<IncludedByReference>> includedByMap = buildIncludedByMap(project, configuration, scanningBuildEnv)
 
-        def types = config.analyzedTypes
+        def types = config.analyzedTypes.get()
         for (String type : types) {
             List<ResolvedArtifactResult> rar = configuration.incoming.artifactView {
                 lenient true

@@ -21,7 +21,17 @@ package org.owasp.dependencycheck.gradle.extension
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Optional
 
+import javax.inject.Inject
 import java.util.stream.Collectors
 
 import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
@@ -36,103 +46,285 @@ import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
 @groovy.transform.CompileStatic
 class DependencyCheckExtension {
 
-    DependencyCheckExtension(Project project) {
-        this.project = project;
-        outputDirectory = "${project.buildDir}/reports"
-    }
-
     Project project;
 
-    /**
-     * Whether the buildEnv should be analyzed.
-     */
-    Boolean scanBuildEnv = false
-    /**
-     * Whether the dependencies should be analyzed.
-     */
-    Boolean scanDependencies = true
+    private final Property<Boolean> scanBuildEnv
+    private final Property<Boolean> scanDependencies
+    private final Property<Boolean> failOnError
+    private final Property<Boolean> quickQueryTimestamp
+    private final DirectoryProperty outputDirectory
+    private final Property<String> suppressionFile
+    private final ListProperty<String> suppressionFiles
+    private final Property<String> suppressionFileUser
+    private final Property<String> suppressionFilePassword
+    private final Property<String> suppressionFileBearerToken
+    private final Property<String> hintsFile
+    private final Property<Boolean> autoUpdate
+    private final Property<Boolean> skipTestGroups
+    private final Property<String> format
+    private final ListProperty<String> formats
+    private final Property<Float> failBuildOnCVSS
+    private final Property<Float> junitFailOnCVSS
+    private final Property<Boolean> failBuildOnUnusedSuppressionRule
+    private final Property<Boolean> showSummary
+    private final ListProperty<String> scanConfigurations
+    private final ListProperty<String> skipConfigurations
+    private final ListProperty<String> scanProjects
+    private final ListProperty<String> skipProjects
+    private final ListProperty<String> skipGroups
+    private final ListProperty<String> analyzedTypes
+    private final Property<Boolean> skip
+    private final ConfigurableFileCollection scanSet
+
     /**
      * The configuration extension for proxy settings.
      */
-    ProxyExtension proxy = new ProxyExtension()
+    ProxyExtension proxy
     /**
-     * The configuration extension for proxy settings.
+     * The configuration extension for slack notifications.
      */
-    SlackExtension slack = new SlackExtension()
+    SlackExtension slack
 
     /**
      * The configuration extension that defines the location of the NVD CVE data.
      */
-    NvdExtension nvd = new NvdExtension()
+    NvdExtension nvd
 
     /**
      * The configuration extension that configures the hosted suppressions file.
      */
-    HostedSuppressionsExtension hostedSuppressions = new HostedSuppressionsExtension()
+    HostedSuppressionsExtension hostedSuppressions
+
+    /**
+     * The configuration extension for data related configuration options.
+     */
+    DataExtension data
+
+    /**
+     * Configuration for the analyzers.
+     */
+    AnalyzerExtension analyzers
+
+    /**
+     * Additional CPE to be analyzed.
+     */
+    NamedDomainObjectContainer<AdditionalCpe> additionalCpes
+
+    /**
+     * The configuration extension for cache settings.
+     */
+    CacheExtension cache
+
+    @Inject
+    DependencyCheckExtension(Project project, ObjectFactory objects) {
+        this.project = project;
+
+        this.scanBuildEnv = objects.property(Boolean).convention(false)
+        this.scanDependencies = objects.property(Boolean).convention(true)
+        this.failOnError = objects.property(Boolean).convention(true)
+        this.quickQueryTimestamp = objects.property(Boolean)
+        this.outputDirectory = objects.directoryProperty().convention(project.layout.buildDirectory.dir("reports"))
+        this.suppressionFile = objects.property(String)
+        this.suppressionFiles = objects.listProperty(String).convention([])
+        this.suppressionFileUser = objects.property(String)
+        this.suppressionFilePassword = objects.property(String)
+        this.suppressionFileBearerToken = objects.property(String)
+        this.hintsFile = objects.property(String)
+        this.autoUpdate = objects.property(Boolean)
+        this.skipTestGroups = objects.property(Boolean).convention(true)
+        this.format = objects.property(String).convention(Format.HTML.toString())
+        this.formats = objects.listProperty(String).convention([])
+        this.failBuildOnCVSS = objects.property(Float).convention(11.0f)
+        this.junitFailOnCVSS = objects.property(Float).convention(0.0f)
+        this.failBuildOnUnusedSuppressionRule = objects.property(Boolean).convention(false)
+        this.showSummary = objects.property(Boolean).convention(true)
+        this.scanConfigurations = objects.listProperty(String).convention([])
+        this.skipConfigurations = objects.listProperty(String).convention([])
+        this.scanProjects = objects.listProperty(String).convention([])
+        this.skipProjects = objects.listProperty(String).convention([])
+        this.skipGroups = objects.listProperty(String).convention([])
+        this.analyzedTypes = objects.listProperty(String).convention(['jar', 'aar', 'js', 'war', 'ear', 'zip'])
+        this.skip = objects.property(Boolean).convention(false)
+        this.scanSet = objects.fileCollection()
+
+        cache = objects.newInstance(CacheExtension, objects)
+        slack = objects.newInstance(SlackExtension, objects)
+        proxy = objects.newInstance(ProxyExtension, objects)
+        nvd = objects.newInstance(NvdExtension, objects)
+        hostedSuppressions = objects.newInstance(HostedSuppressionsExtension, objects)
+        data = objects.newInstance(DataExtension, objects, project)
+        analyzers = new AnalyzerExtension(project, objects)
+        additionalCpes = project.objects.domainObjectContainer(AdditionalCpe.class)
+    }
+
+    /**
+     * Whether the buildEnv should be analyzed.
+     */
+    @Input
+    @Optional
+    Property<Boolean> getScanBuildEnv() {
+        return scanBuildEnv
+    }
+
+    void setScanBuildEnv(Boolean value) {
+        scanBuildEnv.set(value)
+    }
+
+    /**
+     * Whether the dependencies should be analyzed.
+     */
+    @Input
+    @Optional
+    Property<Boolean> getScanDependencies() {
+        return scanDependencies
+    }
+
+    void setScanDependencies(Boolean value) {
+        scanDependencies.set(value)
+    }
 
     /**
      * Whether the plugin should fail when errors occur.
      */
-    Boolean failOnError = true
-    /**
-     * The configuration extension for data related configuration options.
-     */
-    DataExtension data = new DataExtension(project)
+    @Input
+    @Optional
+    Property<Boolean> getFailOnError() {
+        return failOnError
+    }
+
+    void setFailOnError(Boolean value) {
+        failOnError.set(value)
+    }
 
     /**
      * Set to false if the proxy does not support HEAD requests. The default is true.
      */
-    Boolean quickQueryTimestamp
+    @Input
+    @Optional
+    Property<Boolean> getQuickQueryTimestamp() {
+        return quickQueryTimestamp
+    }
+
+    void setQuickQueryTimestamp(Boolean value) {
+        quickQueryTimestamp.set(value)
+    }
+
     /**
      * The directory where the reports will be written. Defaults to 'build/reports'.
      */
-    String outputDirectory
-    /**
-     * Configuration for the analyzers.
-     */
-    AnalyzerExtension analyzers = new AnalyzerExtension(project)
+    @InputDirectory
+    @Optional
+    DirectoryProperty getOutputDirectory() {
+        return outputDirectory
+    }
+
+    void setOutputDirectory(String value) {
+        outputDirectory.set(project.file(value))
+    }
+
+    void setOutputDirectory(File value) {
+        outputDirectory.set(value)
+    }
+
     /**
      * The path to the suppression file.
      */
-    String suppressionFile
+    @Input
+    @Optional
+    Property<String> getSuppressionFile() {
+        return suppressionFile
+    }
+
+    void setSuppressionFile(String value) {
+        suppressionFile.set(value)
+    }
+
     /**
      * The list of paths to suppression files.
      */
-    Collection<String> suppressionFiles = [];
+    @Input
+    @Optional
+    ListProperty<String> getSuppressionFiles() {
+        return suppressionFiles
+    }
 
-    public void setSuppressionFiles(java.lang.Object[] files) {
+    void setSuppressionFiles(java.lang.Object[] files) {
         if (files != null) {
-            suppressionFiles = Arrays.stream(files).map({ o -> o.toString() }).collect(Collectors.toSet())
+            suppressionFiles.set(Arrays.stream(files).map({ o -> o.toString() }).collect(Collectors.toList()))
         }
     }
-    public void setSuppressionFiles(Collection<String> files) {
+
+    void setSuppressionFiles(Collection<String> files) {
         if (files != null) {
-            suppressionFiles = files;
+            suppressionFiles.set(files.toList())
         }
     }
+
     /**
      * The username for downloading the suppression file(s) from HTTP Basic protected locations
      */
-    String suppressionFileUser
+    @Input
+    @Optional
+    Property<String> getSuppressionFileUser() {
+        return suppressionFileUser
+    }
+
+    void setSuppressionFileUser(String value) {
+        suppressionFileUser.set(value)
+    }
+
     /**
      * The password for downloading the suppression file(s) from HTTP Basic protected locations
      */
-    String suppressionFilePassword
+    @Input
+    @Optional
+    Property<String> getSuppressionFilePassword() {
+        return suppressionFilePassword
+    }
+
+    void setSuppressionFilePassword(String value) {
+        suppressionFilePassword.set(value)
+    }
+
     /**
      * The token for downloading the suppression file(s) from HTTP Bearer protected locations
      */
-    String suppressionFileBearerToken
+    @Input
+    @Optional
+    Property<String> getSuppressionFileBearerToken() {
+        return suppressionFileBearerToken
+    }
+
+    void setSuppressionFileBearerToken(String value) {
+        suppressionFileBearerToken.set(value)
+    }
+
     /**
      * The path to the hints file.
      */
-    String hintsFile
+    @Input
+    @Optional
+    Property<String> getHintsFile() {
+        return hintsFile
+    }
+
+    void setHintsFile(String value) {
+        hintsFile.set(value)
+    }
+
     /**
      * Sets whether auto-updating of the NVD CVE/CPE data is enabled.
      */
-    Boolean autoUpdate
+    @Input
+    @Optional
+    Property<Boolean> getAutoUpdate() {
+        return autoUpdate
+    }
 
-    //The following properties are not used via the settings object, instead
-    // they are directly used by the check task.
+    void setAutoUpdate(Boolean value) {
+        autoUpdate.set(value)
+    }
+
     /**
      * When set to true configurations that are considered a test configuration will not be included in the analysis.
      * A configuration is considered a test configuration if and only if any of the following conditions holds:
@@ -145,87 +337,215 @@ class DependencyCheckExtension {
      * </ul>
      * The default value is true.
      */
-    Boolean skipTestGroups = true
+    @Input
+    @Optional
+    Property<Boolean> getSkipTestGroups() {
+        return skipTestGroups
+    }
+
+    void setSkipTestGroups(Boolean value) {
+        skipTestGroups.set(value)
+    }
+
     /**
      * The report format to be generated (HTML, XML, CSV, JUNIT, SARIF, ALL). This configuration option has
      * no affect if using this within the Site plugin unless the externalReport is set to true.
      * The default is HTML.
      */
-    String format = Format.HTML.toString()
+    @Input
+    @Optional
+    Property<String> getFormat() {
+        return format
+    }
+
+    void setFormat(String value) {
+        format.set(value)
+    }
+
     /**
      * The list of formats to generate to report (HTML, XML, CSV, JUNIT, SARIF, ALL).
      */
-    List<String> formats = []
+    @Input
+    @Optional
+    ListProperty<String> getFormats() {
+        return formats
+    }
+
+    void setFormats(List<String> value) {
+        formats.set(value)
+    }
+
     /**
      * Specifies if the build should be failed if a CVSS score above a specified level is identified. The default is
      * 11 which means since the CVSS scores are 0-10, by default the build will never fail.
      */
-    Float failBuildOnCVSS = 11.0f
+    @Input
+    @Optional
+    Property<Float> getFailBuildOnCVSS() {
+        return failBuildOnCVSS
+    }
+
+    void setFailBuildOnCVSS(Float value) {
+        failBuildOnCVSS.set(value)
+    }
+
     /**
      * Specifies the CVSS score that should be considered a failure when generating a JUNIT formatted report. The default
      * is 0.0 which means all identified vulnerabilities would be considered a failure.
      */
-    Float junitFailOnCVSS = 0.0f
+    @Input
+    @Optional
+    Property<Float> getJunitFailOnCVSS() {
+        return junitFailOnCVSS
+    }
+
+    void setJunitFailOnCVSS(Float value) {
+        junitFailOnCVSS.set(value)
+    }
+
     /**
      * Specifies that if any unused suppression rule is found, the build will fail.
      */
-    Boolean failBuildOnUnusedSuppressionRule = false
+    @Input
+    @Optional
+    Property<Boolean> getFailBuildOnUnusedSuppressionRule() {
+        return failBuildOnUnusedSuppressionRule
+    }
+
+    void setFailBuildOnUnusedSuppressionRule(Boolean value) {
+        failBuildOnUnusedSuppressionRule.set(value)
+    }
+
     /**
      * Displays a summary of the findings. Defaults to true.
      */
-    Boolean showSummary = true
+    @Input
+    @Optional
+    Property<Boolean> getShowSummary() {
+        return showSummary
+    }
+
+    void setShowSummary(Boolean value) {
+        showSummary.set(value)
+    }
+
     /**
      * Names of the configurations to scan.
      *
      * This is mutually exclusive with the skipConfigurations property.
      */
-    List<String> scanConfigurations = []
+    @Input
+    @Optional
+    ListProperty<String> getScanConfigurations() {
+        return scanConfigurations
+    }
+
+    void setScanConfigurations(List<String> value) {
+        scanConfigurations.set(value)
+    }
+
     /**
      * Names of the configurations to skip when scanning.
      *
      * This is mutually exclusive with the scanConfigurations property.
      */
-    List<String> skipConfigurations = []
+    @Input
+    @Optional
+    ListProperty<String> getSkipConfigurations() {
+        return skipConfigurations
+    }
+
+    void setSkipConfigurations(List<String> value) {
+        skipConfigurations.set(value)
+    }
+
     /**
      * Paths of the projects to scan.
      *
      * This is mutually exclusive with the skipProjects property.
      */
-    List<String> scanProjects = []
+    @Input
+    @Optional
+    ListProperty<String> getScanProjects() {
+        return scanProjects
+    }
+
+    void setScanProjects(List<String> value) {
+        scanProjects.set(value)
+    }
+
     /**
      * Paths of the projects to skip when scanning.
      *
      * This is mutually exclusive with the scanProjects property.
      */
-    List<String> skipProjects = []
+    @Input
+    @Optional
+    ListProperty<String> getSkipProjects() {
+        return skipProjects
+    }
+
+    void setSkipProjects(List<String> value) {
+        skipProjects.set(value)
+    }
+
     /**
      * Group prefixes of the modules to skip when scanning.
      *
      * The 'project' prefix can be used to skip all internal dependencies from multi-project build.
      */
-    List<String> skipGroups = []
+    @Input
+    @Optional
+    ListProperty<String> getSkipGroups() {
+        return skipGroups
+    }
+
+    void setSkipGroups(List<String> value) {
+        skipGroups.set(value)
+    }
+
     /**
      * The artifact types that will be analyzed in the gradle build.
      */
-    List<String> analyzedTypes = ['jar', 'aar', 'js', 'war', 'ear', 'zip']
+    @Input
+    @Optional
+    ListProperty<String> getAnalyzedTypes() {
+        return analyzedTypes
+    }
+
+    void setAnalyzedTypes(List<String> value) {
+        analyzedTypes.set(value)
+    }
+
     /**
      * whether to skip the execution of dependency-check.
      */
-    Boolean skip = false
+    @Input
+    @Optional
+    Property<Boolean> getSkip() {
+        return skip
+    }
+
+    void setSkip(Boolean value) {
+        skip.set(value)
+    }
+
     /**
      * A set of files or folders to scan.
      */
-    List<File> scanSet
-    /**
-     * Additional CPE to be analyzed.
-     */
-    NamedDomainObjectContainer<AdditionalCpe> additionalCpes =
-            project.objects.domainObjectContainer(AdditionalCpe.class)
+    @InputFiles
+    @Optional
+    ConfigurableFileCollection getScanSet() {
+        return scanSet
+    }
 
-    /**
-     * The configuration extension for cache settings.
-     */
-    CacheExtension cache = new CacheExtension()
+    void setScanSet(List<File> files) {
+        scanSet.setFrom(files)
+    }
+
+    void setScanSet(File... files) {
+        scanSet.setFrom(files)
+    }
 
 
     /**

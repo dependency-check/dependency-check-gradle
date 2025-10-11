@@ -17,29 +17,96 @@
  */
 package org.owasp.dependencycheck.gradle.extension
 
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
+
+import javax.inject.Inject
+
 /**
  * The configuration for the OSS Index Analyzer.
  */
 @groovy.transform.CompileStatic
 class OssIndexExtension {
+
+    private final Property<Boolean> enabled
+    private final Property<String> username
+    private final Property<String> password
+    private final Property<String> url
+    private final Property<Boolean> warnOnlyOnRemoteErrors
+
+    @Inject
+    OssIndexExtension(ObjectFactory objects) {
+        this.enabled = objects.property(Boolean)
+        this.username = objects.property(String)
+        this.password = objects.property(String)
+        this.url = objects.property(String)
+        this.warnOnlyOnRemoteErrors = objects.property(Boolean)
+    }
+
     /**
      * Sets whether the OSS Index Analyzer should be used.
      */
-    Boolean enabled
+    @Input
+    @Optional
+    Property<Boolean> getEnabled() {
+        return enabled
+    }
+
+    void setEnabled(Boolean value) {
+        enabled.set(value)
+    }
+
     /**
      * The optional username to connect to the OSS Index
      */
-    String username
+    @Input
+    @Optional
+    Property<String> getUsername() {
+        return username
+    }
+
+    void setUsername(String value) {
+        username.set(value)
+    }
+
     /**
      * The optional password or API token to connect to the OSS Index
      */
-    String password
+    @Input
+    @Optional
+    Property<String> getPassword() {
+        return password
+    }
+
+    void setPassword(String value) {
+        password.set(value)
+    }
+
     /**
      * The OSS Index URL.
      */
-    String url
+    @Input
+    @Optional
+    Property<String> getUrl() {
+        return url
+    }
+
+    void setUrl(String value) {
+        url.set(value)
+    }
+
     /**
      * Only output a warning message instead of failing when remote errors occur.
      */
-    Boolean warnOnlyOnRemoteErrors
+    @Input
+    @Optional
+    Property<Boolean> getWarnOnlyOnRemoteErrors() {
+        return warnOnlyOnRemoteErrors
+    }
+
+    void setWarnOnlyOnRemoteErrors(Boolean value) {
+        warnOnlyOnRemoteErrors.set(value)
+    }
 }
