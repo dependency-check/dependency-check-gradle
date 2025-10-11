@@ -666,7 +666,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                                 try {
                                     PomUtils.analyzePOM(deps[0], pomFile)
                                 } catch (Exception e) {
-                                    logger.debug("Failed to analyze POM for ${id.group}:${id.name}:${id.version}: ${e.message}")
+                                    logger.debug("Failed to analyze POM for ${compId.group}:${compId.name}:${compId.version}: ${t.message}")
                                 }
                             }
                         }
