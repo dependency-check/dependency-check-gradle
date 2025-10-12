@@ -17,11 +17,45 @@
  */
 package org.owasp.dependencycheck.gradle.extension
 
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
+
+import javax.inject.Inject
+
 /**
- * The configuration for the Node Audit Analyzer.
+ * The configuration for Slack notifications.
  */
 @groovy.transform.CompileStatic
 class SlackExtension {
-    Boolean enabled
-    String webhookUrl
+
+    private final Property<Boolean> enabled
+    private final Property<String> webhookUrl
+
+    @Inject
+    SlackExtension(ObjectFactory objects) {
+        this.enabled = objects.property(Boolean)
+        this.webhookUrl = objects.property(String)
+    }
+
+    @Input
+    @Optional
+    Property<Boolean> getEnabled() {
+        return enabled
+    }
+
+    void setEnabled(Boolean value) {
+        enabled.set(value)
+    }
+
+    @Input
+    @Optional
+    Property<String> getWebhookUrl() {
+        return webhookUrl
+    }
+
+    void setWebhookUrl(String value) {
+        webhookUrl.set(value)
+    }
 }

@@ -61,11 +61,11 @@ class DependencyCheckPlugin implements Plugin<Project> {
     }
 
     void initializeConfigurations(Project project) {
-        project.extensions.create(CHECK_EXTENSION_NAME, DependencyCheckExtension, project)
+        project.extensions.create(CHECK_EXTENSION_NAME, DependencyCheckExtension, project, project.objects)
     }
 
     void registerTasks(Project project) {
-        if (REGISTER_TASK_GRADLE_VERSION.compareTo(GradleVersion.current())<=0) {
+        if (REGISTER_TASK_GRADLE_VERSION.compareTo(GradleVersion.current()) <= 0) {
             project.tasks.register(PURGE_TASK, Purge)
             project.tasks.register(UPDATE_TASK, Update)
             project.tasks.register(ANALYZE_TASK, Analyze)

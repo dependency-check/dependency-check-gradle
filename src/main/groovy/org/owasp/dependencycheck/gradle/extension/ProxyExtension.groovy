@@ -17,6 +17,15 @@
  */
 
 package org.owasp.dependencycheck.gradle.extension
+
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
+
+import javax.inject.Inject
+
 /**
  * TODO - this should not be needed, instead rely on the configured HTTP or HTTPS proxies
  * https://docs.gradle.org/current/userguide/build_environment.html
@@ -24,9 +33,69 @@ package org.owasp.dependencycheck.gradle.extension
 @Deprecated
 @groovy.transform.CompileStatic
 class ProxyExtension {
-    String server
-    Integer port
-    String username
-    String password
-    List<String> nonProxyHosts = []
+
+    private final Property<String> server
+    private final Property<Integer> port
+    private final Property<String> username
+    private final Property<String> password
+    private final ListProperty<String> nonProxyHosts
+
+    @Inject
+    ProxyExtension(ObjectFactory objects) {
+        this.server = objects.property(String)
+        this.port = objects.property(Integer)
+        this.username = objects.property(String)
+        this.password = objects.property(String)
+        this.nonProxyHosts = objects.listProperty(String).empty()
+    }
+
+    @Input
+    @Optional
+    Property<String> getServer() {
+        return server
+    }
+
+    void setServer(String value) {
+        server.set(value)
+    }
+
+    @Input
+    @Optional
+    Property<Integer> getPort() {
+        return port
+    }
+
+    void setPort(Number value) {
+        port.set(value?.intValue())
+    }
+
+    @Input
+    @Optional
+    Property<String> getUsername() {
+        return username
+    }
+
+    void setUsername(String value) {
+        username.set(value)
+    }
+
+    @Input
+    @Optional
+    Property<String> getPassword() {
+        return password
+    }
+
+    void setPassword(String value) {
+        password.set(value)
+    }
+
+    @Input
+    @Optional
+    ListProperty<String> getNonProxyHosts() {
+        return nonProxyHosts
+    }
+
+    void setNonProxyHosts(List<String> value) {
+        nonProxyHosts.set(value)
+    }
 }

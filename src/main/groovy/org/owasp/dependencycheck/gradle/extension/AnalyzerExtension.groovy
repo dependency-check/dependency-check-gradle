@@ -19,6 +19,9 @@ package org.owasp.dependencycheck.gradle.extension
 
 import org.gradle.api.Action
 import org.gradle.api.Project
+import org.gradle.api.model.ObjectFactory
+
+import javax.inject.Inject
 
 /**
  * The analyzer configuration extension. Any value not configured will use the dependency-check-core defaults.
@@ -26,8 +29,15 @@ import org.gradle.api.Project
 @groovy.transform.CompileStatic
 class AnalyzerExtension {
 
-    AnalyzerExtension(Project project) {
+    @Inject
+    AnalyzerExtension(Project project, ObjectFactory objects) {
         this.project = project;
+        kev = objects.newInstance(KEVExtension, objects)
+        retirejs = objects.newInstance(RetireJSExtension, objects)
+        nodeAudit = objects.newInstance(NodeAuditExtension, objects)
+        nodePackage = objects.newInstance(NodePackageExtension, objects)
+        artifactory = objects.newInstance(ArtifactoryExtension, objects)
+        ossIndex = objects.newInstance(OssIndexExtension, objects)
     }
 
     Project project;
@@ -178,32 +188,32 @@ class AnalyzerExtension {
     /**
      * The configuration extension for known exploited vulnerabilities settings.
      */
-    KEVExtension kev = new KEVExtension()
+    KEVExtension kev
 
     /**
      * The configuration extension for retirejs settings.
      */
-    RetireJSExtension retirejs = new RetireJSExtension()
+    RetireJSExtension retirejs
 
     /**
      * The configuration extension for the node audit settings.
      */
-    NodeAuditExtension nodeAudit = new NodeAuditExtension()
+    NodeAuditExtension nodeAudit
 
     /**
      * The configuration extension for the node package settings.
      */
-    NodePackageExtension nodePackage = new NodePackageExtension()
+    NodePackageExtension nodePackage
 
     /**
      * The configuration extension for artifactory settings.
      */
-    ArtifactoryExtension artifactory = new ArtifactoryExtension()
+    ArtifactoryExtension artifactory
 
     /**
      * The configuration extension for artifactory settings.
      */
-    OssIndexExtension ossIndex = new OssIndexExtension()
+    OssIndexExtension ossIndex
 
     /**
      * Allows programmatic configuration of the KEV extension

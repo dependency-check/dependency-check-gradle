@@ -17,17 +17,51 @@
  */
 package org.owasp.dependencycheck.gradle.extension
 
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
+
+import javax.inject.Inject
+
 /**
  * The configuration for the Node Package Analyzer.
  */
 @groovy.transform.CompileStatic
 class NodePackageExtension {
+
+    private final Property<Boolean> enabled
+    private final Property<Boolean> skipDevDependencies
+
+    @Inject
+    NodePackageExtension(ObjectFactory objects) {
+        this.enabled = objects.property(Boolean)
+        this.skipDevDependencies = objects.property(Boolean)
+    }
+
     /**
      * Sets whether the Node Package Analyzer should be used.
      */
-    Boolean enabled
+    @Input
+    @Optional
+    Property<Boolean> getEnabled() {
+        return enabled
+    }
+
+    void setEnabled(Boolean value) {
+        enabled.set(value)
+    }
+
     /**
      * Sets whether the Node Package Analyzer should skip devDependencies.
      */
-    Boolean skipDevDependencies
+    @Input
+    @Optional
+    Property<Boolean> getSkipDevDependencies() {
+        return skipDevDependencies
+    }
+
+    void setSkipDevDependencies(Boolean value) {
+        skipDevDependencies.set(value)
+    }
 }

@@ -150,3 +150,5 @@ configure<org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension> {
     format = org.owasp.dependencycheck.reporting.ReportGenerator.Format.ALL.toString()
 }
 ```
+
+<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=0218d602-986a-4fa2-a5f0-7c399019d793" />

@@ -17,41 +17,141 @@
  */
 package org.owasp.dependencycheck.gradle.extension
 
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
+
+import javax.inject.Inject
+
 /**
  * The configuration for the Node Audit Analyzer.
  */
 @groovy.transform.CompileStatic
 class NodeAuditExtension {
+
+    private final Property<Boolean> enabled
+    private final Property<Boolean> useCache
+    private final Property<Boolean> skipDevDependencies
+    private final Property<Boolean> yarnEnabled
+    private final Property<String> yarnPath
+    private final Property<Boolean> pnpmEnabled
+    private final Property<String> pnpmPath
+    private final Property<String> url
+
+    @Inject
+    NodeAuditExtension(ObjectFactory objects) {
+        this.enabled = objects.property(Boolean)
+        this.useCache = objects.property(Boolean)
+        this.skipDevDependencies = objects.property(Boolean)
+        this.yarnEnabled = objects.property(Boolean)
+        this.yarnPath = objects.property(String)
+        this.pnpmEnabled = objects.property(Boolean)
+        this.pnpmPath = objects.property(String)
+        this.url = objects.property(String)
+    }
+
     /**
      * Sets whether the Node Audit Analyzer should be used.
      */
-    Boolean enabled
+    @Input
+    @Optional
+    Property<Boolean> getEnabled() {
+        return enabled
+    }
+
+    void setEnabled(Boolean value) {
+        enabled.set(value)
+    }
+
     /**
      * Sets whether the Node Audit Analyzer should cache results locally.
      */
-    Boolean useCache
+    @Input
+    @Optional
+    Property<Boolean> getUseCache() {
+        return useCache
+    }
+
+    void setUseCache(Boolean value) {
+        useCache.set(value)
+    }
+
     /**
      * Sets whether the Node Audit Analyzer should skip devDependencies.
      */
-    Boolean skipDevDependencies
+    @Input
+    @Optional
+    Property<Boolean> getSkipDevDependencies() {
+        return skipDevDependencies
+    }
+
+    void setSkipDevDependencies(Boolean value) {
+        skipDevDependencies.set(value)
+    }
+
     /**
      * Sets whether the Yarn Audit Analyzer should be used.
      */
-    Boolean yarnEnabled
+    @Input
+    @Optional
+    Property<Boolean> getYarnEnabled() {
+        return yarnEnabled
+    }
+
+    void setYarnEnabled(Boolean value) {
+        yarnEnabled.set(value)
+    }
+
     /**
      * The path to `yarn`.
      */
-    String yarnPath
+    @Input
+    @Optional
+    Property<String> getYarnPath() {
+        return yarnPath
+    }
+
+    void setYarnPath(String value) {
+        yarnPath.set(value)
+    }
+
     /**
      * Sets whether the Pnpm Audit Analyzer should be used.
      */
-    Boolean pnpmEnabled
+    @Input
+    @Optional
+    Property<Boolean> getPnpmEnabled() {
+        return pnpmEnabled
+    }
+
+    void setPnpmEnabled(Boolean value) {
+        pnpmEnabled.set(value)
+    }
+
     /**
      * The path to `pnpm`.
      */
-    String pnpmPath
+    @Input
+    @Optional
+    Property<String> getPnpmPath() {
+        return pnpmPath
+    }
+
+    void setPnpmPath(String value) {
+        pnpmPath.set(value)
+    }
+
     /**
      * The URL to the NPM Audit API.
      */
-    String url
+    @Input
+    @Optional
+    Property<String> getUrl() {
+        return url
+    }
+
+    void setUrl(String value) {
+        url.set(value)
+    }
 }
