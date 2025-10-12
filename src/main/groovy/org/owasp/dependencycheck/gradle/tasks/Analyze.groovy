@@ -24,7 +24,7 @@ import org.owasp.dependencycheck.Engine
  * Checks the projects dependencies for known vulnerabilities.
  */
 @groovy.transform.CompileStatic
-class Analyze extends AbstractAnalyze {
+abstract class Analyze extends AbstractAnalyze {
 
     Analyze() {
         group = 'OWASP dependency-check'
@@ -39,13 +39,13 @@ class Analyze extends AbstractAnalyze {
      * Loads the projects dependencies into the dependency-check analysis engine.
      */
     def scanDependencies(Engine engine) {
-        if (shouldBeScanned(project) && !shouldBeSkipped(project)) {
+        if (shouldCurrentProjectBeScanned() && !shouldCurrentProjectBeSkipped()) {
             logger.lifecycle("Verifying dependencies for project ${currentProjectName}")
             if (this.config.scanDependencies) {
-                processConfigurations(project, engine)
+                processConfigurations(engine)
             }
             if (this.config.scanBuildEnv) {
-                processBuildEnvironment(project, engine)
+                processBuildEnvironment(engine)
             }
         }
     }

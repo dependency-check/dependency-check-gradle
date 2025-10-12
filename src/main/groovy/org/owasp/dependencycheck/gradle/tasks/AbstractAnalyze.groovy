@@ -23,6 +23,13 @@ import com.github.packageurl.PackageURLBuilder
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.provider.Property
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.SetProperty
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
@@ -61,15 +68,101 @@ import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
 import static org.owasp.dependencycheck.utils.Checksum.*
 
 /**
+ * Simple data class to hold project metadata captured at configuration time.
+ * Used to avoid passing Project objects during task execution.
+ */
+@groovy.transform.CompileStatic
+class ProjectInfo implements Serializable {
+    final String name
+    final String group
+    final String version
+    
+    ProjectInfo(String name, String group, String version) {
+        this.name = name
+        this.group = group ?: ""
+        this.version = version ?: ""
+    }
+    
+    static ProjectInfo from(Project project) {
+        return new ProjectInfo(
+            project.name,
+            project.group?.toString() ?: "",
+            project.version?.toString() ?: ""
+        )
+    }
+}
+
+/**
  * Checks the projects dependencies for known vulnerabilities.
+ * 
+ * Note: This task has been refactored to minimize Project object access during execution.
+ * Project metadata is captured at configuration time and stored in ProjectInfo objects.
  */
 //@groovy.transform.CompileStatic
 abstract class AbstractAnalyze extends ConfiguredTask {
 
     @Internal
-    String currentProjectName = project.getName()
-    @Internal
     Attribute artifactType = Attribute.of('artifactType', String)
+    
+    @Internal
+    abstract Property<String> getProjectName()
+    
+    @Internal
+    abstract Property<String> getProjectDisplayName()
+    
+    @Internal
+    abstract Property<String> getProjectGroup()
+    
+    @Internal
+    abstract Property<String> getProjectVersion()
+    
+    @Internal
+    abstract RegularFileProperty getProjectBuildFile()
+    
+    @Internal
+    abstract Property<String> getProjectPath()
+    
+    @Internal
+    abstract Property<Boolean> getOfflineMode()
+    
+    @Internal
+    abstract DirectoryProperty getProjectDirectory()
+    
+    @Internal
+    abstract ListProperty<String> getScanPaths()
+    
+    // Store Configuration objects to scan - captured at configuration time
+    // Marked as @Internal because configurations are complex objects
+    // The actual files from configurations are tracked via resolution
+    @Internal
+    final List<Configuration> configurationsToScanList = []
+    
+    @Internal  
+    final List<Configuration> buildscriptConfigurationsToScanList = []
+    
+    // For Aggregate task - store configurations from multiple projects
+    @Internal
+    final Map<Project, List<Configuration>> allProjectConfigurations = [:]
+    
+    @Internal
+    final Map<Project, List<Configuration>> allProjectBuildscriptConfigurations = [:]
+    
+    // Store DependencyHandler for artifact resolution queries
+    @Internal
+    DependencyHandler dependencyHandler
+    
+    // Store project metadata captured at configuration time
+    @Internal
+    ProjectInfo currentProjectInfo
+    
+    // Map of Project to ProjectInfo for multi-project scenarios (Aggregate task)
+    @Internal
+    final Map<Project, ProjectInfo> projectInfoMap = [:]
+    
+    @Internal
+    String getCurrentProjectName() {
+        return projectName.get()
+    }
     // @Internal
     private static final GradleVersion CUTOVER_GRADLE_VERSION = GradleVersion.version("4.0")
     private static final GradleVersion IGNORE_NON_RESOLVABLE_SCOPES_GRADLE_VERSION = GradleVersion.version("7.0")
@@ -117,10 +210,10 @@ abstract class AbstractAnalyze extends ConfiguredTask {
 
             logger.lifecycle("Generating report for project ${currentProjectName}")
             try {
-                String name = project.getName()
-                String displayName = determineDisplayName()
-                String groupId = project.getGroup()
-                String version = project.getVersion().toString()
+                String name = projectName.get()
+                String displayName = projectDisplayName.get()
+                String groupId = projectGroup.get()
+                String version = projectVersion.get()
                 File output = config.outputDirectory.get().asFile
                 for (String f : getReportFormats(config.format.get(), config.formats.get())) {
                     engine.writeReports(displayName, groupId, name, version, output, f, exCol)
@@ -151,15 +244,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         }
     }
 
-    /**
-     * Gets the projects display name. Project.getDisplayName() has been
-     * introduced with Gradle 3.3, thus we need to check for the method's
-     * existence first. Fallback: use project NAME
-     * @return the display name
-     */
-    String determineDisplayName() {
-        return project.metaClass.respondsTo(project, "getDisplayName") ? project.getDisplayName() : project.getName()
-    }
+
     /**
      * Verifies aspects of the configuration to ensure dependency-check can run correctly.
      */
@@ -238,7 +323,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
 
         logger.warn("Found ${vulnerabilities.size()} vulnerabilities in project ${currentProjectName}")
         if (config.showSummary.get()) {
-            DependencyCheckScanAgent.showSummary(project.name, engine.getDependencies());
+            DependencyCheckScanAgent.showSummary(projectName.get(), engine.getDependencies());
         }
     }
 
@@ -319,6 +404,16 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     def shouldBeScanned(Project project) {
         config.scanProjects.get().isEmpty() || config.scanProjects.get().contains(project.path)
     }
+    
+    /**
+     * Checks whether the current task's project should be scanned
+     * because either scanProjects is empty or it contains the
+     * project's path.
+     */
+    @groovy.transform.CompileStatic
+    def shouldCurrentProjectBeScanned() {
+        config.scanProjects.get().isEmpty() || config.scanProjects.get().contains(projectPath.get())
+    }
 
     /**
      * Checks whether the given project should be skipped
@@ -327,6 +422,15 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     @groovy.transform.CompileStatic
     def shouldBeSkipped(Project project) {
         config.skipProjects.get().contains(project.path)
+    }
+    
+    /**
+     * Checks whether the current task's project should be skipped
+     * because skipProjects contains the project's path.
+     */
+    @groovy.transform.CompileStatic
+    def shouldCurrentProjectBeSkipped() {
+        config.skipProjects.get().contains(projectPath.get())
     }
 
     /**
@@ -419,17 +523,17 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     /**
      * Resolves the Maven POM file for a given module component.
      * Uses caching to avoid redundant network calls.
-     * @param project the project context
+     * Uses DependencyHandler captured at configuration time.
      * @param mci the module component identifier
      * @return the resolved POM file, or null if resolution fails
      */
     @groovy.transform.CompileStatic
-    private File resolvePomFor(Project project, ModuleComponentIdentifier mci) {
+    private File resolvePomFor(ModuleComponentIdentifier mci) {
         if (pomCache.containsKey(mci)) {
             return pomCache.get(mci)
         }
         try {
-            def query = project.dependencies.createArtifactResolutionQuery()
+            def query = dependencyHandler.createArtifactResolutionQuery()
                     .forComponents(mci)
                     .withArtifacts(MavenModule, MavenPomArtifact)
                     .execute()
@@ -452,59 +556,54 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     }
 
     /**
-     * Process the incoming artifacts for the given project's configurations.
-     * @param project the project to analyze
+     * Process the incoming artifacts for the task's project's build environment configurations.
+     * Uses captured buildscript configurations instead of accessing project at execution time.
      * @param engine the dependency-check engine
      */
     @groovy.transform.CompileStatic
-    protected void processBuildEnvironment(Project project, Engine engine) {
-        project.getBuildscript().configurations.findAll { Configuration configuration ->
-            shouldBeScanned(configuration) && !(shouldBeSkipped(configuration)
-                    || shouldBeSkippedAsTest(configuration)) && canBeResolved(configuration)
-        }.each { Configuration configuration ->
+    protected void processBuildEnvironment(Engine engine) {
+        // Use buildscript configurations captured at configuration time
+        // Use currentProjectInfo instead of project object
+        buildscriptConfigurationsToScanList.each { Configuration configuration ->
             if (CUTOVER_GRADLE_VERSION.compareTo(GradleVersion.current()) > 0) {
                 processConfigLegacy configuration, engine
             } else {
-                processConfigV4 project, configuration, engine, true
+                processConfigV4 currentProjectInfo, configuration, engine, true
             }
         }
     }
 
     /**
-     * Process the incoming artifacts for the given project's configurations.
-     * @param project the project to analyze
+     * Process the incoming artifacts for the task's project's configurations.
+     * Uses captured configurations instead of accessing project at execution time.
      * @param engine the dependency-check engine
      */
     @groovy.transform.CompileStatic
-    protected void processConfigurations(Project project, Engine engine) {
-        project.configurations.findAll { Configuration configuration ->
-            shouldBeScanned(configuration) && !(shouldBeSkipped(configuration)
-                    || shouldBeSkippedAsTest(configuration)) && canBeResolved(configuration)
-        }.each { Configuration configuration ->
+    protected void processConfigurations(Engine engine) {
+        // Use configurations captured at configuration time
+        // Use currentProjectInfo instead of project object
+        configurationsToScanList.each { Configuration configuration ->
             if (CUTOVER_GRADLE_VERSION.compareTo(GradleVersion.current()) > 0) {
                 processConfigLegacy configuration, engine
             } else {
-                processConfigV4 project, configuration, engine
+                processConfigV4 currentProjectInfo, configuration, engine
             }
         }
-        if (config.scanSet == null) {
-            List<String> toScan = ['src/main/resources', 'src/main/webapp',
-                                   './package.json', './package-lock.json',
-                                   './npm-shrinkwrap.json', './yarn.lock',
-                                   './pnpm.lock', 'pnpm-lock.yaml', './Gopkg.lock', './go.mod']
-            toScan.each {
-                File f = project.file it
+        
+        // Scan additional files using captured paths
+        if (config.scanSet == null || config.scanSet.isEmpty()) {
+            scanPaths.get().each { String path ->
+                File f = projectDirectory.get().file(path).asFile
                 if (f.exists()) {
-                    engine.scan(f, project.name)
+                    engine.scan(f, projectName.get())
                 }
             }
         } else {
-            config.scanSet.each {
-                File f = project.file it
+            config.scanSet.files.each { File f ->
                 if (f.exists()) {
-                    engine.scan(f, project.name)
+                    engine.scan(f, projectName.get())
                 } else {
-                    logger.warn("ScanSet file `${f}` does not exist in ${project.name}")
+                    logger.warn("ScanSet file `${f}` does not exist in ${projectName.get()}")
                 }
             }
         }
@@ -531,15 +630,15 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     @groovy.transform.CompileStatic
     protected void processConfigLegacy(Configuration configuration, Engine engine) {
         configuration.getResolvedConfiguration().getResolvedArtifacts().collect { ResolvedArtifact artifact ->
-            def dependencies = engine.scan(artifact.getFile())
-            if (!project.gradle.startParameter.offline && dependencies != null && dependencies.size() == 1) {
+        def dependencies = engine.scan(artifact.getFile())
+        if (!offlineMode.get() && dependencies != null && dependencies.size() == 1) {
                 // Resolve and analyze POM for maven modules to extract additional evidence
                 ModuleVersionIdentifier id = artifact.moduleVersion.getId()
                 if (id.group && id.name && id.version) {
                     // Create a ModuleComponentIdentifier from the artifact's module version
                     def compId = artifact.id.componentIdentifier
                     if (compId instanceof ModuleComponentIdentifier) {
-                        File pomFile = resolvePomFor(project, (ModuleComponentIdentifier) compId)
+                        File pomFile = resolvePomFor((ModuleComponentIdentifier) compId)
                         if (pomFile != null) {
                             try {
                                 PomUtils.analyzePOM(dependencies[0], pomFile)
@@ -556,13 +655,15 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     }
 
     @groovy.transform.CompileStatic
-    private Map<PackageURL, Set<IncludedByReference>> buildIncludedByMap(Project project, Configuration configuration, boolean scanningBuildEnv) {
+    private Map<PackageURL, Set<IncludedByReference>> buildIncludedByMap(ProjectInfo projectInfo, Configuration configuration, boolean scanningBuildEnv) {
         Map<PackageURL, Set<IncludedByReference>> includedByMap = new HashMap<>()
         String type = null
         if (scanningBuildEnv) {
             type = 'buildEnv'
         }
-        IncludedByReference parent = new IncludedByReference(convertIdentifier(project).toString(), type)
+        // Use ProjectInfo version to avoid accessing Project object
+        PackageURL projectPurl = convertIdentifier(projectInfo)
+        IncludedByReference parent = new IncludedByReference(projectPurl.toString(), type)
         configuration.incoming.resolutionResult.root.getDependencies().forEach({
             if (it instanceof ResolvedDependencyResult) {
                 ResolvedDependencyResult dr = (ResolvedDependencyResult) it
@@ -613,14 +714,13 @@ abstract class AbstractAnalyze extends ConfiguredTask {
 
     /**
      * Process the incoming artifacts for the given project's configurations using APIs introduced in gradle 4.0+.
-     * @param project the project to analyze
+     * @param projectInfo metadata about the project being analyzed (captured at configuration time)
      * @param configuration a particular configuration of the project to analyze
      * @param engine the dependency-check engine
      * @param scanningBuildEnv true if scanning the build environment; otherwise false
      */
-    protected void processConfigV4(Project project, Configuration configuration, Engine engine, boolean scanningBuildEnv = false) {
-        String projectName = project.name
-        String scope = "$projectName:$configuration.name"
+    protected void processConfigV4(ProjectInfo projectInfo, Configuration configuration, Engine engine, boolean scanningBuildEnv = false) {
+        String scope = "$projectInfo.name:$configuration.name"
         if (scanningBuildEnv) {
             scope += " (buildEnv)"
         }
@@ -636,7 +736,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                 logger.warn("Unable to resolve: ${it}")
             }
         }
-        Map<PackageURL, Set<IncludedByReference>> includedByMap = buildIncludedByMap(project, configuration, scanningBuildEnv)
+        Map<PackageURL, Set<IncludedByReference>> includedByMap = buildIncludedByMap(projectInfo, configuration, scanningBuildEnv)
 
         def types = config.analyzedTypes.get()
         for (String type : types) {
@@ -657,11 +757,11 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                             "'file':'${resolvedArtifactResult.file}'}"
                 } else {
                     def deps = engine.scan(resolvedArtifactResult.file, scope)
-                    if (!project.gradle.startParameter.offline && deps != null && deps.size() == 1) {
+                    if (!offlineMode.get() && deps != null && deps.size() == 1) {
                         // Resolve and analyze POM for maven modules to extract additional evidence
                         def compId = resolvedArtifactResult.id.componentIdentifier
                         if (compId instanceof ModuleComponentIdentifier) {
-                            File pomFile = resolvePomFor(project, (ModuleComponentIdentifier) compId)
+                            File pomFile = resolvePomFor((ModuleComponentIdentifier) compId)
                             if (pomFile != null) {
                                 try {
                                     PomUtils.analyzePOM(deps[0], pomFile)
@@ -710,6 +810,33 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         }
     }
 
+    @groovy.transform.CompileStatic
+    private PackageURL convertIdentifierForCurrentProject() {
+        return convertIdentifier(currentProjectInfo)
+    }
+    
+    /**
+     * Convert ProjectInfo to PackageURL - uses captured metadata instead of Project object.
+     * This is the preferred method to avoid Task.project deprecation warnings.
+     */
+    @groovy.transform.CompileStatic
+    private static PackageURL convertIdentifier(ProjectInfo projectInfo) {
+        final PackageURL p
+        if (projectInfo.group && !projectInfo.group.isEmpty()) {
+            p = new PackageURL("maven", projectInfo.group,
+                    projectInfo.name, projectInfo.version, null, null)
+        } else {
+            p = PackageURLBuilder.aPackageURL().withType("gradle")
+                    .withName(projectInfo.name).withVersion(projectInfo.version).build()
+        }
+        return p;
+    }
+    
+    /**
+     * Legacy method - converts Project to PackageURL.
+     * Deprecated: Use convertIdentifier(ProjectInfo) instead to avoid Task.project warnings.
+     * Only kept for backwards compatibility with code that still passes Project objects.
+     */
     @groovy.transform.CompileStatic
     private static PackageURL convertIdentifier(Project project) {
         final PackageURL p
@@ -788,7 +915,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         String sha256
         if (file == null) {
             logger.debug("Adding virtual dependency for ${display}")
-            dependency = new Dependency(project.buildFile, true)
+            dependency = new Dependency(projectBuildFile.get().asFile, true)
         } else {
             logger.debug("Adding dependency for ${display}")
             dependency = new Dependency(file)
