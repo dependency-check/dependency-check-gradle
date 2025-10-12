@@ -65,8 +65,8 @@ class ProxyExtension {
         return port
     }
 
-    void setPort(Integer value) {
-        port.set(value)
+    void setPort(Number value) {
+        port.set(value?.intValue())
     }
 
     @Input

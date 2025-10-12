@@ -77,8 +77,8 @@ class NvdExtension {
         return delay
     }
 
-    void setDelay(Integer value) {
-        delay.set(value)
+    void setDelay(Number value) {
+        delay.set(value?.intValue())
     }
 
     /**
@@ -90,8 +90,8 @@ class NvdExtension {
         return resultsPerPage
     }
 
-    void setResultsPerPage(Integer value) {
-        resultsPerPage.set(value)
+    void setResultsPerPage(Number value) {
+        resultsPerPage.set(value?.intValue())
     }
 
     /**
@@ -103,8 +103,8 @@ class NvdExtension {
         return maxRetryCount
     }
 
-    void setMaxRetryCount(Integer value) {
-        maxRetryCount.set(value)
+    void setMaxRetryCount(Number value) {
+        maxRetryCount.set(value?.intValue())
     }
 
     /**
@@ -168,8 +168,8 @@ class NvdExtension {
         return datafeedStartYear
     }
 
-    void setDatafeedStartYear(Integer value) {
-        datafeedStartYear.set(value)
+    void setDatafeedStartYear(Number value) {
+        datafeedStartYear.set(value?.intValue())
     }
 
     /**
@@ -181,8 +181,8 @@ class NvdExtension {
         return validForHours
     }
 
-    void setValidForHours(Integer value) {
-        validForHours.set(value)
+    void setValidForHours(Number value) {
+        validForHours.set(value?.intValue())
     }
 
     /**

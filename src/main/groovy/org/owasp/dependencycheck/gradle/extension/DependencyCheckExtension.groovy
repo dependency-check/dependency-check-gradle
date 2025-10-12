@@ -385,9 +385,9 @@ class DependencyCheckExtension {
         return failBuildOnCVSS
     }
 
-    void setFailBuildOnCVSS(Float value) {
-        failBuildOnCVSS.set(value)
-    }
+    void setFailBuildOnCVSS(Number value) {
+    failBuildOnCVSS.set(value?.floatValue())
+}
 
     /**
      * Specifies the CVSS score that should be considered a failure when generating a JUNIT formatted report. The default
@@ -399,9 +399,9 @@ class DependencyCheckExtension {
         return junitFailOnCVSS
     }
 
-    void setJunitFailOnCVSS(Float value) {
-        junitFailOnCVSS.set(value)
-    }
+    void setJunitFailOnCVSS(Number value) {
+    junitFailOnCVSS.set(value?.floatValue())
+}
 
     /**
      * Specifies that if any unused suppression rule is found, the build will fail.

@@ -119,7 +119,7 @@ class HostedSuppressionsExtension {
         return validForHours
     }
 
-    void setValidForHours(Integer value) {
-        validForHours.set(value)
+    void setValidForHours(Number value) {
+        validForHours.set(value?.intValue())
     }
 }
