@@ -32,10 +32,13 @@ import org.gradle.api.artifacts.result.DependencyResult
 import org.gradle.api.artifacts.result.ResolvedArtifactResult
 import org.gradle.api.artifacts.result.ResolvedComponentResult
 import org.gradle.api.artifacts.result.ResolvedDependencyResult
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.model.ObjectFactory
 import org.gradle.maven.MavenModule
 import org.gradle.maven.MavenPomArtifact
 import org.gradle.api.attributes.Attribute
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.util.GradleVersion
 import org.owasp.dependencycheck.Engine
@@ -54,6 +57,8 @@ import org.owasp.dependencycheck.utils.SeverityUtil
 import org.owasp.dependencycheck.utils.Checksum
 import org.owasp.dependencycheck.xml.pom.PomUtils
 import us.springett.parsers.cpe.CpeParser
+
+import javax.inject.Inject
 
 import static org.owasp.dependencycheck.dependency.EvidenceType.PRODUCT
 import static org.owasp.dependencycheck.dependency.EvidenceType.VENDOR
@@ -75,6 +80,17 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     private static final GradleVersion IGNORE_NON_RESOLVABLE_SCOPES_GRADLE_VERSION = GradleVersion.version("7.0")
 
     private final Map<ModuleComponentIdentifier, File> pomCache = new HashMap<>()
+
+    /**
+     * The output directory for the dependency-check reports.
+     */
+    @OutputDirectory
+    final DirectoryProperty outputDir
+
+    @Inject
+    AbstractAnalyze(ObjectFactory objects) {
+        outputDir = objects.directoryProperty()
+    }
 
     /**
      * Calls dependency-check-core's analysis engine to scan
@@ -121,7 +137,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                 String displayName = determineDisplayName()
                 String groupId = project.getGroup()
                 String version = project.getVersion().toString()
-                File output = config.outputDirectory.get().asFile
+                File output = outputDir.get().asFile
                 for (String f : getReportFormats(config.format.get(), config.formats.get())) {
                     engine.writeReports(displayName, groupId, name, version, output, f, exCol)
                 }

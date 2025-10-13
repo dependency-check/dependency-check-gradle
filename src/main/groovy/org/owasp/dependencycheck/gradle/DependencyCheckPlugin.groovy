@@ -25,6 +25,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.util.GradleVersion
 import org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension
+import org.owasp.dependencycheck.gradle.tasks.AbstractAnalyze
 import org.owasp.dependencycheck.gradle.tasks.Aggregate
 import org.owasp.dependencycheck.gradle.tasks.Analyze
 import org.owasp.dependencycheck.gradle.tasks.Purge
@@ -75,6 +76,11 @@ class DependencyCheckPlugin implements Plugin<Project> {
             project.task(UPDATE_TASK, type: Update)
             project.task(ANALYZE_TASK, type: Analyze)
             project.task(AGGREGATE_TASK, type: Aggregate)
+        }
+
+        def ext = project.extensions.getByType(DependencyCheckExtension)
+        project.tasks.withType(AbstractAnalyze).configureEach { t ->
+            t.outputDir.convention(ext.outputDirectory)
         }
     }
 
