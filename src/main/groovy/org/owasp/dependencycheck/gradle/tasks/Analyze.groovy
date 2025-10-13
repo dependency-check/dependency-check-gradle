@@ -18,12 +18,14 @@
 
 package org.owasp.dependencycheck.gradle.tasks
 
+import org.gradle.api.tasks.CacheableTask
 import org.owasp.dependencycheck.Engine
 
 /**
  * Checks the projects dependencies for known vulnerabilities.
  */
 @groovy.transform.CompileStatic
+@CacheableTask
 class Analyze extends AbstractAnalyze {
 
     Analyze() {
