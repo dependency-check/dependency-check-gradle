@@ -19,8 +19,11 @@
 package org.owasp.dependencycheck.gradle.tasks
 
 import org.gradle.api.Project
+import org.gradle.api.model.ObjectFactory
 import org.owasp.dependencycheck.Engine
 import org.owasp.dependencycheck.gradle.DependencyCheckPlugin
+
+import javax.inject.Inject
 
 /**
  * Checks the projects dependencies for known vulnerabilities.
@@ -28,7 +31,9 @@ import org.owasp.dependencycheck.gradle.DependencyCheckPlugin
 @groovy.transform.CompileStatic
 class Aggregate extends AbstractAnalyze {
 
-    Aggregate() {
+    @Inject
+    Aggregate(ObjectFactory objects) {
+        super(objects)
         group = 'OWASP dependency-check'
         description = 'Identifies and reports known vulnerabilities (CVEs) in multi-project dependencies.'
 
@@ -52,10 +57,10 @@ class Aggregate extends AbstractAnalyze {
     private def scanProject(Set<Project> projects, Engine engine) {
         projects.each { Project project ->
             if (shouldBeScanned(project) && !shouldBeSkipped(project)) {
-                if (this.config.scanDependencies) {
+                if (this.config.scanDependencies.get()) {
                     processConfigurations(project, engine)
                 }
-                if (this.config.scanBuildEnv) {
+                if (this.config.scanBuildEnv.get()) {
                     processBuildEnvironment(project, engine)
                 }
             }

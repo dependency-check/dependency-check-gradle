@@ -74,7 +74,9 @@ class DependencyCheckExtension {
     private final ListProperty<String> skipGroups
     private final ListProperty<String> analyzedTypes
     private final Property<Boolean> skip
+
     private final ConfigurableFileCollection scanSet
+    private boolean scanSetConfigured = false
 
     /**
      * The configuration extension for proxy settings.
@@ -386,8 +388,8 @@ class DependencyCheckExtension {
     }
 
     void setFailBuildOnCVSS(Number value) {
-    failBuildOnCVSS.set(value?.floatValue())
-}
+        failBuildOnCVSS.set(value?.floatValue())
+    }
 
     /**
      * Specifies the CVSS score that should be considered a failure when generating a JUNIT formatted report. The default
@@ -400,8 +402,8 @@ class DependencyCheckExtension {
     }
 
     void setJunitFailOnCVSS(Number value) {
-    junitFailOnCVSS.set(value?.floatValue())
-}
+        junitFailOnCVSS.set(value?.floatValue())
+    }
 
     /**
      * Specifies that if any unused suppression rule is found, the build will fail.
@@ -540,13 +542,18 @@ class DependencyCheckExtension {
     }
 
     void setScanSet(List<File> files) {
+        scanSetConfigured = true
         scanSet.setFrom(files)
     }
 
     void setScanSet(File... files) {
+        scanSetConfigured = true
         scanSet.setFrom(files)
     }
 
+    boolean isScanSetConfigured() {
+        scanSetConfigured
+    }
 
     /**
      * Allows programmatic configuration of the proxy extension
