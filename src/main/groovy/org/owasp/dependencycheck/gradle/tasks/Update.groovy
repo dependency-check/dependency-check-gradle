@@ -56,13 +56,13 @@ class Update extends ConfiguredTask {
             engine.doUpdates()
         } catch (DatabaseException ex) {
             String msg = "Unable to connect to the dependency-check database"
-            if (config.failOnError) {
+            if (config.failOnError.get()) {
                 throw new GradleException(msg, ex)
             } else {
                 logger.error(msg)
             }
         } catch (UpdateException ex) {
-            if (config.failOnError) {
+            if (config.failOnError.get()) {
                 throw new GradleException(ex.getMessage(), ex)
             } else {
                 logger.error(ex.getMessage())
