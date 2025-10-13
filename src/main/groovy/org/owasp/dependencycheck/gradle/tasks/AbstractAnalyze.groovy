@@ -89,7 +89,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
 
     @Inject
     AbstractAnalyze(ObjectFactory objects) {
-        outputDir = objects.directoryProperty()
+        outputDir = objects.directoryProperty().convention(config.outputDirectory)
     }
 
     /**
@@ -191,7 +191,6 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             throw new IllegalArgumentException("you can only specify one of scanProjects or skipProjects")
         }
     }
-
 
     /**
      * Combines the configured suppressionFile and suppressionFiles into a

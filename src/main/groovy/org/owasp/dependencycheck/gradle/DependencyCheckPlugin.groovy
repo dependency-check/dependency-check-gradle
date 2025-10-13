@@ -77,11 +77,6 @@ class DependencyCheckPlugin implements Plugin<Project> {
             project.task(ANALYZE_TASK, type: Analyze)
             project.task(AGGREGATE_TASK, type: Aggregate)
         }
-
-        def ext = project.extensions.getByType(DependencyCheckExtension)
-        project.tasks.withType(AbstractAnalyze).configureEach { t ->
-            t.outputDir.convention(ext.outputDirectory)
-        }
     }
 
     void checkGradleVersion(Project project) {
