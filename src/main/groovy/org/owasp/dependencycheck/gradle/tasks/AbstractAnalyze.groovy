@@ -392,7 +392,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     /**
      * Determines if the configuration should be considered a test configuration.
      * @param configuration the configuration to insepct
-     * @return true if the configuration is considered a tet configuration; otherwise false
+     * @return true if the configuration is considered a test configuration; otherwise false
      */
     @groovy.transform.CompileStatic
     boolean isTestConfiguration(Configuration configuration) {
