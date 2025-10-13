@@ -503,7 +503,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                 processConfigV4 project, configuration, engine
             }
         }
-        if (config.scanSet == null) {
+        if (!config.isScanSetConfigured()) {
             List<String> toScan = ['src/main/resources', 'src/main/webapp',
                                    './package.json', './package-lock.json',
                                    './npm-shrinkwrap.json', './yarn.lock',

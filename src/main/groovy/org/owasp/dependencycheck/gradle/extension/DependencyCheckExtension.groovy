@@ -74,7 +74,9 @@ class DependencyCheckExtension {
     private final ListProperty<String> skipGroups
     private final ListProperty<String> analyzedTypes
     private final Property<Boolean> skip
+
     private final ConfigurableFileCollection scanSet
+    private boolean scanSetConfigured = false
 
     /**
      * The configuration extension for proxy settings.
@@ -540,13 +542,18 @@ class DependencyCheckExtension {
     }
 
     void setScanSet(List<File> files) {
+        scanSetConfigured = true
         scanSet.setFrom(files)
     }
 
     void setScanSet(File... files) {
+        scanSetConfigured = true
         scanSet.setFrom(files)
     }
 
+    boolean isScanSetConfigured() {
+        scanSetConfigured
+    }
 
     /**
      * Allows programmatic configuration of the proxy extension
