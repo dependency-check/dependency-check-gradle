@@ -57,10 +57,10 @@ class Aggregate extends AbstractAnalyze {
     private def scanProject(Set<Project> projects, Engine engine) {
         projects.each { Project project ->
             if (shouldBeScanned(project) && !shouldBeSkipped(project)) {
-                if (this.config.scanDependencies) {
+                if (this.config.scanDependencies.get()) {
                     processConfigurations(project, engine)
                 }
-                if (this.config.scanBuildEnv) {
+                if (this.config.scanBuildEnv.get()) {
                     processBuildEnvironment(project, engine)
                 }
             }
