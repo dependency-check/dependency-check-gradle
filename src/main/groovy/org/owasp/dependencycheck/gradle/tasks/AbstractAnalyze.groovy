@@ -32,14 +32,14 @@ import org.gradle.api.artifacts.result.DependencyResult
 import org.gradle.api.artifacts.result.ResolvedArtifactResult
 import org.gradle.api.artifacts.result.ResolvedComponentResult
 import org.gradle.api.artifacts.result.ResolvedDependencyResult
+import org.gradle.api.attributes.Attribute
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.model.ObjectFactory
-import org.gradle.maven.MavenModule
-import org.gradle.maven.MavenPomArtifact
-import org.gradle.api.attributes.Attribute
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+import org.gradle.maven.MavenModule
+import org.gradle.maven.MavenPomArtifact
 import org.gradle.util.GradleVersion
 import org.owasp.dependencycheck.Engine
 import org.owasp.dependencycheck.agent.DependencyCheckScanAgent
@@ -53,8 +53,8 @@ import org.owasp.dependencycheck.dependency.naming.CpeIdentifier
 import org.owasp.dependencycheck.exception.ExceptionCollection
 import org.owasp.dependencycheck.exception.ReportException
 import org.owasp.dependencycheck.gradle.service.SlackNotificationSenderService
-import org.owasp.dependencycheck.utils.SeverityUtil
 import org.owasp.dependencycheck.utils.Checksum
+import org.owasp.dependencycheck.utils.SeverityUtil
 import org.owasp.dependencycheck.xml.pom.PomUtils
 import us.springett.parsers.cpe.CpeParser
 
@@ -681,7 +681,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                                 try {
                                     PomUtils.analyzePOM(deps[0], pomFile)
                                 } catch (Exception e) {
-                                    logger.debug("Failed to analyze POM for ${compId.group}:${compId.name}:${compId.version}: ${t.message}")
+                                    logger.debug("Failed to analyze POM for ${compId.group}:${compId.name}:${compId.version}: ${e}")
                                 }
                             }
                         }
@@ -735,25 +735,12 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             p = PackageURLBuilder.aPackageURL().withType("gradle")
                     .withName(project.name).withVersion(project.version.toString()).build()
         }
-        return p;
+        return p
     }
 
     @groovy.transform.CompileStatic
     private static PackageURL convertIdentifier(ResolvedComponentResult result) {
-        ModuleVersionIdentifier id = result.getModuleVersion()
-        PackageURL p
-        if (id.group) {
-            p = new PackageURL("maven", id.group,
-                    id.name, id.version, null, null)
-        } else {
-            PackageURLBuilder pb = PackageURLBuilder.aPackageURL().withType("gradle")
-                    .withName(id.name)
-            if (id.version) {
-                pb.withVersion(id.version)
-            }
-            p = pb.build()
-        }
-        return p;
+        return convertIdentifier(result.getModuleVersion())
     }
 
     @groovy.transform.CompileStatic
@@ -773,15 +760,16 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         PackageURL p
         if (id.group) {
             p = new PackageURL("maven", id.group,
-                    id.name, id.version, null, null);
+                    id.name, id.version, null, null)
         } else {
             PackageURLBuilder pb = PackageURLBuilder.aPackageURL().withType("gradle")
                     .withName(id.name)
             if (id.version) {
                 pb.withVersion(id.version)
             }
+            p = pb.build()
         }
-        return p;
+        return p
     }
     /**
      * Adds a dependency to the engine. This is used when an artifact is scanned that is not
