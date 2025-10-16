@@ -81,7 +81,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.nvd.apiKey.getOrNull() == null
         project.dependencyCheck.nvd.delay.getOrNull() == null
         project.dependencyCheck.nvd.maxRetryCount.getOrNull() == null
-        project.dependencyCheck.outputDirectory.get().asFile == project.file("${project.buildDir}/reports")
+        project.dependencyCheck.outputDirectory.get().asFile == project.layout.buildDirectory.dir('reports/dependency-check').get().asFile
         project.dependencyCheck.quickQueryTimestamp.getOrNull() == null
         project.dependencyCheck.scanConfigurations.get() == []
         project.dependencyCheck.skipConfigurations.get() == []
