@@ -43,9 +43,10 @@ Once gradle plugin applied, run following gradle task to check dependencies:
 gradle dependencyCheckAnalyze --info
 ```
 
-The reports will be generated automatically under `build/reports` directory.
+The reports will be generated automatically under `build/reports/dependency-check` by default; resolved via Gradle's reporting
+directory (`project.reporting.baseDirectory.dir("dependency-check")`).
 
-If your project includes multiple sub-projects, the report will be generated for each sub-project in their own `build/reports`.
+If your project includes multiple sub-projects, the report will be generated for each sub-project in their own `project.reporting.baseDirectory.dir("dependency-check")` location.
 
 ### Multiple Configurations
 
@@ -53,20 +54,20 @@ Some projects may require multiple dependency-check configurations. This is supp
 
 ```groovy
 plugins {
-    id 'java'
-    id 'org.owasp.dependencycheck' version '12.2.2'
+  id 'java'
+  id 'org.owasp.dependencycheck' version '12.2.2'
 }
 
 tasks.register('dependencyCheckRelease', org.owasp.dependencycheck.gradle.tasks.Analyze) {
-    dependencyCheck {
-        failBuildOnCVSS = 9.0
-    }
+  dependencyCheck {
+    failBuildOnCVSS = 9.0
+  }
 }
 
 tasks.register('dependencyCheckCI', org.owasp.dependencycheck.gradle.tasks.Analyze) {
-    dependencyCheck {
-        failBuildOnCVSS = 3.0
-    }
+  dependencyCheck {
+    failBuildOnCVSS = 3.0
+  }
 }
 ```
 
@@ -79,13 +80,13 @@ to specific versions compatible with all plugins in your build.
 For example in `buildSrc/build.gradle`
 ```groovy
 dependencies {
-    constraints {
-        // org.owasp.dependencycheck needs at least this version of jackson. Other plugins pull in older versions..
-        add("implementation", "com.fasterxml.jackson:jackson-bom:2.21.2")
-        // org.owasp.dependencycheck needs these versions. Other plugins pull in older versions..
-        add("implementation", "org.apache.commons:commons-lang3:3.20.0")
-        add("implementation", "org.apache.commons:commons-text:1.15.0")
-    }
+  constraints {
+    // org.owasp.dependencycheck needs at least this version of jackson. Other plugins pull in older versions..
+    add("implementation", "com.fasterxml.jackson:jackson-bom:2.21.2")
+    // org.owasp.dependencycheck needs these versions. Other plugins pull in older versions..
+    add("implementation", "org.apache.commons:commons-lang3:3.20.0")
+    add("implementation", "org.apache.commons:commons-text:1.15.0")
+  }
 }
 ```
 
@@ -116,7 +117,7 @@ buildscript {
 }
 
 allprojects {
-    apply plugin: 'org.owasp.dependencycheck'
+  apply plugin: 'org.owasp.dependencycheck'
 }
 ```
 
@@ -135,7 +136,7 @@ buildscript {
 }
 
 subprojects {
-    apply plugin: 'org.owasp.dependencycheck'
+  apply plugin: 'org.owasp.dependencycheck'
 }
 ```
 
@@ -147,15 +148,19 @@ For aggregate scan, apply the plugin either on the root project or alternatively
 
 ### How to customize the report directory?
 
-By default, all reports will be placed under `build/reports` folder, to change the default reporting folder name modify the configuration section like this:
+To change the default report folder, modify the configuration section like this:
 
 ```groovy
 subprojects {
-    apply plugin: 'org.owasp.dependencycheck'
+  apply plugin: 'org.owasp.dependencycheck'
 
-    dependencyCheck {
-        outputDirectory = "$buildDir/security-report"
-    }
+  dependencyCheck {
+    // To somewhere in the build directory
+    outputDirectory = layout.buildDirectory.dir('security-report')
+  
+    // or relative to the global reporting directory:
+    outputDirectory = reporting.baseDirectory.dir('security-report')
+  }
 }
 ```
 
@@ -163,15 +168,15 @@ subprojects {
 
 ```kotlin
 plugins {
-    id("org.owasp.dependencycheck") version "12.2.2" apply false
+  id("org.owasp.dependencycheck") version "12.2.2" apply false
 }
 
 allprojects {
-    apply(plugin = "org.owasp.dependencycheck")
+  apply(plugin = "org.owasp.dependencycheck")
 }
 
 configure<org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension> {
-    format = org.owasp.dependencycheck.reporting.ReportGenerator.Format.ALL.toString()
+  format = org.owasp.dependencycheck.reporting.ReportGenerator.Format.ALL.toString()
 }
 ```
 

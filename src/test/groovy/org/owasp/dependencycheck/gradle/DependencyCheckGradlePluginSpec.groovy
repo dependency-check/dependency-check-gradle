@@ -20,6 +20,7 @@ package org.owasp.dependencycheck.gradle
 
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.reporting.ReportingExtension
 import org.gradle.testfixtures.ProjectBuilder
 import org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension
 import org.owasp.dependencycheck.gradle.extension.NexusExtension
@@ -87,7 +88,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.nvd.apiKey.getOrNull() == null
         project.dependencyCheck.nvd.delay.getOrNull() == null
         project.dependencyCheck.nvd.maxRetryCount.getOrNull() == null
-        project.dependencyCheck.outputDirectory.get().asFile == project.layout.buildDirectory.dir('reports').get().asFile
+        project.dependencyCheck.outputDirectory.get().asFile == project.file('build/reports/dependency-check')
         project.dependencyCheck.scanConfigurations.get() == []
         project.dependencyCheck.skipConfigurations.get() == []
         project.dependencyCheck.scanProjects.get() == []
@@ -128,7 +129,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
             analyzers.retirejs.filters = ['filter1', 'filter2']
             analyzers.retirejs.filterNonVulnerable = true
 
-            outputDirectory = 'outputDirectory'
+            outputDirectory = project.reporting.baseDirectory.dir('outputDirectory')
 
             scanConfigurations = ['a']
             skipConfigurations = ['b']
@@ -173,7 +174,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.hostedSuppressions.url.get() == 'suppressionsurl'
         project.dependencyCheck.hostedSuppressions.validForHours.get() == 5
         project.dependencyCheck.hostedSuppressions.forceupdate.get() == true
-        project.dependencyCheck.outputDirectory.get().asFile == project.file('outputDirectory')
+        project.dependencyCheck.outputDirectory.get().asFile == project.file('build/reports/outputDirectory')
         project.dependencyCheck.scanConfigurations.get() == ['a']
         project.dependencyCheck.skipConfigurations.get() == ['b']
         project.dependencyCheck.scanProjects.get() == ['a']

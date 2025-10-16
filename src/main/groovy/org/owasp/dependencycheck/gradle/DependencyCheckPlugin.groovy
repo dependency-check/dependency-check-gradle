@@ -21,6 +21,7 @@ package org.owasp.dependencycheck.gradle
 import groovy.transform.CompileStatic
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.ReportingBasePlugin
 import org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension
 import org.owasp.dependencycheck.gradle.tasks.Aggregate
 import org.owasp.dependencycheck.gradle.tasks.Analyze
@@ -46,6 +47,7 @@ class DependencyCheckPlugin implements Plugin<Project> {
     }
 
     void apply(Project project) {
+        project.pluginManager.apply(ReportingBasePlugin)
         initializeConfigurations(project)
         registerTasks(project)
     }

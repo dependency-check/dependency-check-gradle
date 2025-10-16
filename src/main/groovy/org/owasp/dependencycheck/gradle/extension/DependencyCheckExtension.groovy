@@ -26,6 +26,7 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.reporting.ReportingExtension
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFiles
@@ -120,10 +121,12 @@ class DependencyCheckExtension {
     DependencyCheckExtension(Project project, ObjectFactory objects) {
         this.project = project;
 
+        def reporting = project.extensions.getByType(ReportingExtension)
+
         this.scanBuildEnv = objects.property(Boolean).convention(false)
         this.scanDependencies = objects.property(Boolean).convention(true)
         this.failOnError = objects.property(Boolean).convention(true)
-        this.outputDirectory = objects.directoryProperty().convention(project.layout.buildDirectory.dir("reports"))
+        this.outputDirectory = objects.directoryProperty().convention(reporting.baseDirectory.dir("dependency-check"))
         this.suppressionFile = objects.property(String)
         this.suppressionFiles = objects.listProperty(String).convention([])
         this.suppressionFileUser = objects.property(String)
@@ -197,7 +200,7 @@ class DependencyCheckExtension {
     }
 
     /**
-     * The directory where the reports will be written. Defaults to 'build/reports'.
+     * The directory where the reports will be written. Defaults to `project.reporting.baseDirectory.dir("dependency-check")`.
      */
     @InputDirectory
     @Optional
