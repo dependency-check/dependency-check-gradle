@@ -214,7 +214,7 @@ class DependencyCheckExtension {
     /**
      * The directory where the reports will be written. Defaults to 'build/reports/dependency-check'.
      */
-    @InputDirectory
+    @Input
     @Optional
     DirectoryProperty getOutputDirectory() {
         return outputDirectory
