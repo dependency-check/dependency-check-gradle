@@ -202,7 +202,7 @@ class DependencyCheckExtension {
     /**
      * The directory where the reports will be written. Defaults to `project.reporting.baseDirectory.dir("dependency-check")`.
      */
-    @InputDirectory
+    @Input
     @Optional
     DirectoryProperty getOutputDirectory() {
         return outputDirectory
