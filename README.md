@@ -65,6 +65,29 @@ The reports will be generated automatically under `build/reports` directory.
 
 If your project includes multiple sub-projects, the report will be generated for each sub-project in their own `build/reports`.
 
+### Multiple Configurations
+
+Some projects may require multiple dependency-check configurations. This is supported by registering multiple tasks:
+
+```groovy
+plugins {
+    id 'java'
+    id 'org.owasp.dependencycheck' version '12.1.5'
+}
+
+tasks.register('dependencyCheckRelease', org.owasp.dependencycheck.gradle.tasks.Analyze) {
+    dependencyCheck {
+        failBuildOnCVSS = 9.0
+    }
+}
+
+tasks.register('dependencyCheckCI', org.owasp.dependencycheck.gradle.tasks.Analyze) {
+    dependencyCheck {
+        failBuildOnCVSS = 3.0
+    }
+}
+```
+
 ## FAQ
 
 > **Questions List:**
