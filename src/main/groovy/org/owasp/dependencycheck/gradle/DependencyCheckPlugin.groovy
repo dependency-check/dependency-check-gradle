@@ -19,31 +19,18 @@
 package org.owasp.dependencycheck.gradle
 
 import groovy.transform.CompileStatic
-import io.github.jeremylong.jcs3.slf4j.Slf4jAdapter
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.util.GradleVersion
 import org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension
-import org.owasp.dependencycheck.gradle.tasks.AbstractAnalyze
 import org.owasp.dependencycheck.gradle.tasks.Aggregate
 import org.owasp.dependencycheck.gradle.tasks.Analyze
 import org.owasp.dependencycheck.gradle.tasks.Purge
 import org.owasp.dependencycheck.gradle.tasks.Update
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 @CompileStatic
 class DependencyCheckPlugin implements Plugin<Project> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DependencyCheckPlugin.class);
-    static {
-        // Quiet noisy loggers
-        System.setProperty("jcs.logSystem", "slf4j")
-        if (!LOGGER.isDebugEnabled()) {
-            Slf4jAdapter.muteLogging(true);
-        }
-    }
-
     static final GradleVersion MINIMUM_GRADLE_VERSION = GradleVersion.version("4.0")
     static final GradleVersion REGISTER_TASK_GRADLE_VERSION = GradleVersion.version("4.9")
 
