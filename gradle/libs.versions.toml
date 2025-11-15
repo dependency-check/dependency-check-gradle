@@ -8,7 +8,6 @@ owasp-dependencyCheck-core = { module = 'org.owasp:dependency-check-core', versi
 owasp-dependencyCheck-utils = { module = 'org.owasp:dependency-check-utils', version.ref = 'odc' }
 openVuln-clients = { module = 'io.github.jeremylong:open-vulnerability-clients', version = '6.1.7' }
 slack-webhook = { module = 'net.gpedro.integrations.slack:slack-webhook', version = '1.4.0' }
-jcs3-slf4j = { module = 'io.github.jeremylong:jcs3-slf4j', version = '1.0.5' }
 
 junit-jupiter-api = { module = 'org.junit.jupiter:junit-jupiter-api', version.ref = 'junit' }
 junit-jupiter-params = { module = 'org.junit.jupiter:junit-jupiter-params', version.ref = 'junit' }
