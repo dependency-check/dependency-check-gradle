@@ -35,7 +35,11 @@ import org.gradle.api.artifacts.result.ResolvedDependencyResult
 import org.gradle.api.attributes.Attribute
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.maven.MavenModule
@@ -71,10 +75,112 @@ import static org.owasp.dependencycheck.utils.Checksum.*
 //@groovy.transform.CompileStatic
 abstract class AbstractAnalyze extends ConfiguredTask {
 
+    /**
+     * A list of which Gradle configurations will be scanned.
+     *
+     * <p>If empty, all resolvable configurations will be scanned. This is mutually
+     * exclusive with {@link #skipConfigurations}</p>
+     *
+     * @see #skipConfigurations
+     * @see org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension#scanConfigurations
+     */
+    @Input
+    @Optional
+    final ListProperty<String> scanConfigurations
+
+    /**
+     * A list of which Gradle configurations to skip when scanning all configurations.
+     *
+     * <p>This is mutually exclusive with {@link #scanConfigurations}</p>
+     *
+     * @see #scanConfigurations
+     * @see org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension#skipConfigurations
+     */
+    @Input
+    @Optional
+    final ListProperty<String> skipConfigurations
+
+    /**
+     * Whether to skip the test configurations when scanning.
+     *
+     * <p>When trying to scan test configurations, this also needs to be explicitly disabled.
+     * Defaults to <code>true</code>.</p>
+     *
+     * @see org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension#skipTestGroups
+     */
+    @Input
+    @Optional
+    final Property<Boolean> skipTestGroups
+
+    /**
+     * Whether to scan the dependencies of the various Gradle configurations.
+     *
+     * <p>Defaults to <code>true</code>.</p>
+     *
+     * @see org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension#scanDependencies
+     */
+    @Input
+    @Optional
+    final Property<Boolean> scanDependencies
+
+    /**
+     * Whether to scan the dependencies of the Gradle build environment.
+     *
+     * <p>Defaults to <code>false</code>.</p>
+     *
+     * @see org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension#scanDependencies
+     */
+    @Input
+    @Optional
+    final Property<Boolean> scanBuildEnv
+
+    /**
+     * Specifies if the build should be failed if a CVSS score equal to or above a specified level is identified.
+     *
+     * <p>Defaults to <code>11</code>, i.e. builds will never fail. More information on CVSS scores can be found at the
+     * <a href="https://nvd.nist.gov/vuln-metrics/cvss">NVD</a></p>
+     *
+     * @see org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension#failBuildOnCVSS
+     */
+    @Input
+    @Optional
+    final Property<Float> failBuildOnCVSS
+
+    /**
+     * <p>The file path to the XML suppression file - used to suppress
+     * <a href="https://dependency-check.github.io/DependencyCheck/general/suppression.html">false positives</a>.</p>
+     *
+     * <p>This can be a local file path, a URL to a
+     * suppression file, or even a reference to a file on the class path.</p>
+     *
+     * <p>Multiple suppression files can also be specified with {@link #suppressionFiles}.</p>
+     *
+     * @see #suppressionFiles
+     * @see org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension#suppressionFile
+     */
+    @Input
+    @Optional
+    final Property<String> suppressionFile
+
+    /**
+     * A list of file paths to XML suppression files.
+     *
+     * <p>These can be local file paths, URLs to hosted
+     * suppression files, or even references to files on the class path.</p>
+     *
+     * @see #suppressionFile
+     * @see org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension#suppressionFiles
+     */
+    @Input
+    @Optional
+    final ListProperty<String> suppressionFiles
+
     @Internal
     String currentProjectName = project.getName()
+
     @Internal
     Attribute artifactType = Attribute.of('artifactType', String)
+
     // @Internal
     private static final GradleVersion CUTOVER_GRADLE_VERSION = GradleVersion.version("4.0")
     private static final GradleVersion IGNORE_NON_RESOLVABLE_SCOPES_GRADLE_VERSION = GradleVersion.version("7.0")
@@ -83,13 +189,26 @@ abstract class AbstractAnalyze extends ConfiguredTask {
 
     /**
      * The output directory for the dependency-check reports.
+     *
+     * @see org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension#outputDirectory
      */
     @OutputDirectory
     final DirectoryProperty outputDir
 
     @Inject
     AbstractAnalyze(ObjectFactory objects) {
+        // task inputs are defaulted using the 'dependencyCheck' extension
+        // this creates a system whereby you can either globally set these inputs via the extension
+        // or you can override them on a per-task basis
+        failBuildOnCVSS = objects.property(Float).convention(config.failBuildOnCVSS)
         outputDir = objects.directoryProperty().convention(config.outputDirectory)
+        scanBuildEnv = objects.property(Boolean).convention(config.scanBuildEnv)
+        scanConfigurations = objects.listProperty(String).convention(config.scanConfigurations)
+        scanDependencies = objects.property(Boolean).convention(config.scanDependencies)
+        skipConfigurations = objects.listProperty(String).convention(config.skipConfigurations)
+        skipTestGroups = objects.property(Boolean).convention(config.skipTestGroups)
+        suppressionFile = objects.property(String).convention(config.suppressionFile)
+        suppressionFiles = objects.listProperty(String).convention(config.suppressionFiles)
     }
 
     /**
@@ -176,15 +295,16 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     String determineDisplayName() {
         return project.metaClass.respondsTo(project, "getDisplayName") ? project.getDisplayName() : project.getName()
     }
+
     /**
      * Verifies aspects of the configuration to ensure dependency-check can run correctly.
      */
     @groovy.transform.CompileStatic
     def verifySettings() {
-        if (!config.scanDependencies.get() && !config.scanBuildEnv.get()) {
+        if (!scanDependencies.get() && !scanBuildEnv.get()) {
             throw new IllegalArgumentException("At least one of scanDependencies or scanBuildEnv must be set to true")
         }
-        if (!config.scanConfigurations.get().isEmpty() && !config.skipConfigurations.get().isEmpty()) {
+        if (!scanConfigurations.get().isEmpty() && !skipConfigurations.get().isEmpty()) {
             throw new IllegalArgumentException("you can only specify one of scanConfigurations or skipConfigurations")
         }
         if (!config.scanProjects.get().isEmpty() && !config.skipProjects.get().isEmpty()) {
@@ -263,7 +383,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      */
     @groovy.transform.CompileStatic
     CheckForFailureResult checkForFailure(Engine engine) {
-        if (config.failBuildOnCVSS.get() > 10) {
+        if (failBuildOnCVSS.get() > 10) {
             return CheckForFailureResult.createSuccess()
         }
 
@@ -278,12 +398,12 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                         && v.getCvssV4().getCvssData().getBaseScore() != null ? v.getCvssV4().getCvssData().getBaseScore() : -1;
                 final boolean useUnscored = cvssV2 == -1 && cvssV3 == -1 && cvssV4 == -1;
                 final double unscoredCvss = (useUnscored && v.getUnscoredSeverity() != null) ? SeverityUtil.estimateCvssV2(v.getUnscoredSeverity()) : -1;
-                if (cvssV2 >= config.failBuildOnCVSS.get()
-                        || cvssV3 >= config.failBuildOnCVSS.get()
-                        || cvssV4 >= config.failBuildOnCVSS.get()
-                        || useUnscored && unscoredCvss >= config.failBuildOnCVSS.get()
+                if (cvssV2 >= failBuildOnCVSS.get()
+                        || cvssV3 >= failBuildOnCVSS.get()
+                        || cvssV4 >= failBuildOnCVSS.get()
+                        || useUnscored && unscoredCvss >= failBuildOnCVSS.get()
                         //safety net to fail on any if for some reason the above misses on 0
-                        || (config.failBuildOnCVSS.get() <= 0.0f)) {
+                        || (failBuildOnCVSS.get() <= 0.0f)) {
                     vulnerabilities.add(v.getName());
                 }
             }
@@ -292,7 +412,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         if (vulnerabilities.size() > 0) {
             final String msg = String.format("%n%nDependency-Analyze Failure:%n"
                     + "One or more dependencies were identified with vulnerabilities that have a CVSS score greater than '%.1f': %s%n"
-                    + "See the dependency-check report for more details.%n%n", config.failBuildOnCVSS.get(), vulnerabilities.join(", "))
+                    + "See the dependency-check report for more details.%n%n", failBuildOnCVSS.get(), vulnerabilities.join(", "))
             return CheckForFailureResult.createFailed(msg)
         } else {
             return CheckForFailureResult.createSuccess()
@@ -351,7 +471,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      */
     @groovy.transform.CompileStatic
     boolean shouldBeScanned(Configuration configuration) {
-        config.scanConfigurations.get().isEmpty() || config.scanConfigurations.get().contains(configuration.name)
+        scanConfigurations.get().isEmpty() || scanConfigurations.get().contains(configuration.name)
     }
 
     /**
@@ -366,7 +486,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                         "runtime".equals(configuration.name) ||
                         "compile".equals(configuration.name) ||
                         "compileOnly".equals(configuration.name)))
-                || config.skipConfigurations.get().contains(configuration.name))
+                || skipConfigurations.get().contains(configuration.name))
     }
 
     /**
@@ -385,7 +505,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      */
     @groovy.transform.CompileStatic
     boolean shouldBeSkippedAsTest(Configuration configuration) {
-        config.skipTestGroups.get() && isTestConfiguration(configuration)
+        skipTestGroups.get() && isTestConfiguration(configuration)
     }
 
     /**
