@@ -146,6 +146,32 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         result.output.contains('commons-collections')
     }
 
+    def "analysis generates distinct reports when multiple tasks are used"() {
+        given:
+        copyBuildFileIntoProjectDir('multipleTasks.gradle')
+
+        when:
+        def result = executeTaskAndGetResult(ANALYZE_TASK, true)
+
+        then:
+        result.task(":$ANALYZE_TASK").outcome == SUCCESS
+        def mainReport = new File(testProjectDir, 'build/reports/dependency-check/main/dependency-check-report.csv')
+        def testReport = new File(testProjectDir, 'build/reports/dependency-check/test/dependency-check-report.csv')
+        def buildReport = new File(testProjectDir, 'build/reports/dependency-check/build/dependency-check-report.csv')
+        // the various reports exist
+        mainReport.exists()
+        testReport.exists()
+        buildReport.exists()
+        // and they contain only the CVEs expected for their respective configurations
+        mainReport.text.contains('CVE-2015-6420') // CVE from commons-collections
+        testReport.text.contains('CVE-2016-7051') // CVE from jackson
+        buildReport.text.contains('CVE-2016-3092') // CVE from commons-fileupload
+        !mainReport.text.contains('CVE-2016-7051') // CVE from jackson shouldn't be in main report
+        !mainReport.text.contains('CVE-2016-3092') // CVE from commons-fileupload shouldn't be in main report
+        !testReport.text.contains('CVE-2016-3092') // CVE from commons-fileupload shouldn't be in test report
+        !buildReport.text.contains('CVE-2015-6420') // CVE from commons-collections shouldn't be in build report
+        !buildReport.text.contains('CVE-2016-7051') // CVE from jackson shouldn't be in build report
+    }
 
     private void copyBuildFileIntoProjectDir(String buildFileName) {
         copyResourceFileIntoProjectDir(buildFileName, 'build.gradle')
