@@ -61,9 +61,9 @@ Once gradle plugin applied, run following gradle task to check dependencies:
 gradle dependencyCheckAnalyze --info
 ```
 
-The reports will be generated automatically under `build/reports` directory.
+The reports will be generated automatically under `build/reports/dependency-check` directory.
 
-If your project includes multiple sub-projects, the report will be generated for each sub-project in their own `build/reports`.
+If your project includes multiple sub-projects, the report will be generated for each sub-project in their own `build/reports/dependency-check`.
 
 ### Multiple Configurations
 
@@ -146,14 +146,14 @@ For aggregate scan, apply the plugin either on the root project or alternatively
 
 ### How to customize the report directory?
 
-By default, all reports will be placed under `build/reports` folder, to change the default reporting folder name modify the configuration section like this:
+By default, all reports will be placed under `build/reports/dependency-check` folder, to change the default reporting folder name modify the configuration section like this:
 
 ```groovy
 subprojects {
     apply plugin: 'org.owasp.dependencycheck'
 
     dependencyCheck {
-        outputDirectory = "$buildDir/security-report"
+        outputDirectory = layout.buildDirectory.dir('security-report')
     }
 }
 ```

@@ -125,7 +125,7 @@ class DependencyCheckExtension {
         this.scanDependencies = objects.property(Boolean).convention(true)
         this.failOnError = objects.property(Boolean).convention(true)
         this.quickQueryTimestamp = objects.property(Boolean)
-        this.outputDirectory = objects.directoryProperty().convention(project.layout.buildDirectory.dir("reports"))
+        this.outputDirectory = objects.directoryProperty().convention(project.layout.buildDirectory.dir("reports/dependency-check"))
         this.suppressionFile = objects.property(String)
         this.suppressionFiles = objects.listProperty(String).convention([])
         this.suppressionFileUser = objects.property(String)
@@ -212,9 +212,9 @@ class DependencyCheckExtension {
     }
 
     /**
-     * The directory where the reports will be written. Defaults to 'build/reports'.
+     * The directory where the reports will be written. Defaults to 'build/reports/dependency-check'.
      */
-    @InputDirectory
+    @Input
     @Optional
     DirectoryProperty getOutputDirectory() {
         return outputDirectory
