@@ -24,6 +24,8 @@ import org.gradle.testfixtures.ProjectBuilder
 import org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension
 import spock.lang.Specification
 
+import static org.owasp.dependencycheck.utils.Settings.KEYS.*
+
 class DependencyCheckGradlePluginSpec extends Specification {
     static final String PLUGIN_ID = 'org.owasp.dependencycheck'
     Project project
@@ -196,6 +198,56 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.additionalCpes.getByName('additional1').description.get() == 'Additional1'
         project.dependencyCheck.additionalCpes.getByName('additional1').cpe.get() == 'cpe:2.3:a:aGroup1:aPackage1:123:*:*:*:*:*:*:*'
 
+    }
+
+    def 'legacy nexus properties mapped to NexusExtension'() {
+        given:
+        project.dependencyCheck {
+            analyzers.nexusEnabled = enabled
+            analyzers.nexusUrl = url
+            analyzers.nexusUsesProxy = proxy
+        }
+
+        expect:
+        project.dependencyCheck {
+            assert analyzers.nexus.enabled.get() == enabled
+            assert analyzers.nexus.url.get() == url
+            assert analyzers.nexus.usesProxy.get() == proxy
+        }
+
+        where:
+        enabled | url | proxy
+        true | 'http://someurl' | true
+        false | 'https://testurl' | false
+    }
+
+    def 'NexusExtension properties configure task settings'() {
+        given:
+        def task = project.tasks.findByName(taskName)
+        with(project.dependencyCheck.analyzers.nexus) {
+            enabled.set(true)
+            usesProxy.set(true)
+            url.set('http://nexus')
+            username.set('user')
+            password.set('pass')
+        }
+
+        when:
+        task.initializeSettings()
+
+        then:
+        with(task.settings) {
+            getBoolean(ANALYZER_NEXUS_ENABLED) == true
+            getBoolean(ANALYZER_NEXUS_USES_PROXY) == true
+            getString(ANALYZER_NEXUS_URL) == 'http://nexus'
+            getString(ANALYZER_NEXUS_USER) == 'user'
+            getString(ANALYZER_NEXUS_PASSWORD) == 'pass'
+        }
+
+        where:
+        taskName | _
+        DependencyCheckPlugin.ANALYZE_TASK | _
+        DependencyCheckPlugin.AGGREGATE_TASK | _
     }
 
     def 'scanConfigurations and skipConfigurations are mutually exclusive'() {

@@ -132,9 +132,11 @@ abstract class ConfiguredTask extends DefaultTask {
 
         settings.setBooleanIfNotNull(ANALYZER_CENTRAL_ENABLED, config.analyzers.centralEnabled.getOrNull())
 
-        settings.setBooleanIfNotNull(ANALYZER_NEXUS_ENABLED, config.analyzers.nexusEnabled.getOrNull())
-        settings.setStringIfNotEmpty(ANALYZER_NEXUS_URL, config.analyzers.nexusUrl.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_NEXUS_USES_PROXY, config.analyzers.nexusUsesProxy.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_NEXUS_ENABLED, config.analyzers.nexus.enabled.getOrNull())
+        settings.setStringIfNotEmpty(ANALYZER_NEXUS_URL, config.analyzers.nexus.url.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_NEXUS_USES_PROXY, config.analyzers.nexus.usesProxy.getOrNull())
+        settings.setStringIfNotNull(ANALYZER_NEXUS_USER, config.analyzers.nexus.username.getOrNull())
+        settings.setStringIfNotNull(ANALYZER_NEXUS_PASSWORD, config.analyzers.nexus.password.getOrNull())
 
         settings.setBooleanIfNotNull(ANALYZER_EXPERIMENTAL_ENABLED, config.analyzers.experimentalEnabled.getOrNull())
         settings.setBooleanIfNotNull(ANALYZER_ARCHIVE_ENABLED, config.analyzers.archiveEnabled.getOrNull())
