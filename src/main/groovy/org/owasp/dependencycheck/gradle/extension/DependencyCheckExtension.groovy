@@ -155,7 +155,7 @@ class DependencyCheckExtension {
         nvd = objects.newInstance(NvdExtension, objects)
         hostedSuppressions = objects.newInstance(HostedSuppressionsExtension, objects)
         data = objects.newInstance(DataExtension, objects, project)
-        analyzers = new AnalyzerExtension(project, objects)
+        analyzers = objects.newInstance(AnalyzerExtension, project, objects)
         additionalCpes = project.objects.domainObjectContainer(AdditionalCpe.class)
     }
 
