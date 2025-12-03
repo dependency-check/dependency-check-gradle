@@ -37,9 +37,6 @@ class AnalyzerExtension {
     private final Property<String> zipExtensions
     private final Property<Boolean> jarEnabled
     private final Property<Boolean> centralEnabled
-    private final Property<Boolean> nexusEnabled
-    private final Property<String> nexusUrl
-    private final Property<Boolean> nexusUsesProxy
     private final Property<Boolean> nuspecEnabled
     private final Property<Boolean> assemblyEnabled
     private final Property<Boolean> msbuildEnabled
@@ -77,9 +74,6 @@ class AnalyzerExtension {
         this.zipExtensions = objects.property(String)
         this.jarEnabled = objects.property(Boolean)
         this.centralEnabled = objects.property(Boolean)
-        this.nexusEnabled = objects.property(Boolean)
-        this.nexusUrl = objects.property(String)
-        this.nexusUsesProxy = objects.property(Boolean)
         this.nuspecEnabled = objects.property(Boolean)
         this.assemblyEnabled = objects.property(Boolean)
         this.msbuildEnabled = objects.property(Boolean)
@@ -112,6 +106,7 @@ class AnalyzerExtension {
         nodePackage = objects.newInstance(NodePackageExtension, objects)
         artifactory = objects.newInstance(ArtifactoryExtension, objects)
         ossIndex = objects.newInstance(OssIndexExtension, objects)
+        nexus = objects.newInstance(NexusExtension)
     }
 
     /**
@@ -181,41 +176,53 @@ class AnalyzerExtension {
 
     /**
      * Sets whether Nexus Analyzer will be used. This analyzer is superceded by the Central Analyzer; however, you can configure this to run against a Nexus Pro installation.
+     * @deprecated use nexus { enabled = true }
      */
     @Input
     @Optional
+    @Deprecated
     Property<Boolean> getNexusEnabled() {
-        return nexusEnabled
+        return nexus.enabled
     }
 
+    /* @deprecated use nexus { enabled = true } */
+    @Deprecated
     void setNexusEnabled(Boolean value) {
-        nexusEnabled.set(value)
+        nexus.enabled.set(value)
     }
 
     /**
      * Defines the Nexus Server's web service end point (example http://domain.enterprise/service/local/). If not set the Nexus Analyzer will be disabled.
+     * @deprecated use nexus { url = "nexus url" }
      */
     @Input
     @Optional
+    @Deprecated
     Property<String> getNexusUrl() {
-        return nexusUrl
+        return nexus.url
     }
 
+    /* @deprecated use nexus { url = "nexus url" } */
+    @Deprecated
     void setNexusUrl(String value) {
-        nexusUrl.set(value)
+        nexus.url.set(value)
     }
 
     /**
      * whether the defined proxy should be used when connecting to Nexus.
+     * @deprecated use nexus { usesProxy = true }
      */
     @Input
     @Optional
+    @Deprecated
     Property<Boolean> getNexusUsesProxy() {
-        return nexusUsesProxy
+        return nexus.usesProxy
     }
 
+    /* @deprecated use nexus { usesProxy = true } */
+    @Deprecated
     void setNexusUsesProxy(Boolean value) {
-        nexusUsesProxy.set(value)
+        nexus.usesProxy.set(value)
     }
 
     /**
@@ -594,6 +601,11 @@ class AnalyzerExtension {
     OssIndexExtension ossIndex
 
     /**
+     * Nexus configuration extension.
+     */
+    NexusExtension nexus
+
+    /**
      * Allows programmatic configuration of the KEV extension
      * @param configClosure the closure to configure the KEV extension
      * @return the KEV extension
@@ -717,5 +729,15 @@ class AnalyzerExtension {
     def nodePackage(Action<NodePackageExtension> config) {
         config.execute(nodePackage)
         return nodePackage
+    }
+
+    /**
+     * Allows programmatic configuration of the nexus extension
+     * @param config the action to configure nexus extension
+     * @return nexus extension
+     */
+    def nexus(Action<NexusExtension> config) {
+        config.execute(nexus)
+        return nexus
     }
 }
