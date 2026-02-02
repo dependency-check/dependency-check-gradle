@@ -29,6 +29,10 @@ import org.owasp.dependencycheck.gradle.tasks.Analyze
 import org.owasp.dependencycheck.gradle.tasks.Purge
 import org.owasp.dependencycheck.gradle.tasks.Update
 
+import java.nio.charset.StandardCharsets
+import java.util.logging.Level
+import java.util.logging.LogManager
+
 @CompileStatic
 class DependencyCheckPlugin implements Plugin<Project> {
     static final GradleVersion MINIMUM_GRADLE_VERSION = GradleVersion.version("4.0")
@@ -41,6 +45,10 @@ class DependencyCheckPlugin implements Plugin<Project> {
 
     /* configuration extensions */
     private static final String CHECK_EXTENSION_NAME = "dependencyCheck"
+
+    static {
+        muteNoisyLoggers()
+    }
 
     void apply(Project project) {
         checkGradleVersion(project)
@@ -75,6 +83,24 @@ class DependencyCheckPlugin implements Plugin<Project> {
                 project.logger.warn("Detected ${GradleVersion.current()}; while the dependency-check-gradle " +
                         "plugin will work it is recommended that you upgrade to ${MINIMUM_GRADLE_VERSION} or higher.")
             }
+        }
+    }
+
+    /**
+     * Hacky method of muting the noisy logging from certain libraries.
+     *
+     * Normally in ODC we'd rely on the jul-to-slf4j bridge and then configuration of the SLF4J logging backend, but
+     * we shouldn't make assumptions about the backend within Gradle, and Gradle has its own logging bridges;
+     * so all we can really do is adjust java.util.logging configuration directly
+     */
+    private static void muteNoisyLoggers() {
+        // Mirrors the configuration within cli/src/main/resources/logback.xml
+        final String noisyJavaUtilLoggerConfig = Map.of(
+                "org.apache.lucene", Level.SEVERE,
+        ).collect { cat -> "${cat.key}.level = ${cat.value}" }.join(System.lineSeparator())
+
+        try (def configStream = new ByteArrayInputStream(noisyJavaUtilLoggerConfig.getBytes(StandardCharsets.UTF_8))) {
+            LogManager.logManager.updateConfiguration(configStream, null)
         }
     }
 }
