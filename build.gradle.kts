@@ -76,12 +76,6 @@ tasks.withType<Test>().configureEach {
     )
 }
 
-tasks.javadoc {
-    if (JavaVersion.current().isJava9Compatible) {
-        (options as StandardJavadocDocletOptions).addBooleanOption("html5", true)
-    }
-}
-
 publishing {
     // customise POM metadata for both the main plugin and the marker artifact based on the basic Gradle plugin metadata
     publications.withType<MavenPublication>().configureEach {
