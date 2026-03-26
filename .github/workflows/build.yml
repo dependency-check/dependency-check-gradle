@@ -13,24 +13,42 @@ permissions:
 
 jobs:
   build:
-    name: Build dependency-check
+    strategy:
+      matrix:
+        jdk_default_version: [ '17' ]                # Single JDK version to run Gradle with and use for compilation etc
+        jdk_test_version: [ '11', '17' ] # JDK version to run tests using
+      fail-fast: false
+
+    name: Build and Test (JDK ${{ matrix.jdk_test_version }}${{ matrix.jdk_test_version == matrix.jdk_default_version && ' - Default' || '' }})
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Set up JDK 11
+      - name: Set up JDKs
         uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
-          java-version: 11
+          java-version: | # last version takes precedence as default
+            ${{ matrix.jdk_test_version }}
+            ${{ matrix.jdk_default_version }}
           distribution: 'zulu'
+          check-latest: true
       - uses: gradle/actions/setup-gradle@39e147cb9de83bb9910b8ef8bd7fff0ee20fcd6f # v6.0.1
       - name: Build
-        id: build
-        run: ./gradlew build
+        run: >
+          ./gradlew build
+          -PtestToolchainVersion=${{ matrix.jdk_test_version }}
+          ${{ matrix.jdk_test_version == matrix.jdk_default_version && 'publishToMavenLocal' || '' }}
+      - name: Problems Report
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        if: always()
+        with:
+          name: problems-report-${{ matrix.jdk_test_version }}
+          retention-days: 7
+          path: build/reports/problems/problems-report.html
+          if-no-files-found: ignore
       - name: Archive Test Report
-        id: archive-reports
         if: always()
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
-          name: it-test-logs
+          name: it-test-logs-${{ matrix.jdk_test_version }}
           retention-days: 7
-          path: build/reports/tests/**
+          path: build/reports/tests/test
