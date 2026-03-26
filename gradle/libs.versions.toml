@@ -6,7 +6,6 @@ junit = '5.10.3'
 [libraries]
 owasp-dependencyCheck-core = { module = 'org.owasp:dependency-check-core', version.ref = 'odc' }
 owasp-dependencyCheck-utils = { module = 'org.owasp:dependency-check-utils', version.ref = 'odc' }
-openVuln-clients = { module = 'io.github.jeremylong:open-vulnerability-clients', version = '6.1.7' }
 slack-webhook = { module = 'net.gpedro.integrations.slack:slack-webhook', version = '1.4.0' }
 
 junit-jupiter-api = { module = 'org.junit.jupiter:junit-jupiter-api', version.ref = 'junit' }
