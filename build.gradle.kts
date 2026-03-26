@@ -56,13 +56,11 @@ dependencies {
     api(libs.owasp.dependencyCheck.utils)
     api(libs.slack.webhook)
 
-    testImplementation(gradleTestKit())
-    testImplementation(libs.spock.core) {
-        exclude(module = "groovy-all")
-    }
-    testImplementation(libs.junit.jupiter.api)
-    testImplementation(libs.junit.jupiter.params)
-    testRuntimeOnly(libs.junit.jupiter.engine)
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(platform(libs.spock.bom))
+    testImplementation(libs.spock.core)
+    testRuntimeOnly(libs.junit.platformSuiteEngine)
+    testRuntimeOnly(libs.junit.platformLauncher)
 }
 
 tasks.withType<Test>().configureEach {
