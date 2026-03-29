@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
 /*
  * This file is part of dependency-check-gradle.
  *
@@ -66,6 +68,10 @@ dependencies {
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
     onlyIf { !project.hasProperty("skipTests") }
+
+    testLogging {
+        events = setOf(TestLogEvent.PASSED, TestLogEvent.FAILED, TestLogEvent.SKIPPED)
+    }
 
     javaLauncher.set(
         javaToolchains.launcherFor {
