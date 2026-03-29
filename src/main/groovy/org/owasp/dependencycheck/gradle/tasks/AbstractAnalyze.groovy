@@ -24,7 +24,6 @@ import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.gradle.api.GradleException
 import org.gradle.api.Project
-import org.gradle.api.artifacts.ArtifactView
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
@@ -60,6 +59,7 @@ import org.owasp.dependencycheck.xml.pom.PomUtils
 import us.springett.parsers.cpe.CpeParser
 
 import javax.inject.Inject
+import java.util.regex.Pattern
 
 import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
 
@@ -68,6 +68,8 @@ import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
  */
 @CompileStatic
 abstract class AbstractAnalyze extends ConfiguredTask {
+
+    private static final Pattern TEST_CONFIG_PATTERN = ~/((^|[a-z0-9_])T|(^|_)t)est([A-Z0-9_]|$)/
 
     @Internal
     String currentProjectName = project.getName()
@@ -320,6 +322,15 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     }
 
     /**
+     * Resolve name for the configuration in way that works for Gradle < 8 using dynamic dispatch. The property/method
+     * has moved to the Named interface in Gradle 8.0, so resolving statically breaks on Gradle 7.x.
+     */
+    @CompileDynamic
+    private static nameOf(Configuration configuration) {
+        configuration.name
+    }
+
+    /**
      * Checks whether the given project should be scanned
      * because either scanProjects is empty or it contains the
      * project's path.
@@ -341,18 +352,16 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * because either scanConfigurations is empty or it contains the
      * configuration's name.
      */
-    @CompileDynamic // configuration.name requires dynamic compile as has moved to Named interface in Gradle 8.0
     private shouldBeScanned(Configuration configuration) {
-        config.scanConfigurations.get().isEmpty() || config.scanConfigurations.get().contains(configuration.name)
+        config.scanConfigurations.get().isEmpty() || config.scanConfigurations.get().contains(nameOf(configuration))
     }
 
     /**
      * Checks whether the given configuration should be skipped
      * because skipConfigurations contains the configuration's name.
      */
-    @CompileDynamic // configuration.name requires dynamic compile as has moved to Named interface in Gradle 8.0
     private shouldBeSkipped(Configuration configuration) {
-        config.skipConfigurations.get().contains(configuration.name)
+        config.skipConfigurations.get().contains(nameOf(configuration))
     }
 
     /**
@@ -377,11 +386,10 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * @param configuration the configuration to inspect
      * @return true if the configuration is considered a test configuration; otherwise false
      */
-    @CompileDynamic // configuration.name requires dynamic compile as has moved to Named interface in Gradle 8.0
     private isTestConfiguration(Configuration configuration) {
         def isTestConfiguration = isTestConfigurationCheck(configuration)
 
-        def hierarchy = configuration.hierarchy.collect({ it.name }).join(" --> ")
+        def hierarchy = configuration.hierarchy.collect { nameOf(it) }.join(" --> ")
         logger.info("'{}' is considered a test configuration: {}", hierarchy, isTestConfiguration)
 
         isTestConfiguration
@@ -395,11 +403,10 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * </ul>
      * The intent of the regular expression is to match `test` in a camel case or snake case configuration name.
      */
-    @CompileDynamic // configuration.name requires dynamic compile as has moved to Named interface in Gradle 8.0
     private static isTestConfigurationCheck(Configuration configuration) {
-        boolean isTestConfiguration = configuration.name =~ /((^|[a-z0-9_])T|(^|_)t)est([A-Z0-9_]|$)/
+        boolean isTestConfiguration = nameOf(configuration) =~ TEST_CONFIG_PATTERN
         configuration.hierarchy.each {
-            isTestConfiguration |= (it.name =~ /((^|[a-z0-9_])T|(^|_)t)est([A-Z0-9_]|$)/) as boolean
+            isTestConfiguration |= (nameOf(it) =~ TEST_CONFIG_PATTERN) as boolean
         }
         isTestConfiguration
     }
@@ -553,22 +560,19 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * @param engine the dependency-check engine
      * @param scanningBuildEnv true if scanning the build environment; otherwise false
      */
-    @CompileDynamic // configuration.name requires dynamic compile as has moved to Named interface in Gradle 8.0
     protected void processConfig(Project project, Configuration configuration, Engine engine, boolean scanningBuildEnv = false) {
-        String projectName = project.name
-        String scope = "$projectName:$configuration.name"
-        if (scanningBuildEnv) {
-            scope += " (buildEnv)"
-        }
+        String scope = "${project.name}:${nameOf(configuration)}${scanningBuildEnv ? ' (buildEnv)' : ''}"
         logger.info "- Analyzing ${scope}"
 
         Map<String, ModuleVersionIdentifier> componentVersions = [:]
         configuration.incoming.resolutionResult.allDependencies.each {
             switch (it) {
                 case ResolvedDependencyResult:
-                    componentVersions.put(it.selected.id.toString(), it.selected.moduleVersion); break
+                    (it as ResolvedDependencyResult).with { componentVersions.put(selected.id.toString(), selected.moduleVersion) }
+                    break
                 case UnresolvedDependencyResult:
-                    logger.debug("Unable to resolve artifact in ${it.attempted.displayName}"); break
+                    (it as UnresolvedDependencyResult).with { logger.debug("Unable to resolve artifact in ${attempted.displayName}") }
+                    break
                 default:
                     logger.warn("Unable to resolve: ${it}")
             }
@@ -577,9 +581,9 @@ abstract class AbstractAnalyze extends ConfiguredTask {
 
         def types = config.analyzedTypes.get()
         for (String type : types) {
-            List<ResolvedArtifactResult> rar = configuration.incoming.artifactView { ArtifactView.ViewConfiguration view ->
-                view.lenient true
-                view.attributes { attrs ->
+            List<ResolvedArtifactResult> rar = configuration.incoming.artifactView {
+                it.setLenient(true)
+                it.attributes { attrs ->
                     attrs.attribute(artifactType, type)
                 }
             }.getArtifacts().toList()

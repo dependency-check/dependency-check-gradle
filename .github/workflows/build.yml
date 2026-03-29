@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         jdk_default_version: [ '17' ]                # Single JDK version to run Gradle with and use for compilation etc
-        jdk_test_version: [ '11', '17' ] # JDK version to run tests using
+        jdk_test_version: [ '11', '17', '21', '25' ] # JDK version to run tests using
       fail-fast: false
 
     name: Build and Test (JDK ${{ matrix.jdk_test_version }}${{ matrix.jdk_test_version == matrix.jdk_default_version && ' - Default' || '' }})

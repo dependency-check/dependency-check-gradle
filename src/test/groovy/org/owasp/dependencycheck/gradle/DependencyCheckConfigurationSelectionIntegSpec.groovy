@@ -2,7 +2,6 @@ package org.owasp.dependencycheck.gradle
 
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
-
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -14,15 +13,18 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
     @TempDir
     File testProjectDir
 
-    def 'test dependencies are ignored by default'() {
+    def "test dependencies are ignored by default"() {
         given:
         copyBuildFileIntoProjectDir('skipTestGroups.gradle')
 
         when:
-        def result = executeTaskAndGetResult(ANALYZE_TASK, true)
+        def result = executeTaskAndGetResult(gradle, ANALYZE_TASK, true)
 
         then:
         result.task(":$ANALYZE_TASK").outcome == SUCCESS
+
+        where:
+        gradle << GradleTestVersion.supportedVersionsForCurrentJvm
     }
 
     def "test dependencies are scanned if skipTestGroups flag is false"() {
@@ -30,7 +32,7 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         copyBuildFileIntoProjectDir('noSkipTestGroups.gradle')
 
         when:
-        def result = executeTaskAndGetResult(ANALYZE_TASK, false)
+        def result = executeTaskAndGetResult(gradle, ANALYZE_TASK, false)
         //println "-----------------"
         //println result.output
         //println "-----------------"
@@ -44,6 +46,9 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         result.output.contains('CVE-2016-3092')
         //the nvd CVE was updated and the version used is no longer considered vulnerable
         //result.output.contains('CVE-2015-5262')
+
+        where:
+        gradle << GradleTestVersion.supportedVersionsForCurrentJvm
     }
 
     def "additional CPEs are scanned when present"() {
@@ -51,12 +56,15 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         copyBuildFileIntoProjectDir('scanAdditionalCpesConfiguration.gradle')
 
         when:
-        def result = executeTaskAndGetResult(ANALYZE_TASK, false)
+        def result = executeTaskAndGetResult(gradle, ANALYZE_TASK, false)
 
         then:
         result.task(":$ANALYZE_TASK").outcome == FAILED
         result.output.contains('CVE-2015-6420')
         result.output.contains('CVE-2016-3092')
+
+        where:
+        gradle << GradleTestVersion.supportedVersionsForCurrentJvm
     }
 
     def "custom configurations are scanned by default"() {
@@ -64,11 +72,14 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         copyBuildFileIntoProjectDir('scanCustomConfiguration.gradle')
 
         when:
-        def result = executeTaskAndGetResult(ANALYZE_TASK, false)
+        def result = executeTaskAndGetResult(gradle, ANALYZE_TASK, false)
 
         then:
         result.task(":$ANALYZE_TASK").outcome == FAILED
         result.output.contains('CVE-2015-6420')
+
+        where:
+        gradle << GradleTestVersion.supportedVersionsForCurrentJvm
     }
 
     def "custom configurations are skipped if blacklisted"() {
@@ -76,10 +87,13 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         copyBuildFileIntoProjectDir('blacklistCustomConfiguration.gradle')
 
         when:
-        def result = executeTaskAndGetResult(ANALYZE_TASK, true)
+        def result = executeTaskAndGetResult(gradle, ANALYZE_TASK, true)
 
         then:
         result.task(":$ANALYZE_TASK").outcome == SUCCESS
+
+        where:
+        gradle << GradleTestVersion.supportedVersionsForCurrentJvm
     }
 
     def "custom configurations are skipped when only scanning whitelisted configurations"() {
@@ -87,10 +101,13 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         copyBuildFileIntoProjectDir('skipCustomConfigurationViaWhitelist.gradle')
 
         when:
-        def result = executeTaskAndGetResult(ANALYZE_TASK, true)
+        def result = executeTaskAndGetResult(gradle, ANALYZE_TASK, true)
 
         then:
         result.task(":$ANALYZE_TASK").outcome == SUCCESS
+
+        where:
+        gradle << GradleTestVersion.supportedVersionsForCurrentJvm
     }
 
     def "groups are skipped if blacklisted"() {
@@ -98,10 +115,13 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         copyBuildFileIntoProjectDir('skipGroups.gradle')
 
         when:
-        def result = executeTaskAndGetResult(ANALYZE_TASK, true)
+        def result = executeTaskAndGetResult(gradle, ANALYZE_TASK, true)
 
         then:
         result.task(":$ANALYZE_TASK").outcome == SUCCESS
+
+        where:
+        gradle << GradleTestVersion.supportedVersionsForCurrentJvm
     }
 
     def "aggregate task aggregates"() {
@@ -112,12 +132,15 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         copyResourceFileIntoProjectDir('aggregateCore.gradle', 'core/build.gradle')
 
         when:
-        def result = executeTaskAndGetResult(AGGREGATE_TASK, true)
+        def result = executeTaskAndGetResult(gradle, AGGREGATE_TASK, true)
 
         then:
         result.task(":$AGGREGATE_TASK").outcome == SUCCESS
         result.output.contains('CVE-2016-7051') //jackson cve from core
         result.output.contains('CVE-2015-6420') //commons cve from app
+
+        where:
+        gradle << GradleTestVersion.supportedVersionsForCurrentJvm
     }
 
     def "suppressionFiles argument can be parsed and files are being respected"() {
@@ -126,10 +149,13 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         copyResourceFileIntoProjectDir('suppressions.xml', 'suppressions.xml')
 
         when:
-        def result = executeTaskAndGetResult(ANALYZE_TASK, true)
+        def result = executeTaskAndGetResult(gradle, ANALYZE_TASK, true)
 
         then:
         result.task(":$ANALYZE_TASK").outcome == SUCCESS
+
+        where:
+        gradle << GradleTestVersion.supportedVersionsForCurrentJvm
     }
 
     def "analysis fails when unused suppression rule is present"() {
@@ -138,12 +164,15 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         copyResourceFileIntoProjectDir('suppressions.xml', 'suppressions.xml')
 
         when:
-        def result = executeTaskAndGetResult(ANALYZE_TASK, false)
+        def result = executeTaskAndGetResult(gradle, ANALYZE_TASK, false)
 
         then:
         result.task(":$ANALYZE_TASK").outcome == FAILED
         result.output.contains('Suppression Rule had zero matches')
         result.output.contains('commons-collections')
+
+        where:
+        gradle << GradleTestVersion.supportedVersionsForCurrentJvm
     }
 
 
@@ -159,10 +188,11 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         targetFile << resourceFileContent
     }
 
-    private BuildResult executeTaskAndGetResult(String taskName, boolean isBuildExpectedToPass) {
+    private BuildResult executeTaskAndGetResult(GradleTestVersion gradle, String taskName, boolean isBuildExpectedToPass) {
         def build = GradleRunner.create()
+                .withGradleVersion(gradle.version)
                 .withProjectDir(testProjectDir)
-                .withArguments(taskName,"--stacktrace")
+                .withArguments(taskName, "--stacktrace")
                 .forwardOutput()
                 .withDebug(true)
                 .withPluginClasspath()
