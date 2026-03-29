@@ -18,6 +18,7 @@
 
 package org.owasp.dependencycheck.gradle.tasks
 
+import groovy.transform.CompileStatic
 import org.gradle.api.model.ObjectFactory
 import org.owasp.dependencycheck.Engine
 
@@ -26,7 +27,7 @@ import javax.inject.Inject
 /**
  * Checks the projects dependencies for known vulnerabilities.
  */
-@groovy.transform.CompileStatic
+@CompileStatic
 class Analyze extends AbstractAnalyze {
 
     @Inject
@@ -34,17 +35,13 @@ class Analyze extends AbstractAnalyze {
         super(objects)
         group = 'OWASP dependency-check'
         description = 'Identifies and reports known vulnerabilities (CVEs) in project dependencies.'
-
-        if (hasNotCompatibleWithConfigurationCacheOption()) {
-            callIncompatibleWithConfigurationCache()
-        }
     }
 
     /**
      * Loads the projects dependencies into the dependency-check analysis engine.
      */
     def scanDependencies(Engine engine) {
-        if (shouldBeScanned(project) && !shouldBeSkipped(project)) {
+        if (shouldProcess(project)) {
             logger.lifecycle("Verifying dependencies for project ${currentProjectName}")
             if (this.config.scanDependencies.get()) {
                 processConfigurations(project, engine)

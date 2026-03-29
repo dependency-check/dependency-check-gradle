@@ -18,14 +18,14 @@
 
 package org.owasp.dependencycheck.gradle.tasks
 
-
+import groovy.transform.CompileStatic
 import org.gradle.api.tasks.TaskAction
 import org.owasp.dependencycheck.Engine
 
 /**
  * Purges the local cache of the NVD CVE data.
  */
-@groovy.transform.CompileStatic
+@CompileStatic
 class Purge extends ConfiguredTask {
 
     /**
