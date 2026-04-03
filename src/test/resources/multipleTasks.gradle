@@ -40,7 +40,7 @@ def dependencyCheckAnalyzeTest = tasks.register('dependencyCheckAnalyzeTest', or
 }
 
 def dependencyCheckAnalyzeBuild = tasks.register('dependencyCheckAnalyzeBuild', org.owasp.dependencycheck.gradle.tasks.Analyze) {
-    description = 'Runs a dependency-check analysis on just the test configuration.'
+    description = 'Runs a dependency-check analysis on the build environment dependencies.'
     outputDir = project.layout.buildDirectory.dir("reports/dependency-check/build")
     scanConfigurations = []
     scanBuildEnv = true
