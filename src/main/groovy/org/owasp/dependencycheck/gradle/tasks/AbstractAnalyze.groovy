@@ -128,7 +128,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      *
      * <p>Defaults to <code>false</code>.</p>
      *
-     * @see org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension#scanDependencies
+     * @see org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension#scanBuildEnv
      */
     @Input
     @Optional
