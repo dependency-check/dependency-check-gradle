@@ -227,7 +227,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
         with(project.dependencyCheck.analyzers.nexus) {
             enabled.set(true)
             usesProxy.set(true)
-            url.set('http://nexus')
+            url.set('https://nexus')
             username.set('user')
             password.set('pass')
         }
@@ -239,7 +239,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
         with(task.settings) {
             getBoolean(ANALYZER_NEXUS_ENABLED) == true
             getBoolean(ANALYZER_NEXUS_USES_PROXY) == true
-            getString(ANALYZER_NEXUS_URL) == 'http://nexus'
+            getString(ANALYZER_NEXUS_URL) == 'https://nexus'
             getString(ANALYZER_NEXUS_USER) == 'user'
             getString(ANALYZER_NEXUS_PASSWORD) == 'pass'
         }

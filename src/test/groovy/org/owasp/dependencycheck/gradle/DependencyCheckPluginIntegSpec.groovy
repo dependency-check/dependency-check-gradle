@@ -15,17 +15,16 @@ class DependencyCheckPluginIntegSpec extends Specification {
     def "Plugin can be added"() {
         given:
         fileSystemFixture.create {
-            dir("app") {
-                file("build.gradle").text = """
-                        plugins {
-                            id 'org.owasp.dependencycheck'
-                        }
-                    """.stripIndent()
-            }
+            file("build.gradle").text = """
+                    plugins {
+                        id 'org.owasp.dependencycheck'
+                    }
+                """.stripIndent()
         }
         when:
         def result = GradleRunner.create()
-                .withProjectDir(fileSystemFixture.resolve("app").toFile())
+                .withGradleVersion(gradle.version)
+                .withProjectDir(fileSystemFixture.resolve("").toFile())
                 .withArguments('tasks')
                 .withPluginClasspath()
                 .forwardOutput()
@@ -33,40 +32,41 @@ class DependencyCheckPluginIntegSpec extends Specification {
 
         then:
         result.output.contains("$DependencyCheckPlugin.ANALYZE_TASK")
+
+        where:
+        gradle << GradleTestVersion.supportedVersionsForCurrentJvm
     }
 
     def "custom configurations are skipped when only scanning whitelisted configurations"() {
         given:
         fileSystemFixture.create {
-            dir("custom") {
-                file("build.gradle").text = """
-                    plugins {
-                        id 'org.owasp.dependencycheck'
-                    }
-                    apply plugin: 'java'
+            file("build.gradle").text = """
+                plugins {
+                    id 'org.owasp.dependencycheck'
+                }
+                apply plugin: 'java'
 
-                    sourceCompatibility = 1.5
-                    version = '1.0'
+                version = '1.0'
 
-                    repositories {
-                        mavenLocal()
-                        mavenCentral()
-                    }
+                repositories {
+                    mavenLocal()
+                    mavenCentral()
+                }
 
-                    dependencies {
-                        implementation group: 'commons-collections', name: 'commons-collections', version: '3.2'
-                    }
-                    dependencyCheck {
-                        analyzers.ossIndex.enabled = false
-                        nvd.datafeedUrl = 'https://dependency-check.github.io/DependencyCheck/hb_nvd/'
-                    }
-                """.stripIndent()
-            }
+                dependencies {
+                    implementation group: 'commons-collections', name: 'commons-collections', version: '3.2'
+                }
+                dependencyCheck {
+                    analyzers.ossIndex.enabled = false
+                    nvd.datafeedUrl = 'https://dependency-check.github.io/DependencyCheck/hb_nvd/'
+                }
+            """.stripIndent()
         }
 
         when:
         def result = GradleRunner.create()
-                .withProjectDir(fileSystemFixture.resolve("custom").toFile())
+                .withGradleVersion(gradle.version)
+                .withProjectDir(fileSystemFixture.resolve("").toFile())
                 .withArguments(DependencyCheckPlugin.ANALYZE_TASK)
                 .withPluginClasspath()
                 .withDebug(true)
@@ -75,40 +75,41 @@ class DependencyCheckPluginIntegSpec extends Specification {
 
         then:
         result.task(":$DependencyCheckPlugin.ANALYZE_TASK").outcome == SUCCESS
+
+        where:
+        gradle << GradleTestVersion.supportedVersionsForCurrentJvm
     }
 
-    def "task completes successfully when configuration cache is enabled in Gradle 7.4"() {
+    def "task completes successfully when configuration cache is enabled"() {
         given:
         fileSystemFixture.create {
-            dir("configCache") {
-                file("build.gradle").text = """
-                    plugins {
-                        id 'org.owasp.dependencycheck'
-                    }
-                    apply plugin: 'java'
+            file("build.gradle").text = """
+                plugins {
+                    id 'org.owasp.dependencycheck'
+                }
+                apply plugin: 'java'
 
-                    sourceCompatibility = 1.5
-                    version = '1.0'
+                version = '1.0'
 
-                    repositories {
-                        mavenLocal()
-                        mavenCentral()
-                    }
+                repositories {
+                    mavenLocal()
+                    mavenCentral()
+                }
 
-                    dependencies {
-                        implementation group: 'commons-collections', name: 'commons-collections', version: '3.2'
-                    }
-                    dependencyCheck {
-                        analyzers.ossIndex.enabled = false
-                        nvd.datafeedUrl = 'https://dependency-check.github.io/DependencyCheck/hb_nvd/'
-                    }
-                """.stripIndent()
-            }
+                dependencies {
+                    implementation group: 'commons-collections', name: 'commons-collections', version: '3.2'
+                }
+                dependencyCheck {
+                    analyzers.ossIndex.enabled = false
+                    nvd.datafeedUrl = 'https://dependency-check.github.io/DependencyCheck/hb_nvd/'
+                }
+            """.stripIndent()
         }
 
         when:
         def result = GradleRunner.create()
-                .withProjectDir(fileSystemFixture.resolve("configCache").toFile())
+                .withGradleVersion(gradle.version)
+                .withProjectDir(fileSystemFixture.dir("").toFile())
                 .withArguments(DependencyCheckPlugin.ANALYZE_TASK, "--configuration-cache")
                 .withPluginClasspath()
                 .withDebug(true)
@@ -117,5 +118,8 @@ class DependencyCheckPluginIntegSpec extends Specification {
 
         then:
         result.task(":$DependencyCheckPlugin.ANALYZE_TASK").outcome == SUCCESS
+
+        where:
+        gradle << GradleTestVersion.supportedVersionsForCurrentJvm
     }
 }

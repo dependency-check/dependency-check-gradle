@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
 /*
  * This file is part of dependency-check-gradle.
  *
@@ -29,81 +31,96 @@ plugins {
 group = "org.owasp"
 version = libs.versions.odc.get()
 
+val targetJavaVersion = 11
+val gradleJavaVersion = JavaLanguageVersion.of(17)
+val testToolchainVersion = providers.gradleProperty("testToolchainVersion")
+    .map(JavaLanguageVersion::of)
+    .orElse(gradleJavaVersion)
+
+logger.lifecycle("Build targets $targetJavaVersion using JDK $gradleJavaVersion (test with JDK ${testToolchainVersion.get()})")
+
+tasks.withType<JavaCompile>().configureEach {
+    options.release.set(targetJavaVersion)
+}
+tasks.withType<GroovyCompile>().configureEach {
+    // Groovy compiler does not support -release flags and ignores it
+    // see https://github.com/gradle/gradle/issues/15703 and https://issues.apache.org/jira/browse/GROOVY-11105
+    sourceCompatibility = targetJavaVersion.toString()
+    targetCompatibility = targetJavaVersion.toString()
+    options.release.set(targetJavaVersion)
+}
+
 dependencies {
     implementation(localGroovy())
     implementation(gradleApi())
 
     api(libs.owasp.dependencyCheck.core)
     api(libs.owasp.dependencyCheck.utils)
-    api(libs.openVuln.clients)
     api(libs.slack.webhook)
 
-    testImplementation(gradleTestKit())
-    testImplementation(libs.spock.core) {
-        exclude(module = "groovy-all")
-    }
-    testImplementation(libs.junit.jupiter.api)
-    testImplementation(libs.junit.jupiter.params)
-    testRuntimeOnly(libs.junit.jupiter.engine)
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(platform(libs.spock.bom))
+    testImplementation(libs.spock.core)
+    testRuntimeOnly(libs.junit.platformSuiteEngine)
+    testRuntimeOnly(libs.junit.platformLauncher)
 }
-tasks.test {
+
+tasks.withType<Test>().configureEach {
     useJUnitPlatform()
-}
-tasks.test.get().onlyIf { !project.hasProperty("skipTests") }
+    onlyIf { !project.hasProperty("skipTests") }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-}
-
-tasks.javadoc {
-    if (JavaVersion.current().isJava9Compatible) {
-        (options as StandardJavadocDocletOptions).addBooleanOption("html5", true)
+    testLogging {
+        events = setOf(TestLogEvent.PASSED, TestLogEvent.FAILED, TestLogEvent.SKIPPED)
     }
+
+    javaLauncher.set(
+        javaToolchains.launcherFor {
+            languageVersion.set(testToolchainVersion)
+        }
+    )
 }
 
 publishing {
-    publications {
-        val pluginPublication by registering(MavenPublication::class) {
-            groupId = project.group as String
-            artifactId = "dependency-check-gradle"
-            version = project.version as String
-            from(components["java"])
-            pom {
-                name.set("dependency-check-gradle")
-                description.set("OWASP dependency-check gradle plugin is a software composition analysis tool used to find known vulnerable dependencies.")
+    // customise POM metadata for both the main plugin and the marker artifact based on the basic Gradle plugin metadata
+    publications.withType<MavenPublication>().configureEach {
+        val plugin = gradlePlugin.plugins.named("dependencyCheck").get()
+        pom {
+            name.set(plugin.displayName)
+            description.set(plugin.description)
+            url.set(gradlePlugin.website)
 
-                url.set("https://dependency-check.github.io/DependencyCheck/")
-
-                licenses {
-                    license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("https://github.com/dependency-check/dependency-check-gradle/blob/main/LICENSE.txt")
-                    }
+            licenses {
+                license {
+                    name.set("The Apache License, Version 2.0")
+                    url.set("${gradlePlugin.vcsUrl.get()}/blob/main/LICENSE.txt")
                 }
-                developers {
-                    developer {
-                        id.set("jlong")
-                        name.set("Jeremy Long")
-                        email.set("jeremy.long@owasp.org")
-                    }
+            }
+            developers {
+                developer {
+                    id.set("jlong")
+                    name.set("Jeremy Long")
+                    email.set("jeremy.long@owasp.org")
                 }
-                scm {
-                    url.set("https://github.com/dependency-check/dependency-check-gradle")
-                    connection.set("scm:git:https://github.com/dependency-check/dependency-check-gradle.git")
-                    developerConnection.set("scm:git:https://github.com/dependency-check/dependency-check-gradle.git")
-                }
+            }
+            scm {
+                url.set(gradlePlugin.vcsUrl.get())
+                connection.set("scm:git:${gradlePlugin.vcsUrl.get()}.git")
+                developerConnection.set("scm:git:${gradlePlugin.vcsUrl.get()}.git")
             }
         }
     }
 }
 
+signing {
+    isRequired = !gradle.startParameter.taskNames.contains("publishToMavenLocal")
+}
+
 gradlePlugin {
-    website.set("http://dependency-check.github.io/DependencyCheck/dependency-check-gradle/index.html")
-    vcsUrl.set("https://github.com/dependency-check/dependency-check-gradle/")
+    website.set("https://dependency-check.github.io/DependencyCheck/dependency-check-gradle")
+    vcsUrl.set("https://github.com/dependency-check/dependency-check-gradle")
 
     plugins {
-        val dependencyCheck by registering {
+        register("dependencyCheck") {
             id = "org.owasp.dependencycheck"
             displayName = "OWASP dependency-check-gradle plugin"
             description = "A software composition analysis plugin that identifies known vulnerable dependencies used by the project."

@@ -18,7 +18,7 @@
 
 package org.owasp.dependencycheck.gradle.tasks
 
-
+import groovy.transform.CompileStatic
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 import org.owasp.dependencycheck.Engine
@@ -32,7 +32,7 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.AUTO_UPDATE
  *
  * @author Jeremy Long
  */
-@groovy.transform.CompileStatic
+@CompileStatic
 class Update extends ConfiguredTask {
 
     /**

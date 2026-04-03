@@ -18,21 +18,16 @@
 
 pluginManagement {
     repositories {
-        gradlePluginPortal()
         mavenCentral()
+        gradlePluginPortal()
     }
 }
 
-dependencyResolutionManagement() {
+dependencyResolutionManagement {
     repositories {
         mavenLocal()
-        maven {
-            name 'OWASP dependency-check snapshot'
-            url 'https://oss.sonatype.org/content/repositories/snapshots'
-        }
         mavenCentral()
     }
 }
 
-
-rootProject.name = 'dependency-check-gradle'
+rootProject.name = "dependency-check-gradle"

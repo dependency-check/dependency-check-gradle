@@ -19,6 +19,7 @@
 package org.owasp.dependencycheck.gradle.tasks
 
 import com.google.common.base.Strings
+import groovy.transform.CompileStatic
 import org.gradle.api.DefaultTask
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.tasks.Internal
@@ -34,7 +35,7 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.*
  *
  * @author Jeremy Long
  */
-@groovy.transform.CompileStatic
+@CompileStatic
 abstract class ConfiguredTask extends DefaultTask {
 
     @Internal

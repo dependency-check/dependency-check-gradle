@@ -20,18 +20,19 @@ package org.owasp.dependencycheck.gradle.tasks
 
 import com.github.packageurl.PackageURL
 import com.github.packageurl.PackageURLBuilder
+import groovy.transform.CompileDynamic
+import groovy.transform.CompileStatic
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ModuleVersionIdentifier
-import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
-import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.artifacts.result.ComponentArtifactsResult
 import org.gradle.api.artifacts.result.DependencyResult
 import org.gradle.api.artifacts.result.ResolvedArtifactResult
 import org.gradle.api.artifacts.result.ResolvedComponentResult
 import org.gradle.api.artifacts.result.ResolvedDependencyResult
+import org.gradle.api.artifacts.result.UnresolvedDependencyResult
 import org.gradle.api.attributes.Attribute
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.model.ObjectFactory
@@ -40,7 +41,6 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.maven.MavenModule
 import org.gradle.maven.MavenPomArtifact
-import org.gradle.util.GradleVersion
 import org.owasp.dependencycheck.Engine
 import org.owasp.dependencycheck.agent.DependencyCheckScanAgent
 import org.owasp.dependencycheck.data.nexus.MavenArtifact
@@ -59,25 +59,22 @@ import org.owasp.dependencycheck.xml.pom.PomUtils
 import us.springett.parsers.cpe.CpeParser
 
 import javax.inject.Inject
+import java.util.regex.Pattern
 
-import static org.owasp.dependencycheck.dependency.EvidenceType.PRODUCT
-import static org.owasp.dependencycheck.dependency.EvidenceType.VENDOR
 import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
-import static org.owasp.dependencycheck.utils.Checksum.*
 
 /**
  * Checks the projects dependencies for known vulnerabilities.
  */
-//@groovy.transform.CompileStatic
+@CompileStatic
 abstract class AbstractAnalyze extends ConfiguredTask {
+
+    private static final Pattern TEST_CONFIG_PATTERN = ~/((^|[a-z0-9_])T|(^|_)t)est([A-Z0-9_]|$)/
 
     @Internal
     String currentProjectName = project.getName()
     @Internal
     Attribute artifactType = Attribute.of('artifactType', String)
-    // @Internal
-    private static final GradleVersion CUTOVER_GRADLE_VERSION = GradleVersion.version("4.0")
-    private static final GradleVersion IGNORE_NON_RESOLVABLE_SCOPES_GRADLE_VERSION = GradleVersion.version("7.0")
 
     private final Map<ModuleComponentIdentifier, File> pomCache = new HashMap<>()
 
@@ -90,6 +87,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     @Inject
     AbstractAnalyze(ObjectFactory objects) {
         outputDir = objects.directoryProperty().convention(config.outputDirectory)
+        super.notCompatibleWithConfigurationCache("${this.class.simpleName} isn't compatible with the configuration cache")
     }
 
     /**
@@ -97,7 +95,6 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * all of the projects dependencies.
      */
     @TaskAction
-    @groovy.transform.CompileStatic
     analyze() {
         if (config.skip.get()) {
             logger.lifecycle("Skipping dependency-check-gradle")
@@ -134,7 +131,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             logger.lifecycle("Generating report for project ${currentProjectName}")
             try {
                 String name = project.getName()
-                String displayName = determineDisplayName()
+                String displayName = project.getDisplayName()
                 String groupId = project.getGroup()
                 String version = project.getVersion().toString()
                 File output = outputDir.get().asFile
@@ -168,18 +165,8 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     }
 
     /**
-     * Gets the projects display name. Project.getDisplayName() has been
-     * introduced with Gradle 3.3, thus we need to check for the method's
-     * existence first. Fallback: use project NAME
-     * @return the display name
-     */
-    String determineDisplayName() {
-        return project.metaClass.respondsTo(project, "getDisplayName") ? project.getDisplayName() : project.getName()
-    }
-    /**
      * Verifies aspects of the configuration to ensure dependency-check can run correctly.
      */
-    @groovy.transform.CompileStatic
     def verifySettings() {
         if (!config.scanDependencies.get() && !config.scanBuildEnv.get()) {
             throw new IllegalArgumentException("At least one of scanDependencies or scanBuildEnv must be set to true")
@@ -198,36 +185,33 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      *
      * @return an array of suppression file paths
      */
-    @groovy.transform.CompileStatic
-    private Set<String> getReportFormats(String format, List<String> formats) {
-        Set<String> selectedFormats = new HashSet<>();
+    private static Set<String> getReportFormats(String format, List<String> formats) {
+        Set<String> selectedFormats = new HashSet<>()
         if (formats != null && !formats.isEmpty()) {
             for (String f : formats) {
                 addFormat(f, selectedFormats)
             }
         }
         addFormat(format, selectedFormats)
-        return selectedFormats;
+        return selectedFormats
     }
 
-    @groovy.transform.CompileStatic
-    private void addFormat(String format, HashSet<String> selectedFormats) {
+    private static void addFormat(String format, Set<String> selectedFormats) {
         if (format != null && !format.trim().isEmpty()) {
             for (Format f : Format.values()) {
                 if (f.toString().equalsIgnoreCase(format)) {
                     selectedFormats.add(f.toString())
-                    return;
+                    return
                 }
             }
             //could be a custom report template...
-            selectedFormats.add(format);
+            selectedFormats.add(format)
         }
     }
 
     /**
      * Releases resources and removes temporary files used.
      */
-    @groovy.transform.CompileStatic
     def cleanup(Engine engine) {
         if (engine != null) {
             engine.close()
@@ -245,7 +229,6 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     /**
      * Displays a summary of the dependency-check results to the build console.
      */
-    @groovy.transform.CompileStatic
     def showSummary(Engine engine) {
         def vulnerabilities = engine.getDependencies().collect { Dependency dependency ->
             dependency.getVulnerabilities()
@@ -253,7 +236,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
 
         logger.warn("Found ${vulnerabilities.size()} vulnerabilities in project ${currentProjectName}")
         if (config.showSummary.get()) {
-            DependencyCheckScanAgent.showSummary(project.name, engine.getDependencies());
+            DependencyCheckScanAgent.showSummary(project.name, engine.getDependencies())
         }
     }
 
@@ -261,30 +244,29 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * If configured, fails the build if a vulnerability is identified with a CVSS
      * score higher than the failure threshold configured.
      */
-    @groovy.transform.CompileStatic
     CheckForFailureResult checkForFailure(Engine engine) {
         if (config.failBuildOnCVSS.get() > 10) {
             return CheckForFailureResult.createSuccess()
         }
 
-        Set<String> vulnerabilities = new HashSet<>();
+        Set<String> vulnerabilities = new HashSet<>()
         for (Dependency d : engine.getDependencies()) {
             for (Vulnerability v : d.getVulnerabilities()) {
                 final double cvssV2 = v.getCvssV2() != null && v.getCvssV2().getCvssData() != null
-                        && v.getCvssV2().getCvssData().getBaseScore() != null ? v.getCvssV2().getCvssData().getBaseScore() : -1;
+                        && v.getCvssV2().getCvssData().getBaseScore() != null ? v.getCvssV2().getCvssData().getBaseScore() : -1
                 final double cvssV3 = v.getCvssV3() != null && v.getCvssV3().getCvssData() != null
-                        && v.getCvssV3().getCvssData().getBaseScore() != null ? v.getCvssV3().getCvssData().getBaseScore() : -1;
+                        && v.getCvssV3().getCvssData().getBaseScore() != null ? v.getCvssV3().getCvssData().getBaseScore() : -1
                 final double cvssV4 = v.getCvssV4() != null && v.getCvssV4().getCvssData() != null
-                        && v.getCvssV4().getCvssData().getBaseScore() != null ? v.getCvssV4().getCvssData().getBaseScore() : -1;
-                final boolean useUnscored = cvssV2 == -1 && cvssV3 == -1 && cvssV4 == -1;
-                final double unscoredCvss = (useUnscored && v.getUnscoredSeverity() != null) ? SeverityUtil.estimateCvssV2(v.getUnscoredSeverity()) : -1;
+                        && v.getCvssV4().getCvssData().getBaseScore() != null ? v.getCvssV4().getCvssData().getBaseScore() : -1
+                final boolean useUnscored = cvssV2 == -1 && cvssV3 == -1 && cvssV4 == -1
+                final double unscoredCvss = (useUnscored && v.getUnscoredSeverity() != null) ? SeverityUtil.estimateCvssV2(v.getUnscoredSeverity()) : -1
                 if (cvssV2 >= config.failBuildOnCVSS.get()
                         || cvssV3 >= config.failBuildOnCVSS.get()
                         || cvssV4 >= config.failBuildOnCVSS.get()
                         || useUnscored && unscoredCvss >= config.failBuildOnCVSS.get()
                         //safety net to fail on any if for some reason the above misses on 0
                         || (config.failBuildOnCVSS.get() <= 0.0f)) {
-                    vulnerabilities.add(v.getName());
+                    vulnerabilities.add(v.getName())
                 }
             }
         }
@@ -299,14 +281,12 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         }
     }
 
-    @groovy.transform.CompileStatic
     void sendSlackNotification(CheckForFailureResult checkForFailureResult) {
         if (checkForFailureResult.failed) {
             new SlackNotificationSenderService(settings).send(getCurrentProjectName(), checkForFailureResult.msg)
         }
     }
 
-    @groovy.transform.CompileStatic
     def static class CheckForFailureResult {
         private Boolean failed
         private String msg
@@ -326,12 +306,36 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     }
 
     /**
+     * Whether or not to process the given project given the plugin's configuration
+     */
+    protected shouldProcess(Project project) {
+        shouldBeScanned(project) && !shouldBeSkipped(project)
+    }
+
+    /**
+     * Whether or not to process the given configuration, given the plugin's configuration
+     */
+    protected shouldProcess(Configuration configuration) {
+        configuration.canBeResolved
+                && shouldBeScanned(configuration)
+                && !(shouldBeSkipped(configuration) || shouldBeSkippedAsTest(configuration))
+    }
+
+    /**
+     * Resolve name for the configuration in way that works for Gradle < 8 using dynamic dispatch. The property/method
+     * has moved to the Named interface in Gradle 8.0, so resolving statically breaks on Gradle 7.x.
+     */
+    @CompileDynamic
+    private static nameOf(Configuration configuration) {
+        configuration.name
+    }
+
+    /**
      * Checks whether the given project should be scanned
      * because either scanProjects is empty or it contains the
      * project's path.
      */
-    @groovy.transform.CompileStatic
-    def shouldBeScanned(Project project) {
+    private shouldBeScanned(Project project) {
         config.scanProjects.get().isEmpty() || config.scanProjects.get().contains(project.path)
     }
 
@@ -339,8 +343,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * Checks whether the given project should be skipped
      * because skipProjects contains the project's path.
      */
-    @groovy.transform.CompileStatic
-    def shouldBeSkipped(Project project) {
+    private shouldBeSkipped(Project project) {
         config.skipProjects.get().contains(project.path)
     }
 
@@ -349,32 +352,23 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * because either scanConfigurations is empty or it contains the
      * configuration's name.
      */
-    @groovy.transform.CompileStatic
-    boolean shouldBeScanned(Configuration configuration) {
-        config.scanConfigurations.get().isEmpty() || config.scanConfigurations.get().contains(configuration.name)
+    private shouldBeScanned(Configuration configuration) {
+        config.scanConfigurations.get().isEmpty() || config.scanConfigurations.get().contains(nameOf(configuration))
     }
 
     /**
      * Checks whether the given configuration should be skipped
      * because skipConfigurations contains the configuration's name.
      */
-    @groovy.transform.CompileStatic
-    boolean shouldBeSkipped(Configuration configuration) {
-        ((IGNORE_NON_RESOLVABLE_SCOPES_GRADLE_VERSION.compareTo(GradleVersion.current()) <= 0 && (
-                "archives".equals(configuration.name) ||
-                        "default".equals(configuration.name) ||
-                        "runtime".equals(configuration.name) ||
-                        "compile".equals(configuration.name) ||
-                        "compileOnly".equals(configuration.name)))
-                || config.skipConfigurations.get().contains(configuration.name))
+    private shouldBeSkipped(Configuration configuration) {
+        config.skipConfigurations.get().contains(nameOf(configuration))
     }
 
     /**
      * Checks whether the given artifact should be skipped
      * because skipGroups contains the artifact's group prefix.
      */
-    @groovy.transform.CompileStatic
-    def shouldBeSkipped(ResolvedArtifactResult artifact) {
+    private shouldBeSkipped(ResolvedArtifactResult artifact) {
         def name = artifact.id.componentIdentifier.displayName
         config.skipGroups.get().any { name.startsWith(it) }
     }
@@ -383,21 +377,19 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * Checks whether the given configuration should be skipped
      * because it is a test configuration and skipTestGroups is true.
      */
-    @groovy.transform.CompileStatic
-    boolean shouldBeSkippedAsTest(Configuration configuration) {
+    private shouldBeSkippedAsTest(Configuration configuration) {
         config.skipTestGroups.get() && isTestConfiguration(configuration)
     }
 
     /**
      * Determines if the configuration should be considered a test configuration.
-     * @param configuration the configuration to insepct
+     * @param configuration the configuration to inspect
      * @return true if the configuration is considered a test configuration; otherwise false
      */
-    @groovy.transform.CompileStatic
-    boolean isTestConfiguration(Configuration configuration) {
+    private isTestConfiguration(Configuration configuration) {
         def isTestConfiguration = isTestConfigurationCheck(configuration)
 
-        def hierarchy = configuration.hierarchy.collect({ it.name }).join(" --> ")
+        def hierarchy = configuration.hierarchy.collect { nameOf(it) }.join(" --> ")
         logger.info("'{}' is considered a test configuration: {}", hierarchy, isTestConfiguration)
 
         isTestConfiguration
@@ -411,24 +403,12 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * </ul>
      * The intent of the regular expression is to match `test` in a camel case or snake case configuration name.
      */
-    @groovy.transform.CompileStatic
-    static boolean isTestConfigurationCheck(Configuration configuration) {
-        boolean isTestConfiguration = configuration.name =~ /((^|[a-z0-9_])T|(^|_)t)est([A-Z0-9_]|$)/
+    private static isTestConfigurationCheck(Configuration configuration) {
+        boolean isTestConfiguration = nameOf(configuration) =~ TEST_CONFIG_PATTERN
         configuration.hierarchy.each {
-            isTestConfiguration |= (it.name =~ /((^|[a-z0-9_])T|(^|_)t)est([A-Z0-9_]|$)/) as boolean
+            isTestConfiguration |= (nameOf(it) =~ TEST_CONFIG_PATTERN) as boolean
         }
         isTestConfiguration
-    }
-
-    /**
-     * Determines if the onfiguration can be resolved
-     * @param configuration the configuration to inspect
-     * @return true if the configuration can be resolved; otherwise false
-     */
-    @groovy.transform.CompileStatic
-    boolean canBeResolved(Configuration configuration) {
-        configuration.metaClass.respondsTo(configuration, "isCanBeResolved") ?
-                configuration.isCanBeResolved() : true
     }
 
     /**
@@ -438,7 +418,6 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * @param mci the module component identifier
      * @return the resolved POM file, or null if resolution fails
      */
-    @groovy.transform.CompileStatic
     private File resolvePomFor(Project project, ModuleComponentIdentifier mci) {
         if (pomCache.containsKey(mci)) {
             return pomCache.get(mci)
@@ -471,17 +450,9 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * @param project the project to analyze
      * @param engine the dependency-check engine
      */
-    @groovy.transform.CompileStatic
     protected void processBuildEnvironment(Project project, Engine engine) {
-        project.getBuildscript().configurations.findAll { Configuration configuration ->
-            shouldBeScanned(configuration) && !(shouldBeSkipped(configuration)
-                    || shouldBeSkippedAsTest(configuration)) && canBeResolved(configuration)
-        }.each { Configuration configuration ->
-            if (CUTOVER_GRADLE_VERSION.compareTo(GradleVersion.current()) > 0) {
-                processConfigLegacy configuration, engine
-            } else {
-                processConfigV4 project, configuration, engine, true
-            }
+        project.getBuildscript().configurations.matching(this.&shouldProcess).each { Configuration configuration ->
+            processConfig project, configuration, engine, true
         }
     }
 
@@ -490,17 +461,9 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * @param project the project to analyze
      * @param engine the dependency-check engine
      */
-    @groovy.transform.CompileStatic
     protected void processConfigurations(Project project, Engine engine) {
-        project.configurations.findAll { Configuration configuration ->
-            shouldBeScanned(configuration) && !(shouldBeSkipped(configuration)
-                    || shouldBeSkippedAsTest(configuration)) && canBeResolved(configuration)
-        }.each { Configuration configuration ->
-            if (CUTOVER_GRADLE_VERSION.compareTo(GradleVersion.current()) > 0) {
-                processConfigLegacy configuration, engine
-            } else {
-                processConfigV4 project, configuration, engine
-            }
+        project.configurations.matching(this.&shouldProcess).each { Configuration configuration ->
+            processConfig project, configuration, engine, false
         }
         if (!config.isScanSetConfigured()) {
             List<String> toScan = ['src/main/resources', 'src/main/webapp',
@@ -525,12 +488,12 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         }
 
         config.additionalCpes.each {
-            var dependency = new Dependency(true);
+            def dependency = new Dependency(true)
             dependency.setDescription(it.description.getOrNull())
-            dependency.setDisplayFileName(it.cpe.getOrNull());
-            dependency.setSha1sum(Checksum.getSHA1Checksum(it.cpe.getOrNull()));
-            dependency.setSha256sum(Checksum.getSHA256Checksum(it.cpe.getOrNull()));
-            dependency.setMd5sum(Checksum.getMD5Checksum(it.cpe.getOrNull()));
+            dependency.setDisplayFileName(it.cpe.getOrNull())
+            dependency.setSha1sum(Checksum.getSHA1Checksum(it.cpe.getOrNull()))
+            dependency.setSha256sum(Checksum.getSHA256Checksum(it.cpe.getOrNull()))
+            dependency.setMd5sum(Checksum.getMD5Checksum(it.cpe.getOrNull()))
             dependency.addVulnerableSoftwareIdentifier(new CpeIdentifier(CpeParser.parse(it.cpe.getOrNull()), Confidence.HIGHEST))
             dependency.setFileName("")
             dependency.setActualFilePath("")
@@ -538,40 +501,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         }
     }
 
-    /**
-     * Process the incoming artifacts for the given project's configurations using APIs pre-gradle 4.0.
-     * @param project the project to analyze
-     * @param engine the dependency-check engine
-     */
-    @groovy.transform.CompileStatic
-    protected void processConfigLegacy(Configuration configuration, Engine engine) {
-        configuration.getResolvedConfiguration().getResolvedArtifacts().collect { ResolvedArtifact artifact ->
-            def dependencies = engine.scan(artifact.getFile())
-            if (!project.gradle.startParameter.offline && dependencies != null && dependencies.size() == 1) {
-                // Resolve and analyze POM for maven modules to extract additional evidence
-                ModuleVersionIdentifier id = artifact.moduleVersion.getId()
-                if (id.group && id.name && id.version) {
-                    // Create a ModuleComponentIdentifier from the artifact's module version
-                    def compId = artifact.id.componentIdentifier
-                    if (compId instanceof ModuleComponentIdentifier) {
-                        File pomFile = resolvePomFor(project, (ModuleComponentIdentifier) compId)
-                        if (pomFile != null) {
-                            try {
-                                PomUtils.analyzePOM(dependencies[0], pomFile)
-                            } catch (Exception e) {
-                                logger.debug("Failed to analyze POM for ${id.group}:${id.name}:${id.version}: ${e.message}")
-                            }
-                        }
-                    }
-                }
-            }
-            addInfoToDependencies(dependencies, configuration.name,
-                    artifact.moduleVersion.getId(), null)
-        }
-    }
-
-    @groovy.transform.CompileStatic
-    private Map<PackageURL, Set<IncludedByReference>> buildIncludedByMap(Project project, Configuration configuration, boolean scanningBuildEnv) {
+    private static Map<PackageURL, Set<IncludedByReference>> buildIncludedByMap(Project project, Configuration configuration, boolean scanningBuildEnv) {
         Map<PackageURL, Set<IncludedByReference>> includedByMap = new HashMap<>()
         String type = null
         if (scanningBuildEnv) {
@@ -580,8 +510,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         IncludedByReference parent = new IncludedByReference(convertIdentifier(project).toString(), type)
         configuration.incoming.resolutionResult.root.getDependencies().forEach({
             if (it instanceof ResolvedDependencyResult) {
-                ResolvedDependencyResult dr = (ResolvedDependencyResult) it
-                ResolvedComponentResult current = dr.selected
+                ResolvedComponentResult current = it.selected
                 PackageURL purl = convertIdentifier(current)
                 if (includedByMap.containsKey(purl)) {
                     includedByMap.get(purl).add(parent)
@@ -595,29 +524,27 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             } else {
                 //TODO logging?
             }
-        });
+        })
         return includedByMap
     }
 
-    @groovy.transform.CompileStatic
     private static void collectDependencyMap(Map<PackageURL, Set<IncludedByReference>> includedByMap, IncludedByReference root, Set<? extends DependencyResult> dependencies, int depth) {
         for (DependencyResult it : dependencies) {
             if (it instanceof ResolvedDependencyResult) {
-                ResolvedDependencyResult rdr = (ResolvedDependencyResult) it
-                ResolvedComponentResult current = rdr.selected
+                ResolvedComponentResult current = it.selected
                 PackageURL purl = convertIdentifier(current)
                 if (includedByMap.containsKey(purl)) {
                     // jackson-bom ends up creating an infinite loop so check if we've been here before
                     // https://github.com/dependency-check/dependency-check-gradle/issues/307
                     Set<IncludedByReference> includedBy = includedByMap.get(purl)
                     if (includedBy.contains(root)) {
-                        continue;
+                        continue
                     }
                     includedBy.add(root)
                 } else {
                     Set<IncludedByReference> rootParent = new HashSet<>()
                     rootParent.add(root)
-                    includedByMap.put(purl, rootParent);
+                    includedByMap.put(purl, rootParent)
                 }
                 if (current.getDependencies() != null && !current.getDependencies().isEmpty() && depth < 500) {
                     collectDependencyMap(includedByMap, root, current.getDependencies(), depth + 1)
@@ -627,28 +554,27 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     }
 
     /**
-     * Process the incoming artifacts for the given project's configurations using APIs introduced in gradle 4.0+.
+     * Process the incoming artifacts for the given project's configuration.
      * @param project the project to analyze
      * @param configuration a particular configuration of the project to analyze
      * @param engine the dependency-check engine
      * @param scanningBuildEnv true if scanning the build environment; otherwise false
      */
-    protected void processConfigV4(Project project, Configuration configuration, Engine engine, boolean scanningBuildEnv = false) {
-        String projectName = project.name
-        String scope = "$projectName:$configuration.name"
-        if (scanningBuildEnv) {
-            scope += " (buildEnv)"
-        }
+    protected void processConfig(Project project, Configuration configuration, Engine engine, boolean scanningBuildEnv = false) {
+        String scope = "${project.name}:${nameOf(configuration)}${scanningBuildEnv ? ' (buildEnv)' : ''}"
         logger.info "- Analyzing ${scope}"
 
         Map<String, ModuleVersionIdentifier> componentVersions = [:]
         configuration.incoming.resolutionResult.allDependencies.each {
-            if (it.hasProperty('selected')) {
-                componentVersions.put(it.selected.id.toString(), it.selected.moduleVersion)
-            } else if (it.hasProperty('attempted')) {
-                logger.debug("Unable to resolve artifact in ${it.attempted.displayName}")
-            } else {
-                logger.warn("Unable to resolve: ${it}")
+            switch (it) {
+                case ResolvedDependencyResult:
+                    (it as ResolvedDependencyResult).with { componentVersions.put(selected.id.toString(), selected.moduleVersion) }
+                    break
+                case UnresolvedDependencyResult:
+                    (it as UnresolvedDependencyResult).with { logger.debug("Unable to resolve artifact in ${attempted.displayName}") }
+                    break
+                default:
+                    logger.warn("Unable to resolve: ${it}")
             }
         }
         Map<PackageURL, Set<IncludedByReference>> includedByMap = buildIncludedByMap(project, configuration, scanningBuildEnv)
@@ -656,15 +582,15 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         def types = config.analyzedTypes.get()
         for (String type : types) {
             List<ResolvedArtifactResult> rar = configuration.incoming.artifactView {
-                lenient true
-                attributes {
-                    it.attribute(artifactType, type)
+                it.setLenient(true)
+                it.attributes { attrs ->
+                    attrs.attribute(artifactType, type)
                 }
-            }.getArtifacts().toList();
+            }.getArtifacts().toList()
 
             for (ResolvedArtifactResult resolvedArtifactResult : rar) {
                 if (shouldBeSkipped(resolvedArtifactResult)) {
-                    continue;
+                    continue
                 }
                 ModuleVersionIdentifier id = componentVersions[resolvedArtifactResult.id.componentIdentifier.getDisplayName()]
                 if (id == null) {
@@ -676,12 +602,12 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                         // Resolve and analyze POM for maven modules to extract additional evidence
                         def compId = resolvedArtifactResult.id.componentIdentifier
                         if (compId instanceof ModuleComponentIdentifier) {
-                            File pomFile = resolvePomFor(project, (ModuleComponentIdentifier) compId)
+                            File pomFile = resolvePomFor(project, compId)
                             if (pomFile != null) {
                                 try {
                                     PomUtils.analyzePOM(deps[0], pomFile)
                                 } catch (Exception e) {
-                                    logger.debug("Failed to analyze POM for ${compId.group}:${compId.name}:${compId.version}: ${e}")
+                                    logger.debug("Failed to analyze POM for ${compId.group}:${compId.module}:${compId.version}: ${e}")
                                 }
                             }
                         }
@@ -702,9 +628,8 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * @param artifact the artifact id for the artifact coordinates
      * @param version the version number for the artifact coordinates
      */
-    @groovy.transform.CompileStatic
-    protected void addInfoToDependencies(List<Dependency> deps, String configurationName,
-                                         ModuleVersionIdentifier id, Set<IncludedByReference> includedBy) {
+    private static void addInfoToDependencies(List<Dependency> deps, String configurationName,
+                                              ModuleVersionIdentifier id, Set<IncludedByReference> includedBy) {
         if (deps != null) {
             if (deps.size() == 1) {
                 def d = deps.get(0)
@@ -725,7 +650,6 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         }
     }
 
-    @groovy.transform.CompileStatic
     private static PackageURL convertIdentifier(Project project) {
         final PackageURL p
         if (project.group) {
@@ -738,24 +662,10 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         return p
     }
 
-    @groovy.transform.CompileStatic
     private static PackageURL convertIdentifier(ResolvedComponentResult result) {
         return convertIdentifier(result.getModuleVersion())
     }
 
-    @groovy.transform.CompileStatic
-    private static PackageURL convertIdentifier(ModuleComponentIdentifier id) {
-        final PackageURL p = new PackageURL("maven", id.moduleIdentifier.group,
-                id.moduleIdentifier.name, id.version, null, null);
-        return p;
-    }
-
-    @groovy.transform.CompileStatic
-    private static PackageURL convertIdentifier(ProjectComponentIdentifier id) {
-        return PackageURLBuilder.aPackageURL().withType("gradle").withName(id.projectPath).build()
-    }
-
-    @groovy.transform.CompileStatic
     private static PackageURL convertIdentifier(ModuleVersionIdentifier id) {
         PackageURL p
         if (id.group) {
@@ -770,70 +680,5 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             p = pb.build()
         }
         return p
-    }
-    /**
-     * Adds a dependency to the engine. This is used when an artifact is scanned that is not
-     * supported by dependency-check (different dependency type for possibly new language).
-     * @param engine a reference to the engine
-     * @param projectName the project name
-     * @param configurationName the configuration name
-     * @param group the group id
-     * @param name the name or artifact id
-     * @param version the version number
-     * @param displayName the display name
-     */
-    @groovy.transform.CompileStatic
-    protected void addDependency(Engine engine, String projectName, String configurationName,
-                                 ModuleVersionIdentifier id, String displayName, File file = null) {
-        //id.group, id.name, id.version,
-        String display = displayName ?: "${id.group}:${id.name}:${id.version}"
-        Dependency dependency
-        String sha256
-        if (file == null) {
-            logger.debug("Adding virtual dependency for ${display}")
-            dependency = new Dependency(project.buildFile, true)
-        } else {
-            logger.debug("Adding dependency for ${display}")
-            dependency = new Dependency(file)
-        }
-
-        if (dependency.sha1sum == null && dependency.virtual) {
-            dependency.sha1sum = getSHA1Checksum("${id.group}:${id.name}:${id.version}")
-            dependency.sha256sum = getSHA256Checksum("${id.group}:${id.name}:${id.version}")
-            dependency.md5sum = getMD5Checksum("${id.group}:${id.name}:${id.version}")
-            dependency.displayFileName = display
-        }
-        dependency.addEvidence(VENDOR, "build.gradle", "displayName", display, Confidence.MEDIUM)
-        dependency.addEvidence(PRODUCT, "build.gradle", "displayName", display, Confidence.HIGH)
-        if (dependency.packagePath == null) {
-            dependency.name = id.name
-            dependency.version = id.version
-            dependency.packagePath = "${id.group}:${id.name}:${id.version}"
-        }
-        MavenArtifact mavenArtifact = new MavenArtifact(id.group, id.name, id.version)
-        dependency.addAsEvidence("gradle", mavenArtifact, Confidence.HIGHEST)
-        dependency.addProjectReference("${projectName}:${configurationName}")
-
-        engine.addDependency(dependency)
-    }
-
-    /**
-     * Check if the notCompatibleWithConfigurationCache method exists in the class.
-     * @return true if it exists; false otherwise.
-     */
-    @groovy.transform.CompileStatic
-    protected boolean hasNotCompatibleWithConfigurationCacheOption() {
-        return metaClass.respondsTo(this, "notCompatibleWithConfigurationCache", String)
-    }
-
-    /**
-     * Calls notCompatibleWithConfigurationCache method in order to avoid failures when
-     * Gradle configuration cache is enabled.
-     */
-    @groovy.transform.CompileStatic
-    protected void callIncompatibleWithConfigurationCache() {
-        String methodName = "notCompatibleWithConfigurationCache"
-        Object[] methodArgs = ["The gradle-versions-plugin isn't compatible with the configuration cache"]
-        metaClass.invokeMethod(this, methodName, methodArgs)
     }
 }
