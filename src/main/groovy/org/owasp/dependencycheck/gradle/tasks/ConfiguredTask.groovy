@@ -21,12 +21,16 @@ package org.owasp.dependencycheck.gradle.tasks
 import com.google.common.base.Strings
 import groovy.transform.CompileStatic
 import org.gradle.api.DefaultTask
-import org.gradle.api.InvalidUserDataException
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
+import org.owasp.dependencycheck.gradle.extension.DataExtension
 import org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension
-import org.owasp.dependencycheck.gradle.service.SlackNotificationSenderService
-import org.owasp.dependencycheck.utils.Downloader
+import org.owasp.dependencycheck.gradle.extension.NvdExtension
+import org.owasp.dependencycheck.gradle.extension.ProxyExtension
 import org.owasp.dependencycheck.utils.Settings
+
+import javax.inject.Inject
 
 import static org.owasp.dependencycheck.utils.Settings.KEYS.*
 
@@ -39,11 +43,68 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.*
 abstract class ConfiguredTask extends DefaultTask {
 
     @Internal
-    DependencyCheckExtension config = (DependencyCheckExtension) project.getExtensions().findByName('dependencyCheck')
+    DependencyCheckExtension defaults
     @Internal
     Settings settings
     @Internal
     String PROPERTIES_FILE = 'task.properties'
+
+    @Internal
+    Property<Boolean> autoUpdate
+    @Internal
+    Property<Boolean> failOnError
+    @Internal
+    Property<Boolean> quickQueryTimestamp
+
+    @Internal
+    ProxyExtension proxy
+    @Internal
+    NvdExtension nvd
+    @Internal
+    DataExtension data
+
+    @Inject
+    ConfiguredTask(ObjectFactory objects) {
+        def defaults = (DependencyCheckExtension) project.getExtensions().findByName('dependencyCheck')
+        this.defaults = defaults
+
+        this.autoUpdate = objects.property(Boolean)
+        this.autoUpdate.convention(defaults.autoUpdate)
+
+        this.failOnError = objects.property(Boolean)
+        this.failOnError.convention(defaults.failOnError)
+
+        this.quickQueryTimestamp = objects.property(Boolean)
+        this.quickQueryTimestamp.convention(defaults.quickQueryTimestamp)
+
+        this.proxy = objects.newInstance(ProxyExtension, objects)
+        proxy.server.convention(defaults.proxy.server)
+        proxy.port.convention(defaults.proxy.port)
+        proxy.username.convention(defaults.proxy.username)
+        proxy.password.convention(defaults.proxy.password)
+        proxy.nonProxyHosts.convention(defaults.proxy.nonProxyHosts)
+
+        this.nvd = objects.newInstance(NvdExtension, objects)
+        nvd.apiKey.convention(defaults.nvd.apiKey)
+        nvd.endpoint.convention(defaults.nvd.endpoint)
+        nvd.delay.convention(defaults.nvd.delay)
+        nvd.resultsPerPage.convention(defaults.nvd.resultsPerPage)
+        nvd.maxRetryCount.convention(defaults.nvd.maxRetryCount)
+        nvd.validForHours.convention(defaults.nvd.validForHours)
+        nvd.datafeedUrl.convention(defaults.nvd.datafeedUrl)
+        nvd.datafeedUser.convention(defaults.nvd.datafeedUser)
+        nvd.datafeedPassword.convention(defaults.nvd.datafeedPassword)
+        nvd.datafeedBearerToken.convention(defaults.nvd.datafeedBearerToken)
+        nvd.datafeedStartYear.convention(defaults.nvd.datafeedStartYear)
+
+        this.data = objects.newInstance(DataExtension, objects, project)
+        data.directory.convention(defaults.data.directory)
+        data.connectionString.convention(defaults.data.connectionString)
+        data.username.convention(defaults.data.username)
+        data.password.convention(defaults.data.password)
+        data.driver.convention(defaults.data.driver)
+        data.driverPath.convention(defaults.data.driverPath)
+    }
 
     /**
      * Initializes the settings object. If the setting is not set the
@@ -68,206 +129,66 @@ abstract class ConfiguredTask extends DefaultTask {
                 }
             }
         }
-        settings.setBooleanIfNotNull(AUTO_UPDATE, config.autoUpdate.getOrNull())
-
-        String[] suppressionLists = determineSuppressions(config.suppressionFiles.getOrElse([]), config.suppressionFile.getOrNull())
-
-        settings.setArrayIfNotEmpty(SUPPRESSION_FILE, suppressionLists)
-        settings.setStringIfNotEmpty(SUPPRESSION_FILE_USER, config.suppressionFileUser.getOrNull())
-        settings.setStringIfNotEmpty(SUPPRESSION_FILE_PASSWORD, config.suppressionFilePassword.getOrNull())
-        settings.setStringIfNotEmpty(SUPPRESSION_FILE_BEARER_TOKEN, config.suppressionFileBearerToken.getOrNull())
-        settings.setStringIfNotEmpty(HINTS_FILE, config.hintsFile.getOrNull())
-
+        settings.setBooleanIfNotNull(AUTO_UPDATE, autoUpdate.getOrNull())
         configureProxy(settings)
-
-        configureSlack(settings)
-
-        //settings.setStringIfNotEmpty(CONNECTION_TIMEOUT, connectionTimeout)
-        settings.setStringIfNotNull(DATA_DIRECTORY, config.data.directory.getOrNull())
-        settings.setStringIfNotEmpty(DB_DRIVER_NAME, config.data.driver.getOrNull())
-        settings.setStringIfNotEmpty(DB_DRIVER_PATH, config.data.driverPath.getOrNull())
-        settings.setStringIfNotEmpty(DB_CONNECTION_STRING, config.data.connectionString.getOrNull())
-        settings.setStringIfNotEmpty(DB_USER, config.data.username.getOrNull())
-        settings.setStringIfNotEmpty(DB_PASSWORD, config.data.password.getOrNull())
-
-
-        settings.setStringIfNotEmpty(NVD_API_KEY, config.nvd.apiKey.getOrNull())
-        settings.setStringIfNotEmpty(NVD_API_ENDPOINT, config.nvd.endpoint.getOrNull())
-        settings.setIntIfNotNull(NVD_API_DELAY, config.nvd.delay.getOrNull())
-        settings.setIntIfNotNull(NVD_API_RESULTS_PER_PAGE, config.nvd.resultsPerPage.getOrNull())
-        settings.setIntIfNotNull(NVD_API_MAX_RETRY_COUNT, config.nvd.maxRetryCount.getOrNull())
-        settings.setIntIfNotNull(NVD_API_VALID_FOR_HOURS, config.nvd.validForHours.getOrNull());
-
-        settings.setStringIfNotEmpty(NVD_API_DATAFEED_URL, config.nvd.datafeedUrl.getOrNull())
-        if (config.nvd.datafeedUser.getOrNull() && config.nvd.datafeedPassword.getOrNull()) {
-            settings.setStringIfNotEmpty(NVD_API_DATAFEED_USER, config.nvd.datafeedUser.getOrNull())
-            settings.setStringIfNotEmpty(NVD_API_DATAFEED_PASSWORD, config.nvd.datafeedPassword.getOrNull())
+        settings.setStringIfNotNull(DATA_DIRECTORY, data.directory.getOrNull())
+        settings.setStringIfNotEmpty(DB_DRIVER_NAME, data.driver.getOrNull())
+        settings.setStringIfNotEmpty(DB_DRIVER_PATH, data.driverPath.getOrNull())
+        settings.setStringIfNotEmpty(DB_CONNECTION_STRING, data.connectionString.getOrNull())
+        settings.setStringIfNotEmpty(DB_USER, data.username.getOrNull())
+        settings.setStringIfNotEmpty(DB_PASSWORD, data.password.getOrNull())
+        settings.setStringIfNotEmpty(NVD_API_KEY, nvd.apiKey.getOrNull())
+        settings.setStringIfNotEmpty(NVD_API_ENDPOINT, nvd.endpoint.getOrNull())
+        settings.setIntIfNotNull(NVD_API_DELAY, nvd.delay.getOrNull())
+        settings.setIntIfNotNull(NVD_API_RESULTS_PER_PAGE, nvd.resultsPerPage.getOrNull())
+        settings.setIntIfNotNull(NVD_API_MAX_RETRY_COUNT, nvd.maxRetryCount.getOrNull())
+        settings.setIntIfNotNull(NVD_API_VALID_FOR_HOURS, nvd.validForHours.getOrNull())
+        settings.setStringIfNotEmpty(NVD_API_DATAFEED_URL, nvd.datafeedUrl.getOrNull())
+        if (nvd.datafeedUser.getOrNull() && nvd.datafeedPassword.getOrNull()) {
+            settings.setStringIfNotEmpty(NVD_API_DATAFEED_USER, nvd.datafeedUser.getOrNull())
+            settings.setStringIfNotEmpty(NVD_API_DATAFEED_PASSWORD, nvd.datafeedPassword.getOrNull())
         }
-        settings.setStringIfNotEmpty(NVD_API_DATAFEED_BEARER_TOKEN, config.nvd.datafeedBearerToken.getOrNull())
-        settings.setIntIfNotNull(NVD_API_DATAFEED_START_YEAR, config.nvd.datafeedStartYear.getOrNull())
-
-        settings.setBooleanIfNotNull(DOWNLOADER_QUICK_QUERY_TIMESTAMP, config.quickQueryTimestamp.getOrNull())
-        settings.setFloat(JUNIT_FAIL_ON_CVSS, config.junitFailOnCVSS.get())
-        settings.setBooleanIfNotNull(FAIL_ON_UNUSED_SUPPRESSION_RULE, config.failBuildOnUnusedSuppressionRule.getOrNull())
-        settings.setBooleanIfNotNull(HOSTED_SUPPRESSIONS_ENABLED, config.hostedSuppressions.enabled.getOrNull())
-        settings.setBooleanIfNotNull(HOSTED_SUPPRESSIONS_FORCEUPDATE, config.hostedSuppressions.forceupdate.getOrNull())
-        settings.setStringIfNotNull(HOSTED_SUPPRESSIONS_URL, config.hostedSuppressions.url.getOrNull())
-        settings.setStringIfNotNull(HOSTED_SUPPRESSIONS_USER, config.hostedSuppressions.user.getOrNull())
-        settings.setStringIfNotNull(HOSTED_SUPPRESSIONS_PASSWORD, config.hostedSuppressions.password.getOrNull())
-        settings.setStringIfNotNull(HOSTED_SUPPRESSIONS_BEARER_TOKEN, config.hostedSuppressions.bearerToken.getOrNull())
-        if (config.hostedSuppressions.validForHours.getOrNull() != null) {
-            if (config.hostedSuppressions.validForHours.getOrNull() >= 0) {
-                settings.setInt(HOSTED_SUPPRESSIONS_VALID_FOR_HOURS, config.hostedSuppressions.validForHours.getOrNull())
-            } else {
-                throw new InvalidUserDataException('Invalid setting: `validForHours` must be 0 or greater')
-            }
-        }
-        settings.setBooleanIfNotNull(ANALYZER_JAR_ENABLED, config.analyzers.jarEnabled.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_NUSPEC_ENABLED, config.analyzers.nuspecEnabled.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_ENABLED, select(config.analyzers.ossIndex.enabled.getOrNull(), config.analyzers.ossIndexEnabled.getOrNull()))
-        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_WARN_ONLY_ON_REMOTE_ERRORS, config.analyzers.ossIndex.warnOnlyOnRemoteErrors.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_ENABLED, config.analyzers.ossIndex.enabled.getOrNull())
-        settings.setStringIfNotEmpty(ANALYZER_OSSINDEX_USER, config.analyzers.ossIndex.username.getOrNull())
-        settings.setStringIfNotEmpty(ANALYZER_OSSINDEX_PASSWORD, config.analyzers.ossIndex.password.getOrNull())
-        settings.setStringIfNotEmpty(ANALYZER_OSSINDEX_URL, config.analyzers.ossIndex.url.getOrNull())
-
-        settings.setBooleanIfNotNull(ANALYZER_CENTRAL_ENABLED, config.analyzers.centralEnabled.getOrNull())
-
-        settings.setBooleanIfNotNull(ANALYZER_NEXUS_ENABLED, config.analyzers.nexus.enabled.getOrNull())
-        settings.setStringIfNotEmpty(ANALYZER_NEXUS_URL, config.analyzers.nexus.url.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_NEXUS_USES_PROXY, config.analyzers.nexus.usesProxy.getOrNull())
-        settings.setStringIfNotNull(ANALYZER_NEXUS_USER, config.analyzers.nexus.username.getOrNull())
-        settings.setStringIfNotNull(ANALYZER_NEXUS_PASSWORD, config.analyzers.nexus.password.getOrNull())
-
-        settings.setBooleanIfNotNull(ANALYZER_EXPERIMENTAL_ENABLED, config.analyzers.experimentalEnabled.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_ARCHIVE_ENABLED, config.analyzers.archiveEnabled.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_KNOWN_EXPLOITED_ENABLED, config.analyzers.kev.enabled.getOrNull())
-        settings.setStringIfNotNull(KEV_URL, config.analyzers.kev.url.getOrNull())
-        settings.setIntIfNotNull(KEV_CHECK_VALID_FOR_HOURS, config.analyzers.kev.validForHours.getOrNull())
-        settings.setStringIfNotNull(KEV_USER, config.analyzers.kev.user.getOrNull())
-        settings.setStringIfNotNull(KEV_PASSWORD, config.analyzers.kev.password.getOrNull())
-        settings.setStringIfNotNull(KEV_BEARER_TOKEN, config.analyzers.kev.bearerToken.getOrNull())
-        settings.setStringIfNotEmpty(ADDITIONAL_ZIP_EXTENSIONS, config.analyzers.zipExtensions.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_ASSEMBLY_ENABLED, config.analyzers.assemblyEnabled.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_MSBUILD_PROJECT_ENABLED, config.analyzers.msbuildEnabled.getOrNull())
-        settings.setStringIfNotEmpty(ANALYZER_ASSEMBLY_DOTNET_PATH, config.analyzers.pathToDotnet.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_GOLANG_DEP_ENABLED, config.analyzers.golangDepEnabled.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_GOLANG_MOD_ENABLED, config.analyzers.golangModEnabled.getOrNull())
-        settings.setStringIfNotNull(ANALYZER_GOLANG_PATH, config.analyzers.pathToGo.getOrNull())
-
-        settings.setBooleanIfNotNull(ANALYZER_COCOAPODS_ENABLED, config.analyzers.cocoapodsEnabled.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_SWIFT_PACKAGE_MANAGER_ENABLED, config.analyzers.swiftEnabled.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_DART_ENABLED, config.analyzers.dartEnabled.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_SWIFT_PACKAGE_RESOLVED_ENABLED, config.analyzers.swiftPackageResolvedEnabled.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_BUNDLE_AUDIT_ENABLED, config.analyzers.bundleAuditEnabled.getOrNull())
-        settings.setStringIfNotEmpty(ANALYZER_BUNDLE_AUDIT_PATH, config.analyzers.pathToBundleAudit.getOrNull())
-
-        settings.setBooleanIfNotNull(ANALYZER_PYTHON_DISTRIBUTION_ENABLED, config.analyzers.pyDistributionEnabled.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_PYTHON_PACKAGE_ENABLED, config.analyzers.pyPackageEnabled.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_RUBY_GEMSPEC_ENABLED, config.analyzers.rubygemsEnabled.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_OPENSSL_ENABLED, config.analyzers.opensslEnabled.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_CMAKE_ENABLED, config.analyzers.cmakeEnabled.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_AUTOCONF_ENABLED, config.analyzers.autoconfEnabled.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_COMPOSER_LOCK_ENABLED, config.analyzers.composerEnabled.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_COMPOSER_LOCK_SKIP_DEV, config.analyzers.composerSkipDev.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_CPANFILE_ENABLED, config.analyzers.cpanEnabled.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_NUGETCONF_ENABLED, config.analyzers.nugetconfEnabled.getOrNull())
-
-        settings.setBooleanIfNotNull(ANALYZER_NODE_PACKAGE_ENABLED, select(config.analyzers.nodePackage.enabled.getOrNull(), config.analyzers.nodeEnabled.getOrNull()))
-        settings.setBooleanIfNotNull(ANALYZER_NODE_PACKAGE_SKIPDEV, config.analyzers.nodePackage.skipDevDependencies.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_ENABLED, select(config.analyzers.nodeAudit.enabled.getOrNull(), config.analyzers.nodeAuditEnabled.getOrNull()))
-        settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_USE_CACHE, config.analyzers.nodeAudit.useCache.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_SKIPDEV, config.analyzers.nodeAudit.skipDevDependencies.getOrNull())
-        settings.setStringIfNotEmpty(ANALYZER_NODE_AUDIT_URL, config.analyzers.nodeAudit.url.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_YARN_AUDIT_ENABLED, config.analyzers.nodeAudit.yarnEnabled.getOrNull())
-        settings.setStringIfNotNull(ANALYZER_YARN_PATH, config.analyzers.nodeAudit.yarnPath.getOrNull());
-        settings.setBooleanIfNotNull(ANALYZER_PNPM_AUDIT_ENABLED, config.analyzers.nodeAudit.pnpmEnabled.getOrNull())
-        settings.setStringIfNotNull(ANALYZER_PNPM_PATH, config.analyzers.nodeAudit.pnpmPath.getOrNull());
-        settings.setBooleanIfNotNull(ANALYZER_RETIREJS_ENABLED, config.analyzers.retirejs.enabled.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_RETIREJS_FORCEUPDATE, config.analyzers.retirejs.forceupdate.getOrNull())
-        settings.setStringIfNotNull(ANALYZER_RETIREJS_REPO_JS_URL, config.analyzers.retirejs.retireJsUrl.getOrNull())
-        settings.setStringIfNotNull(ANALYZER_RETIREJS_REPO_JS_USER, config.analyzers.retirejs.user.getOrNull())
-        settings.setStringIfNotNull(ANALYZER_RETIREJS_REPO_JS_PASSWORD, config.analyzers.retirejs.password.getOrNull())
-        settings.setStringIfNotNull(ANALYZER_RETIREJS_REPO_JS_BEARER_TOKEN, config.analyzers.retirejs.bearerToken.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_RETIREJS_FILTER_NON_VULNERABLE, config.analyzers.retirejs.filterNonVulnerable.getOrNull())
-        settings.setArrayIfNotEmpty(ANALYZER_RETIREJS_FILTERS, config.analyzers.retirejs.filters.getOrElse([]))
-
-        settings.setBooleanIfNotNull(ANALYZER_ARTIFACTORY_ENABLED, config.analyzers.artifactory.enabled.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_ARTIFACTORY_PARALLEL_ANALYSIS, config.analyzers.artifactory.parallelAnalysis.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_ARTIFACTORY_USES_PROXY, config.analyzers.artifactory.usesProxy.getOrNull())
-        settings.setStringIfNotNull(ANALYZER_ARTIFACTORY_URL, config.analyzers.artifactory.url.getOrNull())
-        settings.setStringIfNotNull(ANALYZER_ARTIFACTORY_API_TOKEN, config.analyzers.artifactory.apiToken.getOrNull())
-        settings.setStringIfNotNull(ANALYZER_ARTIFACTORY_API_USERNAME, config.analyzers.artifactory.username.getOrNull())
-        settings.setStringIfNotNull(ANALYZER_ARTIFACTORY_BEARER_TOKEN, config.analyzers.artifactory.bearerToken.getOrNull())
-
-        settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_USE_CACHE, config.cache.nodeAudit.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_CENTRAL_USE_CACHE, config.cache.central.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_USE_CACHE, config.cache.ossIndex.getOrNull())
-
-        Downloader.getInstance().configure(settings);
-    }
-
-    private void configureSlack(Settings settings) {
-        settings.setBooleanIfNotNull(SlackNotificationSenderService.SLACK__WEBHOOK__ENABLED, config.slack.enabled.getOrNull())
-        settings.setStringIfNotEmpty(SlackNotificationSenderService.SLACK__WEBHOOK__URL, config.slack.webhookUrl.getOrNull())
+        settings.setStringIfNotEmpty(NVD_API_DATAFEED_BEARER_TOKEN, nvd.datafeedBearerToken.getOrNull())
+        settings.setIntIfNotNull(NVD_API_DATAFEED_START_YEAR, nvd.datafeedStartYear.getOrNull())
     }
 
     private void configureProxy(Settings settings) {
-        String proxyHost = System.getProperty("https.proxyHost", System.getProperty("http.proxyHost"))
-        if (!Strings.isNullOrEmpty(proxyHost)) {
-            String proxyPort = System.getProperty("https.proxyPort", System.getProperty("http.proxyPort"))
-            String nonProxyHosts = System.getProperty("https.nonProxyHosts", System.getProperty("http.nonProxyHosts"))
-            String proxyUser = System.getProperty("https.proxyUser", System.getProperty("http.proxyUser"))
-            String proxyPassword = System.getProperty("https.proxyPassword", System.getProperty("http.proxyPassword"))
-            config.proxy.server.set(proxyHost)
-            try {
-                config.proxy.port.set(Integer.parseInt(proxyPort))
-            } catch (NumberFormatException nfe) {
-                logger.warn("Unable to convert the configured `http.proxyPort` to a number: ${proxyPort}");
-            }
-            if (!Strings.isNullOrEmpty(proxyUser)) {
-                config.proxy.username.set(proxyUser)
-            }
-            if (!Strings.isNullOrEmpty(proxyPassword)) {
-                config.proxy.password.set(proxyPassword)
-            }
-            if (!Strings.isNullOrEmpty(nonProxyHosts)) {
-                config.proxy.nonProxyHosts.set(nonProxyHosts.tokenize("|"))
-            }
-        }
-        settings.setStringIfNotEmpty(PROXY_SERVER, config.proxy.server.getOrNull())
-        settings.setStringIfNotEmpty(PROXY_PORT, config.proxy.port.getOrNull()?.toString())
-        settings.setStringIfNotEmpty(PROXY_USERNAME, config.proxy.username.getOrNull())
-        settings.setStringIfNotEmpty(PROXY_PASSWORD, config.proxy.password.getOrNull())
-        def nonProxyHostsList = config.proxy.nonProxyHosts.getOrElse([])
-        settings.setStringIfNotEmpty(PROXY_NON_PROXY_HOSTS, nonProxyHostsList ? nonProxyHostsList.join("|") : null)
-    }
+        String proxyServer = proxy.server.getOrNull()
+        Integer proxyPort = proxy.port.getOrNull()
+        String proxyUser = proxy.username.getOrNull()
+        String proxyPass = proxy.password.getOrNull()
+        List<String> nonProxyHostsList = proxy.nonProxyHosts.getOrElse([])
 
-    /**
-     * Combines the configured suppressionFile and suppressionFiles into a
-     * single array.
-     *
-     * @return an array of suppression file paths
-     */
-    private String[] determineSuppressions(Collection<String> suppressionFiles, String suppressionFile) {
-        List<String> files = []
-        if (suppressionFiles != null) {
-            for (String sf : suppressionFiles) {
-                files.add(sf.toString())
+        // Fall back to system properties if not configured
+        String sysProxyHost = System.getProperty("https.proxyHost", System.getProperty("http.proxyHost"))
+        if (!Strings.isNullOrEmpty(sysProxyHost) && proxyServer == null) {
+            proxyServer = sysProxyHost
+            String sysProxyPort = System.getProperty("https.proxyPort", System.getProperty("http.proxyPort"))
+            if (sysProxyPort != null) {
+                try {
+                    proxyPort = Integer.parseInt(sysProxyPort)
+                } catch (NumberFormatException nfe) {
+                    logger.warn("Unable to convert the configured `http.proxyPort` to a number: ${sysProxyPort}")
+                }
+            }
+            String sysProxyUser = System.getProperty("https.proxyUser", System.getProperty("http.proxyUser"))
+            if (!Strings.isNullOrEmpty(sysProxyUser)) {
+                proxyUser = sysProxyUser
+            }
+            String sysProxyPassword = System.getProperty("https.proxyPassword", System.getProperty("http.proxyPassword"))
+            if (!Strings.isNullOrEmpty(sysProxyPassword)) {
+                proxyPass = sysProxyPassword
+            }
+            String sysNonProxyHosts = System.getProperty("https.nonProxyHosts", System.getProperty("http.nonProxyHosts"))
+            if (!Strings.isNullOrEmpty(sysNonProxyHosts)) {
+                nonProxyHostsList = sysNonProxyHosts.tokenize("|")
             }
         }
-        if (suppressionFile != null) {
-            files.add(suppressionFile)
-        }
-        return files.toArray(new String[0])
-    }
-    /**
-     * Selects the current configiguration option - returns the deprecated option if the current configuration option is null
-     * @param current the current configuration
-     * @param deprecated the deprecated configuration
-     * @return the current configuration option if not null; otherwise the deprecated option is returned
-     */
-    private Boolean select(Boolean current, Boolean deprecated) {
-        return current != null ? current : deprecated
+
+        settings.setStringIfNotEmpty(PROXY_SERVER, proxyServer)
+        settings.setStringIfNotEmpty(PROXY_PORT, proxyPort?.toString())
+        settings.setStringIfNotEmpty(PROXY_USERNAME, proxyUser)
+        settings.setStringIfNotEmpty(PROXY_PASSWORD, proxyPass)
+        settings.setStringIfNotEmpty(PROXY_NON_PROXY_HOSTS, nonProxyHostsList ? nonProxyHostsList.join("|") : null)
     }
 }

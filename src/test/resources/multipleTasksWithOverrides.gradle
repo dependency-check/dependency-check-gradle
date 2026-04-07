@@ -1,0 +1,56 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'org.owasp.dependencycheck'
+    id 'java'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+}
+version = '1.0'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    implementation group: 'commons-collections', name: 'commons-collections', version: '3.2'
+    testImplementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-xml', version: '2.7.0'
+}
+
+dependencyCheck {
+    format = 'csv'
+    analyzers.ossIndex.enabled = false
+    nvd.datafeedUrl = 'https://dependency-check.github.io/DependencyCheck/hb_nvd/'
+    // extension default: fail on critical vulns
+    failBuildOnCVSS = 0
+}
+
+// This task overrides failBuildOnCVSS to never fail,
+// proving per-task override works independently from the extension default.
+def dependencyCheckAnalyzeTest = tasks.register('dependencyCheckAnalyzeTest', org.owasp.dependencycheck.gradle.tasks.Analyze) {
+    description = 'Runs a dependency-check analysis on just the test configuration.'
+    outputDir = project.layout.buildDirectory.dir("reports/dependency-check/test")
+    scanConfigurations = ['testRuntimeClasspath']
+    skipTestGroups = false
+    // override: never fail for test deps
+    failBuildOnCVSS = 11
+}
+
+// This task uses a per-task suppression file to suppress commons-collections CVEs,
+// proving per-task suppressionFiles override works.
+tasks.dependencyCheckAnalyze {
+    description = 'Runs a dependency-check analysis on just the runtime configuration.'
+    outputDir = project.layout.buildDirectory.dir("reports/dependency-check/main")
+    scanConfigurations = ['runtimeClasspath']
+    // override: suppress commons-collections CVEs so this task passes despite failBuildOnCVSS=0
+    suppressionFiles = ["${project.rootDir}/suppressions.xml"]
+    dependsOn dependencyCheckAnalyzeTest
+}
