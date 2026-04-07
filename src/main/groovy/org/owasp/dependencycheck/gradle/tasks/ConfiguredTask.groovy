@@ -50,11 +50,11 @@ abstract class ConfiguredTask extends DefaultTask {
     String PROPERTIES_FILE = 'task.properties'
 
     @Internal
-    Property<Boolean> autoUpdate
+    final Property<Boolean> autoUpdate
     @Internal
-    Property<Boolean> failOnError
+    final Property<Boolean> failOnError
     @Internal
-    Property<Boolean> quickQueryTimestamp
+    final Property<Boolean> quickQueryTimestamp
 
     @Internal
     ProxyExtension proxy
