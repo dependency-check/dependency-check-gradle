@@ -80,11 +80,11 @@ For example in `buildSrc/build.gradle`
 ```groovy
 dependencies {
     constraints {
-        // org.owasp.dependencycheck likely needs at least this version of jackson. Other plugins pull in older versions.
-        add("implementation", "com.fasterxml.jackson:jackson-bom:2.18.3")
-        // org.owasp.dependencycheck likely needs these versions. Other plugins pull in older versions.
-        add("implementation", "org.apache.commons:commons-lang3:3.17.0")
-        add("implementation", "org.apache.commons:commons-text:1.13.0")
+        // org.owasp.dependencycheck needs at least this version of jackson. Other plugins pull in older versions..
+        add("implementation", "com.fasterxml.jackson:jackson-bom:2.21.2")
+        // org.owasp.dependencycheck needs these versions. Other plugins pull in older versions..
+        add("implementation", "org.apache.commons:commons-lang3:3.20.0")
+        add("implementation", "org.apache.commons:commons-text:1.15.0")
     }
 }
 ```
