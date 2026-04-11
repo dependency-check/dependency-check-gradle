@@ -31,7 +31,7 @@ Add the plugin to your build.gradle file:
 
 ```groovy
 plugins {
-  id "org.owasp.dependencycheck" version "12.2.0"
+  id "org.owasp.dependencycheck" version "12.2.1"
 }
 ```
 
@@ -54,7 +54,7 @@ Some projects may require multiple dependency-check configurations. This is supp
 ```groovy
 plugins {
     id 'java'
-    id 'org.owasp.dependencycheck' version '12.2.0'
+    id 'org.owasp.dependencycheck' version '12.2.1'
 }
 
 tasks.register('dependencyCheckRelease', org.owasp.dependencycheck.gradle.tasks.Analyze) {
@@ -111,7 +111,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "org.owasp:dependency-check-gradle:12.2.0"
+    classpath "org.owasp:dependency-check-gradle:12.2.1"
   }
 }
 
@@ -130,7 +130,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "org.owasp:dependency-check-gradle:12.2.0"
+    classpath "org.owasp:dependency-check-gradle:12.2.1"
   }
 }
 
@@ -163,7 +163,7 @@ subprojects {
 
 ```kotlin
 plugins {
-    id("org.owasp.dependencycheck") version "12.2.0" apply false
+    id("org.owasp.dependencycheck") version "12.2.1" apply false
 }
 
 allprojects {
