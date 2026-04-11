@@ -1,42 +1,24 @@
 # Dependency-Check-Gradle
 
+[![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/org.owasp.dependencycheck)](https://plugins.gradle.org/plugin/org.owasp.dependencycheck)
 [![Build](https://github.com/dependency-check/dependency-check-gradle/actions/workflows/build.yml/badge.svg)](https://github.com/dependency-check/dependency-check-gradle/actions/workflows/build.yml)
 
 The dependency-check gradle plugin allows projects to monitor dependent libraries for
 known, published vulnerabilities.
 
-## 11.0.0 Upgrade Notice
+## Compatibility
+
+- Gradle 7.6.4 → 9.x (see [test matrix](src/test/groovy/org/owasp/dependencycheck/gradle/GradleTestVersion.groovy))
+- Gradle running with Java 11+
+
+### Mandatory upgrade to 12.1.0+
+
+Due to NVD API compatibility changes, an upgrade is mandatory. See [#7463](https://github.com/dependency-check/DependencyCheck/issues/7463) for more information.
+
+### Upgrading to 11.0.0+
 - The dependency-check-gradle plugin now requires Java 11 or higher.
 - The dependency-check-gradle plugin will no longer be published to Maven Central; it 
   will continue to be published to the Gradle plugin portal.
-
-## 9.0.0 Upgrade Notice
-
-**Breaking Changes** are included in the 9.0.0 release. Please see the [9.0.0 Upgrade Notice](https://github.com/jeremylong/DependencyCheck#900-upgrade-notice)
-on the primary dependency-check site for more information.
-
-### Gradle Build Environment
-
-With 9.0.0 users may encounter issues with `NoSuchMethodError` exceptions due to
-dependency resolution. If you encounter this issue you will need to pin some of
-the transitive dependencies of dependency-check to specific versions. For example:
-
-/buildSrc/build.gradle
-```groovy
-dependencies {
-    constraints {
-        // org.owasp.dependencycheck needs at least this version of jackson. Other plugins pull in older versions..
-        add("implementation", "com.fasterxml.jackson:jackson-bom:2.21.2")
-        // org.owasp.dependencycheck needs these versions. Other plugins pull in older versions..
-        add("implementation", "org.apache.commons:commons-lang3:3.20.0")
-        add("implementation", "org.apache.commons:commons-text:1.15.0")
-    }
-}
-```
-
-## Current Release
-
-The latest version is 12.2.0.
 
 ## Usage
 
@@ -84,6 +66,25 @@ tasks.register('dependencyCheckRelease', org.owasp.dependencycheck.gradle.tasks.
 tasks.register('dependencyCheckCI', org.owasp.dependencycheck.gradle.tasks.Analyze) {
     dependencyCheck {
         failBuildOnCVSS = 3.0
+    }
+}
+```
+
+### Gradle Build Environment conflicts
+
+Sometimes users may encounter issues with `NoSuchMethodError` exceptions due to dependency resolution conflicts with
+other plugins. If you encounter this issue you will need to use `buildSrc` to pin some of the transitive dependencies of dependency-check
+to specific versions compatible with all plugins in your build.
+
+For example in `buildSrc/build.gradle`
+```groovy
+dependencies {
+    constraints {
+        // org.owasp.dependencycheck needs at least this version of jackson. Other plugins pull in older versions..
+        add("implementation", "com.fasterxml.jackson:jackson-bom:2.21.2")
+        // org.owasp.dependencycheck needs these versions. Other plugins pull in older versions..
+        add("implementation", "org.apache.commons:commons-lang3:3.20.0")
+        add("implementation", "org.apache.commons:commons-text:1.15.0")
     }
 }
 ```
