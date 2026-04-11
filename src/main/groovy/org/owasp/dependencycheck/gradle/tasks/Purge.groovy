@@ -19,8 +19,11 @@
 package org.owasp.dependencycheck.gradle.tasks
 
 import groovy.transform.CompileStatic
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.TaskAction
 import org.owasp.dependencycheck.Engine
+
+import javax.inject.Inject
 
 /**
  * Purges the local cache of the NVD CVE data.
@@ -31,7 +34,9 @@ class Purge extends ConfiguredTask {
     /**
      * Initializes the purge task.
      */
-    Purge() {
+    @Inject
+    Purge(ObjectFactory objects) {
+        super(objects)
         group = 'OWASP dependency-check'
         description = 'Purges the local cache of the NVD.'
     }
