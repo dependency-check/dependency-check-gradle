@@ -462,7 +462,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * @param engine the dependency-check engine
      */
     protected void processConfigurations(Project project, Engine engine) {
-        project.configurations.matching(this.&shouldProcess).each { Configuration configuration ->
+        project.configurations.matching(this.&shouldProcess).toList().each { Configuration configuration ->
             processConfig project, configuration, engine, false
         }
         if (!config.isScanSetConfigured()) {
