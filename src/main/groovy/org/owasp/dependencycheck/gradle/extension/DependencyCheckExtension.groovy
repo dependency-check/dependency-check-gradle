@@ -51,7 +51,6 @@ class DependencyCheckExtension {
     private final Property<Boolean> scanBuildEnv
     private final Property<Boolean> scanDependencies
     private final Property<Boolean> failOnError
-    private final Property<Boolean> quickQueryTimestamp
     private final DirectoryProperty outputDirectory
     private final Property<String> suppressionFile
     private final ListProperty<String> suppressionFiles
@@ -124,7 +123,6 @@ class DependencyCheckExtension {
         this.scanBuildEnv = objects.property(Boolean).convention(false)
         this.scanDependencies = objects.property(Boolean).convention(true)
         this.failOnError = objects.property(Boolean).convention(true)
-        this.quickQueryTimestamp = objects.property(Boolean)
         this.outputDirectory = objects.directoryProperty().convention(project.layout.buildDirectory.dir("reports"))
         this.suppressionFile = objects.property(String)
         this.suppressionFiles = objects.listProperty(String).convention([])
@@ -196,19 +194,6 @@ class DependencyCheckExtension {
 
     void setFailOnError(Boolean value) {
         failOnError.set(value)
-    }
-
-    /**
-     * Set to false if the proxy does not support HEAD requests. The default is true.
-     */
-    @Input
-    @Optional
-    Property<Boolean> getQuickQueryTimestamp() {
-        return quickQueryTimestamp
-    }
-
-    void setQuickQueryTimestamp(Boolean value) {
-        quickQueryTimestamp.set(value)
     }
 
     /**

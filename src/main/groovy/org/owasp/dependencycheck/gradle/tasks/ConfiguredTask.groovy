@@ -106,7 +106,6 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setStringIfNotEmpty(NVD_API_DATAFEED_BEARER_TOKEN, config.nvd.datafeedBearerToken.getOrNull())
         settings.setIntIfNotNull(NVD_API_DATAFEED_START_YEAR, config.nvd.datafeedStartYear.getOrNull())
 
-        settings.setBooleanIfNotNull(DOWNLOADER_QUICK_QUERY_TIMESTAMP, config.quickQueryTimestamp.getOrNull())
         settings.setFloat(JUNIT_FAIL_ON_CVSS, config.junitFailOnCVSS.get())
         settings.setBooleanIfNotNull(FAIL_ON_UNUSED_SUPPRESSION_RULE, config.failBuildOnUnusedSuppressionRule.getOrNull())
         settings.setBooleanIfNotNull(HOSTED_SUPPRESSIONS_ENABLED, config.hostedSuppressions.enabled.getOrNull())

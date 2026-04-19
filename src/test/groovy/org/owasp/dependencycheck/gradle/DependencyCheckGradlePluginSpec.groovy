@@ -84,7 +84,6 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.nvd.delay.getOrNull() == null
         project.dependencyCheck.nvd.maxRetryCount.getOrNull() == null
         project.dependencyCheck.outputDirectory.get().asFile == project.file("${project.buildDir}/reports")
-        project.dependencyCheck.quickQueryTimestamp.getOrNull() == null
         project.dependencyCheck.scanConfigurations.get() == []
         project.dependencyCheck.skipConfigurations.get() == []
         project.dependencyCheck.scanProjects.get() == []
@@ -126,7 +125,6 @@ class DependencyCheckGradlePluginSpec extends Specification {
             analyzers.retirejs.filterNonVulnerable = true
 
             outputDirectory = 'outputDirectory'
-            quickQueryTimestamp = false
 
             scanConfigurations = ['a']
             skipConfigurations = ['b']
@@ -172,7 +170,6 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.hostedSuppressions.validForHours.get() == 5
         project.dependencyCheck.hostedSuppressions.forceupdate.get() == true
         project.dependencyCheck.outputDirectory.get().asFile == project.file('outputDirectory')
-        project.dependencyCheck.quickQueryTimestamp.get() == false
         project.dependencyCheck.scanConfigurations.get() == ['a']
         project.dependencyCheck.skipConfigurations.get() == ['b']
         project.dependencyCheck.scanProjects.get() == ['a']
