@@ -1,6 +1,7 @@
 package org.owasp.dependencycheck.gradle
 
 import org.gradle.testkit.runner.GradleRunner
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.TempDir
 import spock.util.io.FileSystemFixture
@@ -121,5 +122,41 @@ class DependencyCheckPluginIntegSpec extends Specification {
 
         where:
         gradle << GradleTestVersion.supportedVersionsForCurrentJvm
+    }
+
+    @IgnoreIf(value = { !jvm.isJavaVersionCompatible(17) }, reason = "Quarkus under test requires Java 17")
+    def "task completes successfully when analyzing quarkus configurations"() {
+        given:
+        fileSystemFixture.create {
+            file("build.gradle").text = """
+                plugins {
+                    id 'org.owasp.dependencycheck'
+                    id 'io.quarkus' version '3.34.5'
+                }
+
+                version = '1.0'
+
+                dependencyCheck {
+                    analyzers.ossIndex.enabled = false
+                    nvd.datafeedUrl = 'https://dependency-check.github.io/DependencyCheck/hb_nvd/'
+                }
+            """.stripIndent()
+        }
+
+        when:
+        def result = GradleRunner.create()
+                .withGradleVersion(gradle.version)
+                .withProjectDir(fileSystemFixture.dir("").toFile())
+                .withArguments(DependencyCheckPlugin.ANALYZE_TASK, '--stacktrace')
+                .withPluginClasspath()
+                .withDebug(true)
+                .forwardOutput()
+                .build()
+
+        then:
+        result.task(":$DependencyCheckPlugin.ANALYZE_TASK").outcome == SUCCESS
+
+        where:
+        gradle << GradleTestVersion.supportedVersionsForCurrentJvmFrom(8) // Quarkus plugin under test needs Gradle 8
     }
 }
