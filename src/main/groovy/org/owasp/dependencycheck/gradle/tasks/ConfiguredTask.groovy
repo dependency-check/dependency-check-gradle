@@ -129,6 +129,7 @@ abstract class ConfiguredTask extends DefaultTask {
         settings.setStringIfNotEmpty(ANALYZER_OSSINDEX_USER, config.analyzers.ossIndex.username.getOrNull())
         settings.setStringIfNotEmpty(ANALYZER_OSSINDEX_PASSWORD, config.analyzers.ossIndex.password.getOrNull())
         settings.setStringIfNotEmpty(ANALYZER_OSSINDEX_URL, config.analyzers.ossIndex.url.getOrNull())
+        settings.setIntIfNotNull(ANALYZER_OSSINDEX_CACHE_VALID_FOR_HOURS, config.analyzers.ossIndex.validForHours.getOrNull())
 
         settings.setBooleanIfNotNull(ANALYZER_CENTRAL_ENABLED, config.analyzers.centralEnabled.getOrNull())
 
