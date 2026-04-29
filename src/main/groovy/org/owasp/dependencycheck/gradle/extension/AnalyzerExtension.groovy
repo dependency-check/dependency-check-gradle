@@ -514,11 +514,11 @@ class AnalyzerExtension {
 
     /**
      * Sets whether the Node.js Analyzer should be used.
-     * @deprecated Use nodePackage { enabled = true }
+     * @deprecated since 8.4.1 - please use nodePackage.enabled = true
      */
     @Input
     @Optional
-    @Deprecated
+    @Deprecated(since = "8.4.1", forRemoval = true)
     Property<Boolean> getNodeEnabled() {
         return nodeEnabled
     }
@@ -529,11 +529,11 @@ class AnalyzerExtension {
 
     /**
      * Sets whether the NSP Analyzer should be used.
-     * @deprecated As of the 5.2.5 - please use nodeAudit { enabled = true }
+     * @deprecated since 5.2.5 - please use nodeAudit.enabled = true
      */
     @Input
     @Optional
-    @Deprecated
+    @Deprecated(since = "5.2.5", forRemoval = true)
     Property<Boolean> getNodeAuditEnabled() {
         return nodeAuditEnabled
     }
@@ -557,11 +557,11 @@ class AnalyzerExtension {
 
     /**
      * Sets whether the OSS Index Analyzer should be used.
-     * @deprecated As of the 5.0.1 - please use ossIndex { enabled = true }
+     * @deprecated since 5.0.1 - please use ossIndex.enabled = true
      */
     @Input
     @Optional
-    @Deprecated
+    @Deprecated(since = "5.0.1", forRemoval = true)
     Property<Boolean> getOssIndexEnabled() {
         return ossIndexEnabled
     }
