@@ -5,8 +5,10 @@ updates:
     schedule:
       interval: "weekly"
     ignore:
-      - dependency-name: "gradle-wrapper" # Don't update the gradle wrapper major version, as impacts plugin API compatibility
-        update-types: ["version-update:semver-major"]
+      - dependency-name: "gradle-wrapper"             # Don't try and update the Gradle wrapper major version,
+        update-types: ["version-update:semver-major"] # as it changes plugin API compatibility.
+      - dependency-name: "org.junit:junit-bom"        # Don't try and update JUnit major version,
+        update-types: ["version-update:semver-major"] # as it changes Java version compatibility.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
