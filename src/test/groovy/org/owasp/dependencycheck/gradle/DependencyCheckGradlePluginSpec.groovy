@@ -29,6 +29,7 @@ import spock.lang.Specification
 
 import static org.owasp.dependencycheck.utils.Settings.KEYS.*
 
+@SuppressWarnings('ConfigurationAvoidance')
 class DependencyCheckGradlePluginSpec extends Specification {
     static final String PLUGIN_ID = 'org.owasp.dependencycheck'
     Project project
