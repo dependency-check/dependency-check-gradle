@@ -34,6 +34,7 @@ class OssIndexExtension {
     private final Property<String> username
     private final Property<String> password
     private final Property<String> url
+    private final Property<Integer> validForHours
     private final Property<Boolean> warnOnlyOnRemoteErrors
 
     @Inject
@@ -42,6 +43,7 @@ class OssIndexExtension {
         this.username = objects.property(String)
         this.password = objects.property(String)
         this.url = objects.property(String)
+        this.validForHours = objects.property(Integer)
         this.warnOnlyOnRemoteErrors = objects.property(Boolean)
     }
 
@@ -95,6 +97,19 @@ class OssIndexExtension {
 
     void setUrl(String value) {
         url.set(value)
+    }
+
+    /**
+     * The number of hours to wait before checking for new updates on individual packages/components.
+     */
+    @Input
+    @Optional
+    Property<Integer> getValidForHours() {
+        return validForHours
+    }
+
+    void setValidForHours(Number value) {
+        validForHours.set(value?.intValue())
     }
 
     /**

@@ -22,10 +22,14 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.testfixtures.ProjectBuilder
 import org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension
+import org.owasp.dependencycheck.gradle.extension.NexusExtension
+import org.owasp.dependencycheck.gradle.extension.OssIndexExtension
+import org.owasp.dependencycheck.utils.Settings
 import spock.lang.Specification
 
 import static org.owasp.dependencycheck.utils.Settings.KEYS.*
 
+@SuppressWarnings('ConfigurationAvoidance')
 class DependencyCheckGradlePluginSpec extends Specification {
     static final String PLUGIN_ID = 'org.owasp.dependencycheck'
     Project project
@@ -83,7 +87,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
         project.dependencyCheck.nvd.apiKey.getOrNull() == null
         project.dependencyCheck.nvd.delay.getOrNull() == null
         project.dependencyCheck.nvd.maxRetryCount.getOrNull() == null
-        project.dependencyCheck.outputDirectory.get().asFile == project.file("${project.buildDir}/reports")
+        project.dependencyCheck.outputDirectory.get().asFile == project.layout.buildDirectory.dir('reports').get().asFile
         project.dependencyCheck.scanConfigurations.get() == []
         project.dependencyCheck.skipConfigurations.get() == []
         project.dependencyCheck.scanProjects.get() == []
@@ -221,7 +225,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
     def 'NexusExtension properties configure task settings'() {
         given:
         def task = project.tasks.findByName(taskName)
-        with(project.dependencyCheck.analyzers.nexus) {
+        with(project.dependencyCheck.analyzers.nexus as NexusExtension) {
             enabled.set(true)
             usesProxy.set(true)
             url.set('https://nexus')
@@ -233,12 +237,43 @@ class DependencyCheckGradlePluginSpec extends Specification {
         task.initializeSettings()
 
         then:
-        with(task.settings) {
-            getBoolean(ANALYZER_NEXUS_ENABLED) == true
-            getBoolean(ANALYZER_NEXUS_USES_PROXY) == true
+        with(task.settings as Settings) {
+            getBoolean(ANALYZER_NEXUS_ENABLED)
+            getBoolean(ANALYZER_NEXUS_USES_PROXY)
             getString(ANALYZER_NEXUS_URL) == 'https://nexus'
             getString(ANALYZER_NEXUS_USER) == 'user'
             getString(ANALYZER_NEXUS_PASSWORD) == 'pass'
+        }
+
+        where:
+        taskName | _
+        DependencyCheckPlugin.ANALYZE_TASK | _
+        DependencyCheckPlugin.AGGREGATE_TASK | _
+    }
+
+    def 'OssIndexExtension properties configure task settings'() {
+        given:
+        def task = project.tasks.findByName(taskName)
+        with(project.dependencyCheck.analyzers.ossIndex as OssIndexExtension) {
+            enabled.set(true)
+            url.set('https://ossindex')
+            username.set('user')
+            password.set('pass')
+            validForHours.set(48)
+            warnOnlyOnRemoteErrors.set(true)
+        }
+
+        when:
+        task.initializeSettings()
+
+        then:
+        with(task.settings as Settings) {
+            getBoolean(ANALYZER_OSSINDEX_ENABLED)
+            getString(ANALYZER_OSSINDEX_URL) == 'https://ossindex'
+            getString(ANALYZER_OSSINDEX_USER) == 'user'
+            getString(ANALYZER_OSSINDEX_PASSWORD) == 'pass'
+            getInt(ANALYZER_OSSINDEX_CACHE_VALID_FOR_HOURS) == 48
+            getBoolean(ANALYZER_OSSINDEX_WARN_ONLY_ON_REMOTE_ERRORS)
         }
 
         where:

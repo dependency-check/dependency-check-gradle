@@ -27,10 +27,9 @@ import org.gradle.api.tasks.Optional
 import javax.inject.Inject
 
 /**
- * TODO - this should not be needed, instead rely on the configured HTTP or HTTPS proxies
- * https://docs.gradle.org/current/userguide/build_environment.html
+ * @deprecated this should not be needed, instead rely on the configured HTTP or HTTPS proxies https://docs.gradle.org/current/userguide/build_environment.html
  */
-@Deprecated
+@Deprecated(since = "5.3.1", forRemoval = true)
 @groovy.transform.CompileStatic
 class ProxyExtension {
 
@@ -40,6 +39,7 @@ class ProxyExtension {
     private final Property<String> password
     private final ListProperty<String> nonProxyHosts
 
+    @SuppressWarnings('GrDeprecatedAPIUsage')
     @Inject
     ProxyExtension(ObjectFactory objects) {
         this.server = objects.property(String)
