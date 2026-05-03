@@ -1,7 +1,7 @@
 [versions]
-odc = '12.2.0'
+odc = '12.2.2-SNAPSHOT'
 spock = '2.4-groovy-3.0'
-junit = '5.14.3'
+junit = '5.14.4'
 
 [libraries]
 owasp-dependencyCheck-core = { module = 'org.owasp:dependency-check-core', version.ref = 'odc' }

@@ -28,6 +28,7 @@ import org.owasp.dependencycheck.gradle.extension.DataExtension
 import org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension
 import org.owasp.dependencycheck.gradle.extension.NvdExtension
 import org.owasp.dependencycheck.gradle.extension.ProxyExtension
+import org.owasp.dependencycheck.utils.Downloader
 import org.owasp.dependencycheck.utils.Settings
 
 import javax.inject.Inject
@@ -53,8 +54,6 @@ abstract class ConfiguredTask extends DefaultTask {
     final Property<Boolean> autoUpdate
     @Internal
     final Property<Boolean> failOnError
-    @Internal
-    final Property<Boolean> quickQueryTimestamp
 
     @Internal
     ProxyExtension proxy
@@ -73,9 +72,6 @@ abstract class ConfiguredTask extends DefaultTask {
 
         this.failOnError = objects.property(Boolean)
         this.failOnError.convention(defaults.failOnError)
-
-        this.quickQueryTimestamp = objects.property(Boolean)
-        this.quickQueryTimestamp.convention(defaults.quickQueryTimestamp)
 
         this.proxy = objects.newInstance(ProxyExtension, objects)
         proxy.server.convention(defaults.proxy.server)
@@ -150,6 +146,7 @@ abstract class ConfiguredTask extends DefaultTask {
         }
         settings.setStringIfNotEmpty(NVD_API_DATAFEED_BEARER_TOKEN, nvd.datafeedBearerToken.getOrNull())
         settings.setIntIfNotNull(NVD_API_DATAFEED_START_YEAR, nvd.datafeedStartYear.getOrNull())
+        Downloader.getInstance().configure(settings)
     }
 
     private void configureProxy(Settings settings) {

@@ -61,8 +61,6 @@ import org.owasp.dependencycheck.exception.ExceptionCollection
 import org.owasp.dependencycheck.exception.ReportException
 import org.owasp.dependencycheck.gradle.service.SlackNotificationSenderService
 import org.owasp.dependencycheck.utils.Checksum
-import org.owasp.dependencycheck.utils.Downloader
-import org.owasp.dependencycheck.utils.Settings
 import org.owasp.dependencycheck.utils.SeverityUtil
 import org.owasp.dependencycheck.xml.pom.PomUtils
 import us.springett.parsers.cpe.CpeParser
@@ -241,6 +239,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         analyzers.ossIndex.username.convention(defaults.analyzers.ossIndex.username)
         analyzers.ossIndex.password.convention(defaults.analyzers.ossIndex.password)
         analyzers.ossIndex.url.convention(defaults.analyzers.ossIndex.url)
+        analyzers.ossIndex.validForHours.convention(defaults.analyzers.ossIndex.validForHours)
 
         analyzers.nexus.enabled.convention(defaults.analyzers.nexus.enabled)
         analyzers.nexus.url.convention(defaults.analyzers.nexus.url)
@@ -298,7 +297,6 @@ abstract class AbstractAnalyze extends ConfiguredTask {
 
         configureSlack(settings)
 
-        settings.setBooleanIfNotNull(DOWNLOADER_QUICK_QUERY_TIMESTAMP, quickQueryTimestamp.getOrNull())
         settings.setFloat(JUNIT_FAIL_ON_CVSS, junitFailOnCVSS.get())
         settings.setBooleanIfNotNull(FAIL_ON_UNUSED_SUPPRESSION_RULE, failBuildOnUnusedSuppressionRule.getOrNull())
         settings.setBooleanIfNotNull(HOSTED_SUPPRESSIONS_ENABLED, hostedSuppressions.enabled.getOrNull())
@@ -323,6 +321,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         settings.setStringIfNotEmpty(ANALYZER_OSSINDEX_USER, analyzers.ossIndex.username.getOrNull())
         settings.setStringIfNotEmpty(ANALYZER_OSSINDEX_PASSWORD, analyzers.ossIndex.password.getOrNull())
         settings.setStringIfNotEmpty(ANALYZER_OSSINDEX_URL, analyzers.ossIndex.url.getOrNull())
+        settings.setIntIfNotNull(ANALYZER_OSSINDEX_CACHE_VALID_FOR_HOURS, analyzers.ossIndex.validForHours.getOrNull())
 
         settings.setBooleanIfNotNull(ANALYZER_CENTRAL_ENABLED, analyzers.centralEnabled.getOrNull())
 
@@ -396,8 +395,6 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_USE_CACHE, cache.nodeAudit.getOrNull())
         settings.setBooleanIfNotNull(ANALYZER_CENTRAL_USE_CACHE, cache.central.getOrNull())
         settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_USE_CACHE, cache.ossIndex.getOrNull())
-
-        Downloader.getInstance().configure(settings)
     }
 
     /**
@@ -761,7 +758,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * @param engine the dependency-check engine
      */
     protected void processBuildEnvironment(Project project, Engine engine) {
-        project.getBuildscript().configurations.matching(this.&shouldProcess).each { Configuration configuration ->
+        project.getBuildscript().configurations.matching(this.&shouldProcess).toList().each { Configuration configuration ->
             processConfig project, configuration, engine, true
         }
     }
@@ -772,7 +769,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * @param engine the dependency-check engine
      */
     protected void processConfigurations(Project project, Engine engine) {
-        project.configurations.matching(this.&shouldProcess).each { Configuration configuration ->
+        project.configurations.matching(this.&shouldProcess).toList().each { Configuration configuration ->
             processConfig project, configuration, engine, false
         }
         if (!defaults.isScanSetConfigured()) {
