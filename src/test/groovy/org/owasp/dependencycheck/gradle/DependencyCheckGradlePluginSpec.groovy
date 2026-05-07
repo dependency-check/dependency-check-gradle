@@ -27,6 +27,8 @@ import org.owasp.dependencycheck.gradle.extension.OssIndexExtension
 import org.owasp.dependencycheck.utils.Settings
 import spock.lang.Specification
 
+import java.time.Duration
+
 import static org.owasp.dependencycheck.utils.Settings.KEYS.*
 
 @SuppressWarnings('ConfigurationAvoidance')
@@ -80,28 +82,32 @@ class DependencyCheckGradlePluginSpec extends Specification {
         task.group == 'OWASP dependency-check'
         task.description == 'Identifies and reports known vulnerabilities (CVEs) in project dependencies.'
 
-        project.dependencyCheck.proxy.server.getOrNull() == null
-        project.dependencyCheck.proxy.port.getOrNull() == null
-        project.dependencyCheck.proxy.username.getOrNull() == null
-        project.dependencyCheck.proxy.password.getOrNull() == null
-        project.dependencyCheck.nvd.apiKey.getOrNull() == null
-        project.dependencyCheck.nvd.delay.getOrNull() == null
-        project.dependencyCheck.nvd.maxRetryCount.getOrNull() == null
-        project.dependencyCheck.outputDirectory.get().asFile == project.layout.buildDirectory.dir('reports').get().asFile
-        project.dependencyCheck.scanConfigurations.get() == []
-        project.dependencyCheck.skipConfigurations.get() == []
-        project.dependencyCheck.scanProjects.get() == []
-        project.dependencyCheck.skipProjects.get() == []
-        project.dependencyCheck.skipGroups.get() == []
-        project.dependencyCheck.skipTestGroups.get() == true
-        project.dependencyCheck.suppressionFile.getOrNull() == null
+        with(project.dependencyCheck as DependencyCheckExtension) {
+            proxy.server.getOrNull() == null
+            proxy.port.getOrNull() == null
+            proxy.username.getOrNull() == null
+            proxy.password.getOrNull() == null
+            nvd.apiKey.getOrNull() == null
+            nvd.delay.getOrNull() == null
+            nvd.maxRetryCount.getOrNull() == null
+            outputDirectory.get().asFile == project.layout.buildDirectory.dir('reports').get().asFile
+            scanConfigurations.get() == []
+            skipConfigurations.get() == []
+            scanProjects.get() == []
+            skipProjects.get() == []
+            skipGroups.get() == []
+            skipTestGroups.get() == true
+            suppressionFile.getOrNull() == null
+            connectionTimeout.getOrNull() == null
+            readTimeout.getOrNull() == null
+        }
     }
 
     def 'tasks use correct values when extension is used'() {
         given:
         def slackWebhookUrl = 'https://slack.com/webhook'
         when:
-        project.dependencyCheck {
+        project.getExtensions().findByType(DependencyCheckExtension).with {
             proxy.server = '127.0.0.1'
             proxy.port = 3128
             proxy.username = 'proxyUsername'
@@ -111,6 +117,9 @@ class DependencyCheckGradlePluginSpec extends Specification {
             nvd.apiKey = 'apiKey'
             nvd.delay = 5000
             nvd.maxRetryCount = 20
+
+            connectionTimeout = 3000L
+            readTimeout = Duration.ofMinutes(2)
 
             hostedSuppressions.url = 'suppressionsurl'
             hostedSuppressions.validForHours = 5
@@ -161,44 +170,48 @@ class DependencyCheckGradlePluginSpec extends Specification {
         }
 
         then:
-        project.dependencyCheck.proxy.server.get() == '127.0.0.1'
-        project.dependencyCheck.proxy.port.get() == 3128
-        project.dependencyCheck.proxy.username.get() == 'proxyUsername'
-        project.dependencyCheck.proxy.password.get() == 'proxyPassword'
-        project.dependencyCheck.proxy.nonProxyHosts.get() == ['localhost']
+        with(project.dependencyCheck as DependencyCheckExtension) {
+            proxy.server.get() == '127.0.0.1'
+            proxy.port.get() == 3128
+            proxy.username.get() == 'proxyUsername'
+            proxy.password.get() == 'proxyPassword'
+            proxy.nonProxyHosts.get() == ['localhost']
 
-        project.dependencyCheck.nvd.apiKey.get() == 'apiKey'
-        project.dependencyCheck.nvd.delay.get() == 5000
-        project.dependencyCheck.nvd.maxRetryCount.get() == 20
-        project.dependencyCheck.hostedSuppressions.url.get() == 'suppressionsurl'
-        project.dependencyCheck.hostedSuppressions.validForHours.get() == 5
-        project.dependencyCheck.hostedSuppressions.forceupdate.get() == true
-        project.dependencyCheck.outputDirectory.get().asFile == project.file('outputDirectory')
-        project.dependencyCheck.scanConfigurations.get() == ['a']
-        project.dependencyCheck.skipConfigurations.get() == ['b']
-        project.dependencyCheck.scanProjects.get() == ['a']
-        project.dependencyCheck.skipProjects.get() == ['b']
-        project.dependencyCheck.skipGroups.get() == ['b']
-        project.dependencyCheck.skipTestGroups.get() == false
-        project.dependencyCheck.suppressionFile.get() == './src/config/suppression.xml'
-        project.dependencyCheck.suppressionFiles.get().getAt(0) == './src/config/suppression1.xml'
-        project.dependencyCheck.suppressionFiles.get().getAt(1) == './src/config/suppression2.xml'
-        //project.dependencyCheck.suppressionFiles == ['./src/config/suppression1.xml', './src/config/suppression2.xml']
-        project.dependencyCheck.suppressionFileUser.get() == 'suppressionFileUsername'
-        project.dependencyCheck.suppressionFilePassword.get() == 'suppressionFilePassword'
-        project.dependencyCheck.analyzers.artifactory.enabled.get() == true
-        project.dependencyCheck.analyzers.artifactory.url.get() == 'https://example.com/artifacgtory'
-        project.dependencyCheck.analyzers.artifactory.bearerToken.get() == 'abc123=='
-        project.dependencyCheck.analyzers.kev.enabled.get() == false
-        project.dependencyCheck.analyzers.kev.url.get() == "https://example.com"
-        project.dependencyCheck.analyzers.retirejs.filters.get() == ['filter1', 'filter2']
-        project.dependencyCheck.analyzers.retirejs.filterNonVulnerable.get() == true
-        project.dependencyCheck.slack.enabled.get() == true
-        project.dependencyCheck.slack.webhookUrl.get() == slackWebhookUrl
-        project.dependencyCheck.additionalCpes.size() == 3
-        project.dependencyCheck.additionalCpes.getByName('additional1').description.get() == 'Additional1'
-        project.dependencyCheck.additionalCpes.getByName('additional1').cpe.get() == 'cpe:2.3:a:aGroup1:aPackage1:123:*:*:*:*:*:*:*'
+            connectionTimeout.get() == Duration.ofMillis(3000)
+            readTimeout.get() == Duration.ofMinutes(2)
 
+            nvd.apiKey.get() == 'apiKey'
+            nvd.delay.get() == 5000
+            nvd.maxRetryCount.get() == 20
+            hostedSuppressions.url.get() == 'suppressionsurl'
+            hostedSuppressions.validForHours.get() == 5
+            hostedSuppressions.forceupdate.get() == true
+            outputDirectory.get().asFile == project.file('outputDirectory')
+            scanConfigurations.get() == ['a']
+            skipConfigurations.get() == ['b']
+            scanProjects.get() == ['a']
+            skipProjects.get() == ['b']
+            skipGroups.get() == ['b']
+            skipTestGroups.get() == false
+            suppressionFile.get() == './src/config/suppression.xml'
+            suppressionFiles.get().getAt(0) == './src/config/suppression1.xml'
+            suppressionFiles.get().getAt(1) == './src/config/suppression2.xml'
+            //suppressionFiles == ['./src/config/suppression1.xml', './src/config/suppression2.xml']
+            suppressionFileUser.get() == 'suppressionFileUsername'
+            suppressionFilePassword.get() == 'suppressionFilePassword'
+            analyzers.artifactory.enabled.get() == true
+            analyzers.artifactory.url.get() == 'https://example.com/artifacgtory'
+            analyzers.artifactory.bearerToken.get() == 'abc123=='
+            analyzers.kev.enabled.get() == false
+            analyzers.kev.url.get() == "https://example.com"
+            analyzers.retirejs.filters.get() == ['filter1', 'filter2']
+            analyzers.retirejs.filterNonVulnerable.get() == true
+            slack.enabled.get() == true
+            slack.webhookUrl.get() == slackWebhookUrl
+            additionalCpes.size() == 3
+            additionalCpes.getByName('additional1').description.get() == 'Additional1'
+            additionalCpes.getByName('additional1').cpe.get() == 'cpe:2.3:a:aGroup1:aPackage1:123:*:*:*:*:*:*:*'
+        }
     }
 
     def 'legacy nexus properties mapped to NexusExtension'() {

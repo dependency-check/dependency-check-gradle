@@ -108,6 +108,10 @@ abstract class ConfiguredTask extends DefaultTask {
 
         settings.setFloat(JUNIT_FAIL_ON_CVSS, config.junitFailOnCVSS.get())
         settings.setBooleanIfNotNull(FAIL_ON_UNUSED_SUPPRESSION_RULE, config.failBuildOnUnusedSuppressionRule.getOrNull())
+
+        settings.setIntIfNotNull(CONNECTION_TIMEOUT, config.connectionTimeout.map { it.toMillis().intValue() }.getOrNull())
+        settings.setIntIfNotNull(CONNECTION_READ_TIMEOUT, config.readTimeout.map { it.toMillis().intValue() }.getOrNull())
+
         settings.setBooleanIfNotNull(HOSTED_SUPPRESSIONS_ENABLED, config.hostedSuppressions.enabled.getOrNull())
         settings.setBooleanIfNotNull(HOSTED_SUPPRESSIONS_FORCEUPDATE, config.hostedSuppressions.forceupdate.getOrNull())
         settings.setStringIfNotNull(HOSTED_SUPPRESSIONS_URL, config.hostedSuppressions.url.getOrNull())
