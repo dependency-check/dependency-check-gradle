@@ -32,6 +32,7 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Optional
 
 import javax.inject.Inject
+import java.time.Duration
 import java.util.stream.Collectors
 
 import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
@@ -76,6 +77,9 @@ class DependencyCheckExtension {
 
     private final ConfigurableFileCollection scanSet
     private boolean scanSetConfigured = false
+
+    private final Property<Duration> connectionTimeout
+    private final Property<Duration> readTimeout
 
     /**
      * The configuration extension for proxy settings.
@@ -146,6 +150,8 @@ class DependencyCheckExtension {
         this.analyzedTypes = objects.listProperty(String).convention(['jar', 'aar', 'js', 'war', 'ear', 'zip'])
         this.skip = objects.property(Boolean).convention(false)
         this.scanSet = objects.fileCollection()
+        this.connectionTimeout = objects.property(Duration)
+        this.readTimeout = objects.property(Duration)
 
         cache = objects.newInstance(CacheExtension, objects)
         slack = objects.newInstance(SlackExtension, objects)
@@ -538,6 +544,46 @@ class DependencyCheckExtension {
 
     boolean isScanSetConfigured() {
         scanSetConfigured
+    }
+
+    /**
+     * The connection timeout used when downloading external data.
+     */
+    @Input
+    @Optional
+    Property<Duration> getConnectionTimeout() {
+        return connectionTimeout
+    }
+
+    void setConnectionTimeout(Duration value) {
+        connectionTimeout.set(value)
+    }
+
+    /**
+     * @param value The connection timeout in milliseconds
+     */
+    void setConnectionTimeout(Number value) {
+        connectionTimeout.set(value != null ? Duration.ofMillis(value.longValue()) : null)
+    }
+
+    /**
+     * The connection timeout used when downloading external data.
+     */
+    @Input
+    @Optional
+    Property<Duration> getReadTimeout() {
+        return readTimeout
+    }
+
+    void setReadTimeout(Duration value) {
+        readTimeout.set(value)
+    }
+
+    /**
+     * @param value The connection read timeout in milliseconds
+     */
+    void setReadTimeout(Number value) {
+        readTimeout.set(value != null ? Duration.ofMillis(value.longValue()) : null)
     }
 
     /**
