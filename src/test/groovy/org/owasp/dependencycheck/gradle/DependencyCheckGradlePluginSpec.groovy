@@ -20,6 +20,7 @@ package org.owasp.dependencycheck.gradle
 
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.reporting.ReportingExtension
 import org.gradle.testfixtures.ProjectBuilder
 import org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension
 import org.owasp.dependencycheck.gradle.extension.NexusExtension
@@ -90,7 +91,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
             nvd.apiKey.getOrNull() == null
             nvd.delay.getOrNull() == null
             nvd.maxRetryCount.getOrNull() == null
-            outputDirectory.get().asFile == project.layout.buildDirectory.dir('reports').get().asFile
+            outputDirectory.get().asFile == project.layout.buildDirectory.dir('reports/dependency-check').get().asFile
             scanConfigurations.get() == []
             skipConfigurations.get() == []
             scanProjects.get() == []
@@ -137,7 +138,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
             analyzers.retirejs.filters = ['filter1', 'filter2']
             analyzers.retirejs.filterNonVulnerable = true
 
-            outputDirectory = 'outputDirectory'
+            outputDirectory = project.reporting.baseDirectory.dir('outputDirectory')
 
             scanConfigurations = ['a']
             skipConfigurations = ['b']
@@ -186,7 +187,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
             hostedSuppressions.url.get() == 'suppressionsurl'
             hostedSuppressions.validForHours.get() == 5
             hostedSuppressions.forceupdate.get() == true
-            outputDirectory.get().asFile == project.file('outputDirectory')
+            outputDirectory.get().asFile == project.layout.buildDirectory.dir('reports/outputDirectory').get().asFile
             scanConfigurations.get() == ['a']
             skipConfigurations.get() == ['b']
             scanProjects.get() == ['a']
