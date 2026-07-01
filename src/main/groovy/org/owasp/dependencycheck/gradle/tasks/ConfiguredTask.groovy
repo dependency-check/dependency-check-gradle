@@ -31,6 +31,7 @@ import org.owasp.dependencycheck.gradle.extension.ProxyExtension
 import org.owasp.dependencycheck.utils.Downloader
 import org.owasp.dependencycheck.utils.Settings
 
+import java.time.Duration
 import javax.inject.Inject
 
 import static org.owasp.dependencycheck.utils.Settings.KEYS.*
@@ -54,6 +55,10 @@ abstract class ConfiguredTask extends DefaultTask {
     final Property<Boolean> autoUpdate
     @Internal
     final Property<Boolean> failOnError
+    @Internal
+    final Property<Duration> connectionTimeout
+    @Internal
+    final Property<Duration> readTimeout
 
     @Internal
     ProxyExtension proxy
@@ -72,6 +77,12 @@ abstract class ConfiguredTask extends DefaultTask {
 
         this.failOnError = objects.property(Boolean)
         this.failOnError.convention(defaults.failOnError)
+
+        this.connectionTimeout = objects.property(Duration)
+        this.connectionTimeout.convention(defaults.connectionTimeout)
+
+        this.readTimeout = objects.property(Duration)
+        this.readTimeout.convention(defaults.readTimeout)
 
         this.proxy = objects.newInstance(ProxyExtension, objects)
         proxy.server.convention(defaults.proxy.server)
@@ -146,6 +157,8 @@ abstract class ConfiguredTask extends DefaultTask {
         }
         settings.setStringIfNotEmpty(NVD_API_DATAFEED_BEARER_TOKEN, nvd.datafeedBearerToken.getOrNull())
         settings.setIntIfNotNull(NVD_API_DATAFEED_START_YEAR, nvd.datafeedStartYear.getOrNull())
+        settings.setIntIfNotNull(CONNECTION_TIMEOUT, connectionTimeout.map { it.toMillis().intValue() }.getOrNull())
+        settings.setIntIfNotNull(CONNECTION_READ_TIMEOUT, readTimeout.map { it.toMillis().intValue() }.getOrNull())
         Downloader.getInstance().configure(settings)
     }
 
