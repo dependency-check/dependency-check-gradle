@@ -119,7 +119,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
             nvd.delay = 5000
             nvd.maxRetryCount = 20
 
-            connectionTimeout = 3000L
+            connectionTimeout = Duration.ofMillis(3000)
             readTimeout = Duration.ofMinutes(2)
 
             hostedSuppressions.url = 'suppressionsurl'

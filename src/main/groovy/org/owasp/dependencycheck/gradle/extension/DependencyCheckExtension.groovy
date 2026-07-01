@@ -570,7 +570,7 @@ class DependencyCheckExtension {
     }
 
     /**
-     * The connection timeout used when downloading external data.
+     * The read timeout used when downloading external data.
      */
     @Input
     @Optional
