@@ -27,7 +27,6 @@ import org.gradle.api.tasks.Internal
 import org.owasp.dependencycheck.gradle.extension.DataExtension
 import org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension
 import org.owasp.dependencycheck.gradle.extension.NvdExtension
-import org.owasp.dependencycheck.gradle.extension.ProxyExtension
 import org.owasp.dependencycheck.utils.Downloader
 import org.owasp.dependencycheck.utils.Settings
 
@@ -61,8 +60,6 @@ abstract class ConfiguredTask extends DefaultTask {
     final Property<Duration> readTimeout
 
     @Internal
-    ProxyExtension proxy
-    @Internal
     NvdExtension nvd
     @Internal
     DataExtension data
@@ -76,13 +73,6 @@ abstract class ConfiguredTask extends DefaultTask {
         this.failOnError = objects.property(Boolean).convention(defaults.failOnError)
         this.connectionTimeout = objects.property(Duration).convention(defaults.connectionTimeout)
         this.readTimeout = objects.property(Duration).convention(defaults.readTimeout)
-
-        this.proxy = objects.newInstance(ProxyExtension, objects)
-        proxy.server.convention(defaults.proxy.server)
-        proxy.port.convention(defaults.proxy.port)
-        proxy.username.convention(defaults.proxy.username)
-        proxy.password.convention(defaults.proxy.password)
-        proxy.nonProxyHosts.convention(defaults.proxy.nonProxyHosts)
 
         this.nvd = objects.newInstance(NvdExtension, objects)
         nvd.apiKey.convention(defaults.nvd.apiKey)
@@ -156,42 +146,26 @@ abstract class ConfiguredTask extends DefaultTask {
     }
 
     private void configureProxy(Settings settings) {
-        String proxyServer = proxy.server.getOrNull()
-        Integer proxyPort = proxy.port.getOrNull()
-        String proxyUser = proxy.username.getOrNull()
-        String proxyPass = proxy.password.getOrNull()
-        List<String> nonProxyHostsList = proxy.nonProxyHosts.getOrElse([])
-
-        // Fall back to system properties if not configured
         String sysProxyHost = System.getProperty("https.proxyHost", System.getProperty("http.proxyHost"))
-        if (!Strings.isNullOrEmpty(sysProxyHost) && proxyServer == null) {
-            proxyServer = sysProxyHost
+        if (!Strings.isNullOrEmpty(sysProxyHost)) {
             String sysProxyPort = System.getProperty("https.proxyPort", System.getProperty("http.proxyPort"))
             if (sysProxyPort != null) {
                 try {
-                    proxyPort = Integer.parseInt(sysProxyPort)
-                } catch (NumberFormatException nfe) {
+                    Integer.parseInt(sysProxyPort)
+                } catch (NumberFormatException ignored) {
                     logger.warn("Unable to convert the configured `http.proxyPort` to a number: ${sysProxyPort}")
                 }
             }
             String sysProxyUser = System.getProperty("https.proxyUser", System.getProperty("http.proxyUser"))
-            if (!Strings.isNullOrEmpty(sysProxyUser)) {
-                proxyUser = sysProxyUser
-            }
             String sysProxyPassword = System.getProperty("https.proxyPassword", System.getProperty("http.proxyPassword"))
-            if (!Strings.isNullOrEmpty(sysProxyPassword)) {
-                proxyPass = sysProxyPassword
-            }
             String sysNonProxyHosts = System.getProperty("https.nonProxyHosts", System.getProperty("http.nonProxyHosts"))
-            if (!Strings.isNullOrEmpty(sysNonProxyHosts)) {
-                nonProxyHostsList = sysNonProxyHosts.tokenize("|")
-            }
+            settings.setStringIfNotEmpty(PROXY_SERVER, sysProxyHost)
+            settings.setStringIfNotEmpty(PROXY_PORT, sysProxyPort)
+            settings.setStringIfNotEmpty(PROXY_USERNAME, sysProxyUser)
+            settings.setStringIfNotEmpty(PROXY_PASSWORD, sysProxyPassword)
+            settings.setStringIfNotEmpty(PROXY_NON_PROXY_HOSTS, sysNonProxyHosts?.tokenize("|")?.join("|"))
         }
 
-        settings.setStringIfNotEmpty(PROXY_SERVER, proxyServer)
-        settings.setStringIfNotEmpty(PROXY_PORT, proxyPort?.toString())
-        settings.setStringIfNotEmpty(PROXY_USERNAME, proxyUser)
-        settings.setStringIfNotEmpty(PROXY_PASSWORD, proxyPass)
-        settings.setStringIfNotEmpty(PROXY_NON_PROXY_HOSTS, nonProxyHostsList ? nonProxyHostsList.join("|") : null)
+
     }
 }

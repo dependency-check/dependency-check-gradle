@@ -59,10 +59,7 @@ class AnalyzerExtension {
     private final Property<Boolean> composerEnabled
     private final Property<Boolean> composerSkipDev
     private final Property<Boolean> cpanEnabled
-    private final Property<Boolean> nodeEnabled
-    private final Property<Boolean> nodeAuditEnabled
     private final Property<Boolean> nugetconfEnabled
-    private final Property<Boolean> ossIndexEnabled
 
     Project project;
 
@@ -96,10 +93,7 @@ class AnalyzerExtension {
         this.composerEnabled = objects.property(Boolean)
         this.composerSkipDev = objects.property(Boolean)
         this.cpanEnabled = objects.property(Boolean)
-        this.nodeEnabled = objects.property(Boolean)
-        this.nodeAuditEnabled = objects.property(Boolean)
         this.nugetconfEnabled = objects.property(Boolean)
-        this.ossIndexEnabled = objects.property(Boolean)
         kev = objects.newInstance(KEVExtension, objects)
         retirejs = objects.newInstance(RetireJSExtension, objects)
         nodeAudit = objects.newInstance(NodeAuditExtension, objects)
@@ -172,57 +166,6 @@ class AnalyzerExtension {
 
     void setCentralEnabled(Boolean value) {
         centralEnabled.set(value)
-    }
-
-    /**
-     * Sets whether Nexus Analyzer will be used. This analyzer is superceded by the Central Analyzer; however, you can configure this to run against a Nexus Pro installation.
-     * @deprecated use nexus { enabled = true }
-     */
-    @Input
-    @Optional
-    @Deprecated
-    Property<Boolean> getNexusEnabled() {
-        return nexus.enabled
-    }
-
-    /* @deprecated use nexus { enabled = true } */
-    @Deprecated
-    void setNexusEnabled(Boolean value) {
-        nexus.enabled.set(value)
-    }
-
-    /**
-     * Defines the Nexus Server's web service end point (example http://domain.enterprise/service/local/). If not set the Nexus Analyzer will be disabled.
-     * @deprecated use nexus { url = "nexus url" }
-     */
-    @Input
-    @Optional
-    @Deprecated
-    Property<String> getNexusUrl() {
-        return nexus.url
-    }
-
-    /* @deprecated use nexus { url = "nexus url" } */
-    @Deprecated
-    void setNexusUrl(String value) {
-        nexus.url.set(value)
-    }
-
-    /**
-     * whether the defined proxy should be used when connecting to Nexus.
-     * @deprecated use nexus { usesProxy = true }
-     */
-    @Input
-    @Optional
-    @Deprecated
-    Property<Boolean> getNexusUsesProxy() {
-        return nexus.usesProxy
-    }
-
-    /* @deprecated use nexus { usesProxy = true } */
-    @Deprecated
-    void setNexusUsesProxy(Boolean value) {
-        nexus.usesProxy.set(value)
     }
 
     /**
@@ -513,36 +456,6 @@ class AnalyzerExtension {
     }
 
     /**
-     * Sets whether the Node.js Analyzer should be used.
-     * @deprecated since 8.4.1 - please use nodePackage.enabled = true
-     */
-    @Input
-    @Optional
-    @Deprecated(since = "8.4.1", forRemoval = true)
-    Property<Boolean> getNodeEnabled() {
-        return nodeEnabled
-    }
-
-    void setNodeEnabled(Boolean value) {
-        nodeEnabled.set(value)
-    }
-
-    /**
-     * Sets whether the NSP Analyzer should be used.
-     * @deprecated since 5.2.5 - please use nodeAudit.enabled = true
-     */
-    @Input
-    @Optional
-    @Deprecated(since = "5.2.5", forRemoval = true)
-    Property<Boolean> getNodeAuditEnabled() {
-        return nodeAuditEnabled
-    }
-
-    void setNodeAuditEnabled(Boolean value) {
-        nodeAuditEnabled.set(value)
-    }
-
-    /**
      * Sets whether the Nuget packages.config Configuration Analyzer should be used.
      */
     @Input
@@ -553,21 +466,6 @@ class AnalyzerExtension {
 
     void setNugetconfEnabled(Boolean value) {
         nugetconfEnabled.set(value)
-    }
-
-    /**
-     * Sets whether the OSS Index Analyzer should be used.
-     * @deprecated since 5.0.1 - please use ossIndex.enabled = true
-     */
-    @Input
-    @Optional
-    @Deprecated(since = "5.0.1", forRemoval = true)
-    Property<Boolean> getOssIndexEnabled() {
-        return ossIndexEnabled
-    }
-
-    void setOssIndexEnabled(Boolean value) {
-        ossIndexEnabled.set(value)
     }
 
     /**
@@ -607,34 +505,12 @@ class AnalyzerExtension {
 
     /**
      * Allows programmatic configuration of the KEV extension
-     * @param configClosure the closure to configure the KEV extension
-     * @return the KEV extension
-     * @deprecated Use the {@code Action} variant instead
-     */
-    @Deprecated
-    def kev(Closure configClosure) {
-        return project.configure(kev, configClosure)
-    }
-
-    /**
-     * Allows programmatic configuration of the KEV extension
      * @param config the action to configure the KEV extension
      * @return the KEV extension
      */
     def kev(Action<KEVExtension> config) {
         config.execute(kev)
         return kev
-    }
-
-    /**
-     * Allows programmatic configuration of the retirejs extension
-     * @param configClosure the closure to configure the retirejs extension
-     * @return the retirejs extension
-     * @deprecated Use the {@code Action} variant instead
-     */
-    @Deprecated()
-    def retirejs(Closure configClosure) {
-        return project.configure(retirejs, configClosure)
     }
 
     /**
@@ -649,34 +525,12 @@ class AnalyzerExtension {
 
     /**
      * Allows programmatic configuration of the artifactory extension
-     * @param configClosure the closure to configure the artifactory extension
-     * @return the artifactory extension
-     * @deprecated Use the {@code Action} variant instead
-     */
-    @Deprecated()
-    def artifactory(Closure configClosure) {
-        return project.configure(artifactory, configClosure)
-    }
-
-    /**
-     * Allows programmatic configuration of the artifactory extension
      * @param config the action to configure the artifactory extension
      * @return the artifactory extension
      */
     def artifactory(Action<ArtifactoryExtension> config) {
         config.execute(artifactory)
         return artifactory
-    }
-
-    /**
-     * Allows programmatic configuration of the ossIndex extension
-     * @param configClosure the closure to configure the ossIndex extension
-     * @return the ossIndex extension
-     * @deprecated Use the {@code Action} variant instead
-     */
-    @Deprecated()
-    def ossIndex(Closure configClosure) {
-        return project.configure(ossIndex, configClosure)
     }
 
     /**
@@ -691,34 +545,12 @@ class AnalyzerExtension {
 
     /**
      * Allows programmatic configuration of the nodeAudit extension
-     * @param configClosure the closure to configure the ossIndex extension
-     * @return the ossIndex extension
-     * @deprecated Use the {@code Action} variant instead
-     */
-    @Deprecated()
-    def nodeAudit(Closure configClosure) {
-        return project.configure(nodeAudit, configClosure)
-    }
-
-    /**
-     * Allows programmatic configuration of the nodeAudit extension
      * @param config the action to configure the ossIndex extension
      * @return the ossIndex extension
      */
     def nodeAudit(Action<NodeAuditExtension> config) {
         config.execute(nodeAudit)
         return nodeAudit
-    }
-
-    /**
-     * Allows programmatic configuration of the node package extension
-     * @param configClosure the closure to configure the node extension
-     * @return the node extension
-     * @deprecated Use the {@code Action} variant instead
-     */
-    @Deprecated()
-    def nodePackage(Closure configClosure) {
-        return project.configure(nodePackage, configClosure)
     }
 
     /**

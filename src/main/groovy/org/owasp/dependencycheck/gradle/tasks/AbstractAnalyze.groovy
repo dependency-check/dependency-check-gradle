@@ -61,6 +61,7 @@ import org.owasp.dependencycheck.exception.ExceptionCollection
 import org.owasp.dependencycheck.exception.ReportException
 import org.owasp.dependencycheck.gradle.service.SlackNotificationSenderService
 import org.owasp.dependencycheck.utils.Checksum
+import org.owasp.dependencycheck.utils.Settings
 import org.owasp.dependencycheck.utils.SeverityUtil
 import org.owasp.dependencycheck.xml.pom.PomUtils
 import us.springett.parsers.cpe.CpeParser
@@ -229,10 +230,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         analyzers.composerEnabled.convention(defaults.analyzers.composerEnabled)
         analyzers.composerSkipDev.convention(defaults.analyzers.composerSkipDev)
         analyzers.cpanEnabled.convention(defaults.analyzers.cpanEnabled)
-        analyzers.nodeEnabled.convention(defaults.analyzers.nodeEnabled)
-        analyzers.nodeAuditEnabled.convention(defaults.analyzers.nodeAuditEnabled)
         analyzers.nugetconfEnabled.convention(defaults.analyzers.nugetconfEnabled)
-        analyzers.ossIndexEnabled.convention(defaults.analyzers.ossIndexEnabled)
 
         analyzers.ossIndex.enabled.convention(defaults.analyzers.ossIndex.enabled)
         analyzers.ossIndex.warnOnlyOnRemoteErrors.convention(defaults.analyzers.ossIndex.warnOnlyOnRemoteErrors)
@@ -315,7 +313,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
 
         settings.setBooleanIfNotNull(ANALYZER_JAR_ENABLED, analyzers.jarEnabled.getOrNull())
         settings.setBooleanIfNotNull(ANALYZER_NUSPEC_ENABLED, analyzers.nuspecEnabled.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_ENABLED, select(analyzers.ossIndex.enabled.getOrNull(), analyzers.ossIndexEnabled.getOrNull()))
+        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_ENABLED, analyzers.ossIndex.enabled.getOrNull())
         settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_WARN_ONLY_ON_REMOTE_ERRORS, analyzers.ossIndex.warnOnlyOnRemoteErrors.getOrNull())
         settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_ENABLED, analyzers.ossIndex.enabled.getOrNull())
         settings.setStringIfNotEmpty(ANALYZER_OSSINDEX_USER, analyzers.ossIndex.username.getOrNull())
@@ -365,9 +363,9 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         settings.setBooleanIfNotNull(ANALYZER_CPANFILE_ENABLED, analyzers.cpanEnabled.getOrNull())
         settings.setBooleanIfNotNull(ANALYZER_NUGETCONF_ENABLED, analyzers.nugetconfEnabled.getOrNull())
 
-        settings.setBooleanIfNotNull(ANALYZER_NODE_PACKAGE_ENABLED, select(analyzers.nodePackage.enabled.getOrNull(), analyzers.nodeEnabled.getOrNull()))
+        settings.setBooleanIfNotNull(ANALYZER_NODE_PACKAGE_ENABLED, analyzers.nodePackage.enabled.getOrNull())
         settings.setBooleanIfNotNull(ANALYZER_NODE_PACKAGE_SKIPDEV, analyzers.nodePackage.skipDevDependencies.getOrNull())
-        settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_ENABLED, select(analyzers.nodeAudit.enabled.getOrNull(), analyzers.nodeAuditEnabled.getOrNull()))
+        settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_ENABLED, analyzers.nodeAudit.enabled.getOrNull())
         settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_USE_CACHE, analyzers.nodeAudit.useCache.getOrNull())
         settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_SKIPDEV, analyzers.nodeAudit.skipDevDependencies.getOrNull())
         settings.setStringIfNotEmpty(ANALYZER_NODE_AUDIT_URL, analyzers.nodeAudit.url.getOrNull())
@@ -989,7 +987,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         return p
     }
 
-    private void configureSlack(org.owasp.dependencycheck.utils.Settings settings) {
+    private void configureSlack(Settings settings) {
         settings.setBooleanIfNotNull(SlackNotificationSenderService.SLACK__WEBHOOK__ENABLED, slack.enabled.getOrNull())
         settings.setStringIfNotEmpty(SlackNotificationSenderService.SLACK__WEBHOOK__URL, slack.webhookUrl.getOrNull())
     }
@@ -1005,9 +1003,5 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             files.add(suppressionFile)
         }
         return files.toArray(new String[0])
-    }
-
-    private Boolean select(Boolean current, Boolean deprecated) {
-        return current != null ? current : deprecated
     }
 }
