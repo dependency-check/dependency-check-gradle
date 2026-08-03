@@ -158,6 +158,41 @@ class DependencyCheckConfigurationSelectionIntegSpec extends Specification {
         gradle << GradleTestVersion.supportedVersionsForCurrentJvm
     }
 
+    def "analysis generates distinct reports when multiple tasks are used"() {
+        given:
+        copyBuildFileIntoProjectDir('multipleTasks.gradle')
+
+        when:
+        def result = executeTaskAndGetResult(gradle, ANALYZE_TASK, true)
+
+        then:
+        result.task(":$ANALYZE_TASK").outcome == SUCCESS
+        result.task(":dependencyCheckAnalyzeTest") != null
+        new File(testProjectDir, 'build/reports/dependency-check/main').exists()
+        new File(testProjectDir, 'build/reports/dependency-check/test').exists()
+
+        where:
+        gradle << GradleTestVersion.supportedVersionsForCurrentJvm
+    }
+
+    def "multiple tasks support per-task failBuildOnCVSS and suppressionFiles overrides"() {
+        given:
+        copyBuildFileIntoProjectDir('multipleTasksWithOverrides.gradle')
+        copyResourceFileIntoProjectDir('suppressions.xml', 'suppressions.xml')
+
+        when:
+        // The test task has failBuildOnCVSS=11 (never fail), so it passes.
+        // The main task has failBuildOnCVSS=0 (from extension) but uses suppressionFiles to suppress commons-collections CVEs, so it also passes.
+        def result = executeTaskAndGetResult(gradle, ANALYZE_TASK, true)
+
+        then:
+        result.task(":$ANALYZE_TASK").outcome == SUCCESS
+        result.task(":dependencyCheckAnalyzeTest") != null
+
+        where:
+        gradle << GradleTestVersion.supportedVersionsForCurrentJvm
+    }
+
     def "analysis fails when unused suppression rule is present"() {
         given:
         copyBuildFileIntoProjectDir('suppressionFilesFailOnUnusedRule.gradle')

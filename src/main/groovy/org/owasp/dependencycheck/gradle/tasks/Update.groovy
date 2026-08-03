@@ -20,10 +20,13 @@ package org.owasp.dependencycheck.gradle.tasks
 
 import groovy.transform.CompileStatic
 import org.gradle.api.GradleException
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.TaskAction
 import org.owasp.dependencycheck.Engine
 import org.owasp.dependencycheck.data.nvdcve.DatabaseException
 import org.owasp.dependencycheck.data.update.exception.UpdateException
+
+import javax.inject.Inject
 
 import static org.owasp.dependencycheck.utils.Settings.KEYS.AUTO_UPDATE
 
@@ -38,7 +41,9 @@ class Update extends ConfiguredTask {
     /**
      * Initializes the update task.
      */
-    Update() {
+    @Inject
+    Update(ObjectFactory objects) {
+        super(objects)
         group = 'OWASP dependency-check'
         description = 'Downloads and stores updates from the NVD CVE data feeds.'
     }
@@ -56,13 +61,13 @@ class Update extends ConfiguredTask {
             engine.doUpdates()
         } catch (DatabaseException ex) {
             String msg = "Unable to connect to the dependency-check database"
-            if (config.failOnError.get()) {
+            if (failOnError.get()) {
                 throw new GradleException(msg, ex)
             } else {
                 logger.error(msg)
             }
         } catch (UpdateException ex) {
-            if (config.failOnError.get()) {
+            if (failOnError.get()) {
                 throw new GradleException(ex.getMessage(), ex)
             } else {
                 logger.error(ex.getMessage())

@@ -43,10 +43,10 @@ class Analyze extends AbstractAnalyze {
     def scanDependencies(Engine engine) {
         if (shouldProcess(project)) {
             logger.lifecycle("Verifying dependencies for project ${currentProjectName}")
-            if (this.config.scanDependencies.get()) {
+            if (this.scanDependencies.get()) {
                 processConfigurations(project, engine)
             }
-            if (this.config.scanBuildEnv.get()) {
+            if (this.scanBuildEnv.get()) {
                 processBuildEnvironment(project, engine)
             }
         }

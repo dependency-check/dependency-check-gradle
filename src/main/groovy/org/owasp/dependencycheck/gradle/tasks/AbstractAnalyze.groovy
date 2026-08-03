@@ -34,8 +34,11 @@ import org.gradle.api.artifacts.result.ResolvedComponentResult
 import org.gradle.api.artifacts.result.ResolvedDependencyResult
 import org.gradle.api.artifacts.result.UnresolvedDependencyResult
 import org.gradle.api.attributes.Attribute
+import org.gradle.api.InvalidUserDataException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
@@ -43,6 +46,10 @@ import org.gradle.maven.MavenModule
 import org.gradle.maven.MavenPomArtifact
 import org.owasp.dependencycheck.Engine
 import org.owasp.dependencycheck.agent.DependencyCheckScanAgent
+import org.owasp.dependencycheck.gradle.extension.AnalyzerExtension
+import org.owasp.dependencycheck.gradle.extension.CacheExtension
+import org.owasp.dependencycheck.gradle.extension.HostedSuppressionsExtension
+import org.owasp.dependencycheck.gradle.extension.SlackExtension
 import org.owasp.dependencycheck.data.nexus.MavenArtifact
 import org.owasp.dependencycheck.data.nvdcve.DatabaseException
 import org.owasp.dependencycheck.dependency.Confidence
@@ -62,6 +69,7 @@ import javax.inject.Inject
 import java.util.regex.Pattern
 
 import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
+import static org.owasp.dependencycheck.utils.Settings.KEYS.*
 
 /**
  * Checks the projects dependencies for known vulnerabilities.
@@ -84,10 +92,309 @@ abstract class AbstractAnalyze extends ConfiguredTask {
     @OutputDirectory
     final DirectoryProperty outputDir
 
+    @Internal
+    final Property<Boolean> skip
+    @Internal
+    final Property<Boolean> scanDependencies
+    @Internal
+    final Property<Boolean> scanBuildEnv
+    @Internal
+    final Property<String> suppressionFile
+    @Internal
+    final ListProperty<String> suppressionFiles
+    @Internal
+    final Property<String> suppressionFileUser
+    @Internal
+    final Property<String> suppressionFilePassword
+    @Internal
+    final Property<String> suppressionFileBearerToken
+    @Internal
+    final Property<String> hintsFile
+    @Internal
+    final Property<String> format
+    @Internal
+    final ListProperty<String> formats
+    @Internal
+    final Property<Float> failBuildOnCVSS
+    @Internal
+    final Property<Float> junitFailOnCVSS
+
+    void setFailBuildOnCVSS(Number value) {
+        failBuildOnCVSS.set(value?.floatValue())
+    }
+
+    void setJunitFailOnCVSS(Number value) {
+        junitFailOnCVSS.set(value?.floatValue())
+    }
+    @Internal
+    final Property<Boolean> failBuildOnUnusedSuppressionRule
+    @Internal
+    final Property<Boolean> showSummary
+    @Internal
+    final Property<Boolean> skipTestGroups
+    @Internal
+    final ListProperty<String> scanConfigurations
+    @Internal
+    final ListProperty<String> skipConfigurations
+    @Internal
+    final ListProperty<String> scanProjects
+    @Internal
+    final ListProperty<String> skipProjects
+    @Internal
+    final ListProperty<String> skipGroups
+    @Internal
+    final ListProperty<String> analyzedTypes
+
+    @Internal
+    final SlackExtension slack
+    @Internal
+    final HostedSuppressionsExtension hostedSuppressions
+    @Internal
+    final CacheExtension cache
+    @Internal
+    final AnalyzerExtension analyzers
+
     @Inject
     AbstractAnalyze(ObjectFactory objects) {
-        outputDir = objects.directoryProperty().convention(config.outputDirectory)
+        super(objects)
+        outputDir = objects.directoryProperty().convention(defaults.outputDirectory)
         super.notCompatibleWithConfigurationCache("${this.class.simpleName} isn't compatible with the configuration cache")
+
+        skip = objects.property(Boolean).convention(defaults.skip)
+        scanDependencies = objects.property(Boolean).convention(defaults.scanDependencies)
+        scanBuildEnv = objects.property(Boolean).convention(defaults.scanBuildEnv)
+        suppressionFile = objects.property(String).convention(defaults.suppressionFile)
+        suppressionFiles = objects.listProperty(String).convention(defaults.suppressionFiles)
+        suppressionFileUser = objects.property(String).convention(defaults.suppressionFileUser)
+        suppressionFilePassword = objects.property(String).convention(defaults.suppressionFilePassword)
+        suppressionFileBearerToken = objects.property(String).convention(defaults.suppressionFileBearerToken)
+        hintsFile = objects.property(String).convention(defaults.hintsFile)
+        format = objects.property(String).convention(defaults.format)
+        formats = objects.listProperty(String).convention(defaults.formats)
+        failBuildOnCVSS = objects.property(Float).convention(defaults.failBuildOnCVSS)
+        junitFailOnCVSS = objects.property(Float).convention(defaults.junitFailOnCVSS)
+        failBuildOnUnusedSuppressionRule = objects.property(Boolean).convention(defaults.failBuildOnUnusedSuppressionRule)
+        showSummary = objects.property(Boolean).convention(defaults.showSummary)
+        skipTestGroups = objects.property(Boolean).convention(defaults.skipTestGroups)
+        scanConfigurations = objects.listProperty(String).convention(defaults.scanConfigurations)
+        skipConfigurations = objects.listProperty(String).convention(defaults.skipConfigurations)
+        scanProjects = objects.listProperty(String).convention(defaults.scanProjects)
+        skipProjects = objects.listProperty(String).convention(defaults.skipProjects)
+        skipGroups = objects.listProperty(String).convention(defaults.skipGroups)
+        analyzedTypes = objects.listProperty(String).convention(defaults.analyzedTypes)
+
+        slack = objects.newInstance(SlackExtension, objects)
+        slack.enabled.convention(defaults.slack.enabled)
+        slack.webhookUrl.convention(defaults.slack.webhookUrl)
+
+        hostedSuppressions = objects.newInstance(HostedSuppressionsExtension, objects)
+        hostedSuppressions.enabled.convention(defaults.hostedSuppressions.enabled)
+        hostedSuppressions.forceupdate.convention(defaults.hostedSuppressions.forceupdate)
+        hostedSuppressions.url.convention(defaults.hostedSuppressions.url)
+        hostedSuppressions.user.convention(defaults.hostedSuppressions.user)
+        hostedSuppressions.password.convention(defaults.hostedSuppressions.password)
+        hostedSuppressions.bearerToken.convention(defaults.hostedSuppressions.bearerToken)
+        hostedSuppressions.validForHours.convention(defaults.hostedSuppressions.validForHours)
+
+        cache = objects.newInstance(CacheExtension, objects)
+        cache.nodeAudit.convention(defaults.cache.nodeAudit)
+        cache.central.convention(defaults.cache.central)
+        cache.ossIndex.convention(defaults.cache.ossIndex)
+
+        analyzers = objects.newInstance(AnalyzerExtension, project, objects)
+        analyzers.jarEnabled.convention(defaults.analyzers.jarEnabled)
+        analyzers.nuspecEnabled.convention(defaults.analyzers.nuspecEnabled)
+        analyzers.centralEnabled.convention(defaults.analyzers.centralEnabled)
+        analyzers.experimentalEnabled.convention(defaults.analyzers.experimentalEnabled)
+        analyzers.archiveEnabled.convention(defaults.analyzers.archiveEnabled)
+        analyzers.zipExtensions.convention(defaults.analyzers.zipExtensions)
+        analyzers.assemblyEnabled.convention(defaults.analyzers.assemblyEnabled)
+        analyzers.msbuildEnabled.convention(defaults.analyzers.msbuildEnabled)
+        analyzers.pathToDotnet.convention(defaults.analyzers.pathToDotnet)
+        analyzers.golangDepEnabled.convention(defaults.analyzers.golangDepEnabled)
+        analyzers.golangModEnabled.convention(defaults.analyzers.golangModEnabled)
+        analyzers.pathToGo.convention(defaults.analyzers.pathToGo)
+        analyzers.cocoapodsEnabled.convention(defaults.analyzers.cocoapodsEnabled)
+        analyzers.swiftEnabled.convention(defaults.analyzers.swiftEnabled)
+        analyzers.dartEnabled.convention(defaults.analyzers.dartEnabled)
+        analyzers.swiftPackageResolvedEnabled.convention(defaults.analyzers.swiftPackageResolvedEnabled)
+        analyzers.bundleAuditEnabled.convention(defaults.analyzers.bundleAuditEnabled)
+        analyzers.pathToBundleAudit.convention(defaults.analyzers.pathToBundleAudit)
+        analyzers.pyDistributionEnabled.convention(defaults.analyzers.pyDistributionEnabled)
+        analyzers.pyPackageEnabled.convention(defaults.analyzers.pyPackageEnabled)
+        analyzers.rubygemsEnabled.convention(defaults.analyzers.rubygemsEnabled)
+        analyzers.opensslEnabled.convention(defaults.analyzers.opensslEnabled)
+        analyzers.cmakeEnabled.convention(defaults.analyzers.cmakeEnabled)
+        analyzers.autoconfEnabled.convention(defaults.analyzers.autoconfEnabled)
+        analyzers.composerEnabled.convention(defaults.analyzers.composerEnabled)
+        analyzers.composerSkipDev.convention(defaults.analyzers.composerSkipDev)
+        analyzers.cpanEnabled.convention(defaults.analyzers.cpanEnabled)
+        analyzers.nodeEnabled.convention(defaults.analyzers.nodeEnabled)
+        analyzers.nodeAuditEnabled.convention(defaults.analyzers.nodeAuditEnabled)
+        analyzers.nugetconfEnabled.convention(defaults.analyzers.nugetconfEnabled)
+        analyzers.ossIndexEnabled.convention(defaults.analyzers.ossIndexEnabled)
+
+        analyzers.ossIndex.enabled.convention(defaults.analyzers.ossIndex.enabled)
+        analyzers.ossIndex.warnOnlyOnRemoteErrors.convention(defaults.analyzers.ossIndex.warnOnlyOnRemoteErrors)
+        analyzers.ossIndex.username.convention(defaults.analyzers.ossIndex.username)
+        analyzers.ossIndex.password.convention(defaults.analyzers.ossIndex.password)
+        analyzers.ossIndex.url.convention(defaults.analyzers.ossIndex.url)
+        analyzers.ossIndex.validForHours.convention(defaults.analyzers.ossIndex.validForHours)
+
+        analyzers.nexus.enabled.convention(defaults.analyzers.nexus.enabled)
+        analyzers.nexus.url.convention(defaults.analyzers.nexus.url)
+        analyzers.nexus.usesProxy.convention(defaults.analyzers.nexus.usesProxy)
+        analyzers.nexus.username.convention(defaults.analyzers.nexus.username)
+        analyzers.nexus.password.convention(defaults.analyzers.nexus.password)
+
+        analyzers.kev.enabled.convention(defaults.analyzers.kev.enabled)
+        analyzers.kev.url.convention(defaults.analyzers.kev.url)
+        analyzers.kev.validForHours.convention(defaults.analyzers.kev.validForHours)
+        analyzers.kev.user.convention(defaults.analyzers.kev.user)
+        analyzers.kev.password.convention(defaults.analyzers.kev.password)
+        analyzers.kev.bearerToken.convention(defaults.analyzers.kev.bearerToken)
+
+        analyzers.nodePackage.enabled.convention(defaults.analyzers.nodePackage.enabled)
+        analyzers.nodePackage.skipDevDependencies.convention(defaults.analyzers.nodePackage.skipDevDependencies)
+
+        analyzers.nodeAudit.enabled.convention(defaults.analyzers.nodeAudit.enabled)
+        analyzers.nodeAudit.useCache.convention(defaults.analyzers.nodeAudit.useCache)
+        analyzers.nodeAudit.skipDevDependencies.convention(defaults.analyzers.nodeAudit.skipDevDependencies)
+        analyzers.nodeAudit.url.convention(defaults.analyzers.nodeAudit.url)
+        analyzers.nodeAudit.yarnEnabled.convention(defaults.analyzers.nodeAudit.yarnEnabled)
+        analyzers.nodeAudit.yarnPath.convention(defaults.analyzers.nodeAudit.yarnPath)
+        analyzers.nodeAudit.pnpmEnabled.convention(defaults.analyzers.nodeAudit.pnpmEnabled)
+        analyzers.nodeAudit.pnpmPath.convention(defaults.analyzers.nodeAudit.pnpmPath)
+
+        analyzers.retirejs.enabled.convention(defaults.analyzers.retirejs.enabled)
+        analyzers.retirejs.forceupdate.convention(defaults.analyzers.retirejs.forceupdate)
+        analyzers.retirejs.retireJsUrl.convention(defaults.analyzers.retirejs.retireJsUrl)
+        analyzers.retirejs.user.convention(defaults.analyzers.retirejs.user)
+        analyzers.retirejs.password.convention(defaults.analyzers.retirejs.password)
+        analyzers.retirejs.bearerToken.convention(defaults.analyzers.retirejs.bearerToken)
+        analyzers.retirejs.filterNonVulnerable.convention(defaults.analyzers.retirejs.filterNonVulnerable)
+        analyzers.retirejs.filters.convention(defaults.analyzers.retirejs.filters)
+
+        analyzers.artifactory.enabled.convention(defaults.analyzers.artifactory.enabled)
+        analyzers.artifactory.parallelAnalysis.convention(defaults.analyzers.artifactory.parallelAnalysis)
+        analyzers.artifactory.usesProxy.convention(defaults.analyzers.artifactory.usesProxy)
+        analyzers.artifactory.url.convention(defaults.analyzers.artifactory.url)
+        analyzers.artifactory.apiToken.convention(defaults.analyzers.artifactory.apiToken)
+        analyzers.artifactory.username.convention(defaults.analyzers.artifactory.username)
+        analyzers.artifactory.bearerToken.convention(defaults.analyzers.artifactory.bearerToken)
+    }
+
+    @Override
+    protected void initializeSettings() {
+        super.initializeSettings()
+
+        String[] suppressionLists = determineSuppressions(suppressionFiles.getOrElse([]), suppressionFile.getOrNull())
+        settings.setArrayIfNotEmpty(SUPPRESSION_FILE, suppressionLists)
+        settings.setStringIfNotEmpty(SUPPRESSION_FILE_USER, suppressionFileUser.getOrNull())
+        settings.setStringIfNotEmpty(SUPPRESSION_FILE_PASSWORD, suppressionFilePassword.getOrNull())
+        settings.setStringIfNotEmpty(SUPPRESSION_FILE_BEARER_TOKEN, suppressionFileBearerToken.getOrNull())
+        settings.setStringIfNotEmpty(HINTS_FILE, hintsFile.getOrNull())
+
+        configureSlack(settings)
+
+        settings.setFloat(JUNIT_FAIL_ON_CVSS, junitFailOnCVSS.get())
+        settings.setBooleanIfNotNull(FAIL_ON_UNUSED_SUPPRESSION_RULE, failBuildOnUnusedSuppressionRule.getOrNull())
+        settings.setBooleanIfNotNull(HOSTED_SUPPRESSIONS_ENABLED, hostedSuppressions.enabled.getOrNull())
+        settings.setBooleanIfNotNull(HOSTED_SUPPRESSIONS_FORCEUPDATE, hostedSuppressions.forceupdate.getOrNull())
+        settings.setStringIfNotNull(HOSTED_SUPPRESSIONS_URL, hostedSuppressions.url.getOrNull())
+        settings.setStringIfNotNull(HOSTED_SUPPRESSIONS_USER, hostedSuppressions.user.getOrNull())
+        settings.setStringIfNotNull(HOSTED_SUPPRESSIONS_PASSWORD, hostedSuppressions.password.getOrNull())
+        settings.setStringIfNotNull(HOSTED_SUPPRESSIONS_BEARER_TOKEN, hostedSuppressions.bearerToken.getOrNull())
+        if (hostedSuppressions.validForHours.getOrNull() != null) {
+            if (hostedSuppressions.validForHours.getOrNull() >= 0) {
+                settings.setInt(HOSTED_SUPPRESSIONS_VALID_FOR_HOURS, hostedSuppressions.validForHours.getOrNull())
+            } else {
+                throw new InvalidUserDataException('Invalid setting: `validForHours` must be 0 or greater')
+            }
+        }
+
+        settings.setBooleanIfNotNull(ANALYZER_JAR_ENABLED, analyzers.jarEnabled.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_NUSPEC_ENABLED, analyzers.nuspecEnabled.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_ENABLED, select(analyzers.ossIndex.enabled.getOrNull(), analyzers.ossIndexEnabled.getOrNull()))
+        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_WARN_ONLY_ON_REMOTE_ERRORS, analyzers.ossIndex.warnOnlyOnRemoteErrors.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_ENABLED, analyzers.ossIndex.enabled.getOrNull())
+        settings.setStringIfNotEmpty(ANALYZER_OSSINDEX_USER, analyzers.ossIndex.username.getOrNull())
+        settings.setStringIfNotEmpty(ANALYZER_OSSINDEX_PASSWORD, analyzers.ossIndex.password.getOrNull())
+        settings.setStringIfNotEmpty(ANALYZER_OSSINDEX_URL, analyzers.ossIndex.url.getOrNull())
+        settings.setIntIfNotNull(ANALYZER_OSSINDEX_CACHE_VALID_FOR_HOURS, analyzers.ossIndex.validForHours.getOrNull())
+
+        settings.setBooleanIfNotNull(ANALYZER_CENTRAL_ENABLED, analyzers.centralEnabled.getOrNull())
+
+        settings.setBooleanIfNotNull(ANALYZER_NEXUS_ENABLED, analyzers.nexus.enabled.getOrNull())
+        settings.setStringIfNotEmpty(ANALYZER_NEXUS_URL, analyzers.nexus.url.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_NEXUS_USES_PROXY, analyzers.nexus.usesProxy.getOrNull())
+        settings.setStringIfNotNull(ANALYZER_NEXUS_USER, analyzers.nexus.username.getOrNull())
+        settings.setStringIfNotNull(ANALYZER_NEXUS_PASSWORD, analyzers.nexus.password.getOrNull())
+
+        settings.setBooleanIfNotNull(ANALYZER_EXPERIMENTAL_ENABLED, analyzers.experimentalEnabled.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_ARCHIVE_ENABLED, analyzers.archiveEnabled.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_KNOWN_EXPLOITED_ENABLED, analyzers.kev.enabled.getOrNull())
+        settings.setStringIfNotNull(KEV_URL, analyzers.kev.url.getOrNull())
+        settings.setIntIfNotNull(KEV_CHECK_VALID_FOR_HOURS, analyzers.kev.validForHours.getOrNull())
+        settings.setStringIfNotNull(KEV_USER, analyzers.kev.user.getOrNull())
+        settings.setStringIfNotNull(KEV_PASSWORD, analyzers.kev.password.getOrNull())
+        settings.setStringIfNotNull(KEV_BEARER_TOKEN, analyzers.kev.bearerToken.getOrNull())
+        settings.setStringIfNotEmpty(ADDITIONAL_ZIP_EXTENSIONS, analyzers.zipExtensions.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_ASSEMBLY_ENABLED, analyzers.assemblyEnabled.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_MSBUILD_PROJECT_ENABLED, analyzers.msbuildEnabled.getOrNull())
+        settings.setStringIfNotEmpty(ANALYZER_ASSEMBLY_DOTNET_PATH, analyzers.pathToDotnet.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_GOLANG_DEP_ENABLED, analyzers.golangDepEnabled.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_GOLANG_MOD_ENABLED, analyzers.golangModEnabled.getOrNull())
+        settings.setStringIfNotNull(ANALYZER_GOLANG_PATH, analyzers.pathToGo.getOrNull())
+
+        settings.setBooleanIfNotNull(ANALYZER_COCOAPODS_ENABLED, analyzers.cocoapodsEnabled.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_SWIFT_PACKAGE_MANAGER_ENABLED, analyzers.swiftEnabled.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_DART_ENABLED, analyzers.dartEnabled.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_SWIFT_PACKAGE_RESOLVED_ENABLED, analyzers.swiftPackageResolvedEnabled.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_BUNDLE_AUDIT_ENABLED, analyzers.bundleAuditEnabled.getOrNull())
+        settings.setStringIfNotEmpty(ANALYZER_BUNDLE_AUDIT_PATH, analyzers.pathToBundleAudit.getOrNull())
+
+        settings.setBooleanIfNotNull(ANALYZER_PYTHON_DISTRIBUTION_ENABLED, analyzers.pyDistributionEnabled.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_PYTHON_PACKAGE_ENABLED, analyzers.pyPackageEnabled.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_RUBY_GEMSPEC_ENABLED, analyzers.rubygemsEnabled.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_OPENSSL_ENABLED, analyzers.opensslEnabled.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_CMAKE_ENABLED, analyzers.cmakeEnabled.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_AUTOCONF_ENABLED, analyzers.autoconfEnabled.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_COMPOSER_LOCK_ENABLED, analyzers.composerEnabled.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_COMPOSER_LOCK_SKIP_DEV, analyzers.composerSkipDev.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_CPANFILE_ENABLED, analyzers.cpanEnabled.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_NUGETCONF_ENABLED, analyzers.nugetconfEnabled.getOrNull())
+
+        settings.setBooleanIfNotNull(ANALYZER_NODE_PACKAGE_ENABLED, select(analyzers.nodePackage.enabled.getOrNull(), analyzers.nodeEnabled.getOrNull()))
+        settings.setBooleanIfNotNull(ANALYZER_NODE_PACKAGE_SKIPDEV, analyzers.nodePackage.skipDevDependencies.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_ENABLED, select(analyzers.nodeAudit.enabled.getOrNull(), analyzers.nodeAuditEnabled.getOrNull()))
+        settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_USE_CACHE, analyzers.nodeAudit.useCache.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_SKIPDEV, analyzers.nodeAudit.skipDevDependencies.getOrNull())
+        settings.setStringIfNotEmpty(ANALYZER_NODE_AUDIT_URL, analyzers.nodeAudit.url.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_YARN_AUDIT_ENABLED, analyzers.nodeAudit.yarnEnabled.getOrNull())
+        settings.setStringIfNotNull(ANALYZER_YARN_PATH, analyzers.nodeAudit.yarnPath.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_PNPM_AUDIT_ENABLED, analyzers.nodeAudit.pnpmEnabled.getOrNull())
+        settings.setStringIfNotNull(ANALYZER_PNPM_PATH, analyzers.nodeAudit.pnpmPath.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_RETIREJS_ENABLED, analyzers.retirejs.enabled.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_RETIREJS_FORCEUPDATE, analyzers.retirejs.forceupdate.getOrNull())
+        settings.setStringIfNotNull(ANALYZER_RETIREJS_REPO_JS_URL, analyzers.retirejs.retireJsUrl.getOrNull())
+        settings.setStringIfNotNull(ANALYZER_RETIREJS_REPO_JS_USER, analyzers.retirejs.user.getOrNull())
+        settings.setStringIfNotNull(ANALYZER_RETIREJS_REPO_JS_PASSWORD, analyzers.retirejs.password.getOrNull())
+        settings.setStringIfNotNull(ANALYZER_RETIREJS_REPO_JS_BEARER_TOKEN, analyzers.retirejs.bearerToken.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_RETIREJS_FILTER_NON_VULNERABLE, analyzers.retirejs.filterNonVulnerable.getOrNull())
+        settings.setArrayIfNotEmpty(ANALYZER_RETIREJS_FILTERS, analyzers.retirejs.filters.getOrElse([]))
+
+        settings.setBooleanIfNotNull(ANALYZER_ARTIFACTORY_ENABLED, analyzers.artifactory.enabled.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_ARTIFACTORY_PARALLEL_ANALYSIS, analyzers.artifactory.parallelAnalysis.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_ARTIFACTORY_USES_PROXY, analyzers.artifactory.usesProxy.getOrNull())
+        settings.setStringIfNotNull(ANALYZER_ARTIFACTORY_URL, analyzers.artifactory.url.getOrNull())
+        settings.setStringIfNotNull(ANALYZER_ARTIFACTORY_API_TOKEN, analyzers.artifactory.apiToken.getOrNull())
+        settings.setStringIfNotNull(ANALYZER_ARTIFACTORY_API_USERNAME, analyzers.artifactory.username.getOrNull())
+        settings.setStringIfNotNull(ANALYZER_ARTIFACTORY_BEARER_TOKEN, analyzers.artifactory.bearerToken.getOrNull())
+
+        settings.setBooleanIfNotNull(ANALYZER_NODE_AUDIT_USE_CACHE, cache.nodeAudit.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_CENTRAL_USE_CACHE, cache.central.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_OSSINDEX_USE_CACHE, cache.ossIndex.getOrNull())
     }
 
     /**
@@ -96,7 +403,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      */
     @TaskAction
     analyze() {
-        if (config.skip.get()) {
+        if (skip.get()) {
             logger.lifecycle("Skipping dependency-check-gradle")
             return
         }
@@ -107,7 +414,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             engine = new Engine(settings)
         } catch (DatabaseException ex) {
             String msg = "Unable to connect to the dependency-check database"
-            if (config.failOnError.get()) {
+            if (failOnError.get()) {
                 cleanup(engine)
                 throw new GradleException(msg, ex)
             } else {
@@ -121,7 +428,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             try {
                 engine.analyzeDependencies()
             } catch (ExceptionCollection ex) {
-                if (config.failOnError.get() || ex.isFatal()) {
+                if (failOnError.get() || ex.isFatal()) {
                     cleanup(engine)
                     throw new GradleException("Analysis failed.", ex)
                 }
@@ -135,7 +442,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                 String groupId = project.getGroup()
                 String version = project.getVersion().toString()
                 File output = outputDir.get().asFile
-                for (String f : getReportFormats(config.format.get(), config.formats.get())) {
+                for (String f : getReportFormats(format.get(), formats.get())) {
                     engine.writeReports(displayName, groupId, name, version, output, f, exCol)
                 }
                 showSummary(engine)
@@ -145,7 +452,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                     throw new GradleException(result.msg)
                 }
             } catch (ReportException ex) {
-                if (config.failOnError.get()) {
+                if (failOnError.get()) {
                     if (exCol != null) {
                         exCol.addException(ex)
                         throw new GradleException("Error generating the report", exCol)
@@ -158,7 +465,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             } finally {
                 cleanup(engine)
             }
-            if (config.failOnError.get() && exCol != null && exCol.getExceptions().size() > 0) {
+            if (failOnError.get() && exCol != null && exCol.getExceptions().size() > 0) {
                 throw new GradleException("One or more exceptions occurred during analysis", exCol)
             }
         }
@@ -168,13 +475,13 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * Verifies aspects of the configuration to ensure dependency-check can run correctly.
      */
     def verifySettings() {
-        if (!config.scanDependencies.get() && !config.scanBuildEnv.get()) {
+        if (!scanDependencies.get() && !scanBuildEnv.get()) {
             throw new IllegalArgumentException("At least one of scanDependencies or scanBuildEnv must be set to true")
         }
-        if (!config.scanConfigurations.get().isEmpty() && !config.skipConfigurations.get().isEmpty()) {
+        if (!scanConfigurations.get().isEmpty() && !skipConfigurations.get().isEmpty()) {
             throw new IllegalArgumentException("you can only specify one of scanConfigurations or skipConfigurations")
         }
-        if (!config.scanProjects.get().isEmpty() && !config.skipProjects.get().isEmpty()) {
+        if (!scanProjects.get().isEmpty() && !skipProjects.get().isEmpty()) {
             throw new IllegalArgumentException("you can only specify one of scanProjects or skipProjects")
         }
     }
@@ -235,7 +542,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         }.flatten()
 
         logger.warn("Found ${vulnerabilities.size()} vulnerabilities in project ${currentProjectName}")
-        if (config.showSummary.get()) {
+        if (showSummary.get()) {
             DependencyCheckScanAgent.showSummary(project.name, engine.getDependencies())
         }
     }
@@ -245,7 +552,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * score higher than the failure threshold configured.
      */
     CheckForFailureResult checkForFailure(Engine engine) {
-        if (config.failBuildOnCVSS.get() > 10) {
+        if (failBuildOnCVSS.get() > 10) {
             return CheckForFailureResult.createSuccess()
         }
 
@@ -260,12 +567,12 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                         && v.getCvssV4().getCvssData().getBaseScore() != null ? v.getCvssV4().getCvssData().getBaseScore() : -1
                 final boolean useUnscored = cvssV2 == -1 && cvssV3 == -1 && cvssV4 == -1
                 final double unscoredCvss = (useUnscored && v.getUnscoredSeverity() != null) ? SeverityUtil.estimateCvssV2(v.getUnscoredSeverity()) : -1
-                if (cvssV2 >= config.failBuildOnCVSS.get()
-                        || cvssV3 >= config.failBuildOnCVSS.get()
-                        || cvssV4 >= config.failBuildOnCVSS.get()
-                        || useUnscored && unscoredCvss >= config.failBuildOnCVSS.get()
+                if (cvssV2 >= failBuildOnCVSS.get()
+                        || cvssV3 >= failBuildOnCVSS.get()
+                        || cvssV4 >= failBuildOnCVSS.get()
+                        || useUnscored && unscoredCvss >= failBuildOnCVSS.get()
                         //safety net to fail on any if for some reason the above misses on 0
-                        || (config.failBuildOnCVSS.get() <= 0.0f)) {
+                        || (failBuildOnCVSS.get() <= 0.0f)) {
                     vulnerabilities.add(v.getName())
                 }
             }
@@ -274,7 +581,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         if (vulnerabilities.size() > 0) {
             final String msg = String.format("%n%nDependency-Analyze Failure:%n"
                     + "One or more dependencies were identified with vulnerabilities that have a CVSS score greater than '%.1f': %s%n"
-                    + "See the dependency-check report for more details.%n%n", config.failBuildOnCVSS.get(), vulnerabilities.join(", "))
+                    + "See the dependency-check report for more details.%n%n", failBuildOnCVSS.get(), vulnerabilities.join(", "))
             return CheckForFailureResult.createFailed(msg)
         } else {
             return CheckForFailureResult.createSuccess()
@@ -336,7 +643,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * project's path.
      */
     private shouldBeScanned(Project project) {
-        config.scanProjects.get().isEmpty() || config.scanProjects.get().contains(project.path)
+        scanProjects.get().isEmpty() || scanProjects.get().contains(project.path)
     }
 
     /**
@@ -344,7 +651,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * because skipProjects contains the project's path.
      */
     private shouldBeSkipped(Project project) {
-        config.skipProjects.get().contains(project.path)
+        skipProjects.get().contains(project.path)
     }
 
     /**
@@ -353,7 +660,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * configuration's name.
      */
     private shouldBeScanned(Configuration configuration) {
-        config.scanConfigurations.get().isEmpty() || config.scanConfigurations.get().contains(nameOf(configuration))
+        scanConfigurations.get().isEmpty() || scanConfigurations.get().contains(nameOf(configuration))
     }
 
     /**
@@ -361,7 +668,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * because skipConfigurations contains the configuration's name.
      */
     private shouldBeSkipped(Configuration configuration) {
-        config.skipConfigurations.get().contains(nameOf(configuration))
+        skipConfigurations.get().contains(nameOf(configuration))
     }
 
     /**
@@ -370,7 +677,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      */
     private shouldBeSkipped(ResolvedArtifactResult artifact) {
         def name = artifact.id.componentIdentifier.displayName
-        config.skipGroups.get().any { name.startsWith(it) }
+        skipGroups.get().any { name.startsWith(it) }
     }
 
     /**
@@ -378,7 +685,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
      * because it is a test configuration and skipTestGroups is true.
      */
     private shouldBeSkippedAsTest(Configuration configuration) {
-        config.skipTestGroups.get() && isTestConfiguration(configuration)
+        skipTestGroups.get() && isTestConfiguration(configuration)
     }
 
     /**
@@ -465,7 +772,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         project.configurations.matching(this.&shouldProcess).toList().each { Configuration configuration ->
             processConfig project, configuration, engine, false
         }
-        if (!config.isScanSetConfigured()) {
+        if (!defaults.isScanSetConfigured()) {
             List<String> toScan = ['src/main/resources', 'src/main/webapp',
                                    './package.json', './package-lock.json',
                                    './npm-shrinkwrap.json', './yarn.lock',
@@ -477,7 +784,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
                 }
             }
         } else {
-            config.scanSet.each {
+            defaults.scanSet.each {
                 File f = project.file it
                 if (f.exists()) {
                     engine.scan(f, project.name)
@@ -487,7 +794,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             }
         }
 
-        config.additionalCpes.each {
+        defaults.additionalCpes.each {
             def dependency = new Dependency(true)
             dependency.setDescription(it.description.getOrNull())
             dependency.setDisplayFileName(it.cpe.getOrNull())
@@ -579,7 +886,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         }
         Map<PackageURL, Set<IncludedByReference>> includedByMap = buildIncludedByMap(project, configuration, scanningBuildEnv)
 
-        def types = config.analyzedTypes.get()
+        def types = analyzedTypes.get()
         for (String type : types) {
             List<ResolvedArtifactResult> rar = configuration.incoming.artifactView {
                 it.setLenient(true)
@@ -680,5 +987,27 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             p = pb.build()
         }
         return p
+    }
+
+    private void configureSlack(org.owasp.dependencycheck.utils.Settings settings) {
+        settings.setBooleanIfNotNull(SlackNotificationSenderService.SLACK__WEBHOOK__ENABLED, slack.enabled.getOrNull())
+        settings.setStringIfNotEmpty(SlackNotificationSenderService.SLACK__WEBHOOK__URL, slack.webhookUrl.getOrNull())
+    }
+
+    private String[] determineSuppressions(Collection<String> suppressionFiles, String suppressionFile) {
+        List<String> files = []
+        if (suppressionFiles != null) {
+            for (String sf : suppressionFiles) {
+                files.add(sf.toString())
+            }
+        }
+        if (suppressionFile != null) {
+            files.add(suppressionFile)
+        }
+        return files.toArray(new String[0])
+    }
+
+    private Boolean select(Boolean current, Boolean deprecated) {
+        return current != null ? current : deprecated
     }
 }

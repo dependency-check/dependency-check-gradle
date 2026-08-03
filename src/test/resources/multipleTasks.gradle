@@ -1,0 +1,44 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'org.owasp.dependencycheck'
+    id 'java'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+}
+version = '1.0'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    implementation group: 'commons-collections', name: 'commons-collections', version: '3.2'
+    testImplementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-xml', version: '2.7.0'
+}
+
+dependencyCheck {
+    format = 'csv'
+    analyzers.ossIndex.enabled = false
+    nvd.datafeedUrl = 'https://dependency-check.github.io/DependencyCheck/hb_nvd/'
+}
+
+def dependencyCheckAnalyzeTest = tasks.register('dependencyCheckAnalyzeTest', org.owasp.dependencycheck.gradle.tasks.Analyze) {
+    outputDir = project.layout.buildDirectory.dir("reports/dependency-check/test")
+    scanConfigurations = ['testRuntimeClasspath']
+    skipTestGroups = false
+}
+
+tasks.dependencyCheckAnalyze {
+    outputDir = project.layout.buildDirectory.dir("reports/dependency-check/main")
+    scanConfigurations = ['runtimeClasspath']
+    dependsOn dependencyCheckAnalyzeTest
+}
