@@ -41,8 +41,7 @@ class DataExtension {
 
     @Inject
     DataExtension(ObjectFactory objects, Project project) {
-        this.directory = objects.property(String)
-        this.directory.set("${project.gradle.gradleUserHomeDir}/dependency-check-data/11.0".toString())
+        this.directory = objects.property(String).convention("${project.gradle.gradleUserHomeDir}/dependency-check-data/11.0".toString())
         this.connectionString = objects.property(String)
         this.username = objects.property(String)
         this.password = objects.property(String)

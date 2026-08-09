@@ -20,11 +20,12 @@ package org.owasp.dependencycheck.gradle
 
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.reporting.ReportingExtension
 import org.gradle.testfixtures.ProjectBuilder
 import org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension
 import org.owasp.dependencycheck.gradle.extension.NexusExtension
 import org.owasp.dependencycheck.gradle.extension.OssIndexExtension
+import org.owasp.dependencycheck.gradle.tasks.AbstractAnalyze
+import org.owasp.dependencycheck.gradle.tasks.ConfiguredTask
 import org.owasp.dependencycheck.utils.Settings
 import spock.lang.Specification
 
@@ -83,7 +84,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
         task.group == 'OWASP dependency-check'
         task.description == 'Identifies and reports known vulnerabilities (CVEs) in project dependencies.'
 
-        with(project.dependencyCheck as DependencyCheckExtension) {
+        verifyAll(project.dependencyCheck as DependencyCheckExtension) {
             proxy.server.getOrNull() == null
             proxy.port.getOrNull() == null
             proxy.username.getOrNull() == null
@@ -105,10 +106,12 @@ class DependencyCheckGradlePluginSpec extends Specification {
     }
 
     def 'tasks use correct values when extension is used'() {
-        given:
-        def slackWebhookUrl = 'https://slack.com/webhook'
         when:
         project.getExtensions().findByType(DependencyCheckExtension).with {
+            autoUpdate = false
+            data.directory = project.layout.buildDirectory.dir('custom-data').get().toString()
+            data.password = 'password'
+
             proxy.server = '127.0.0.1'
             proxy.port = 3128
             proxy.username = 'proxyUsername'
@@ -127,7 +130,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
             hostedSuppressions.forceupdate = true
 
             slack.enabled = true
-            slack.webhookUrl = slackWebhookUrl
+            slack.webhookUrl = 'https://slack.com/webhook'
 
             analyzers.artifactory.enabled = true
             analyzers.artifactory.url = 'https://example.com/artifacgtory'
@@ -171,7 +174,11 @@ class DependencyCheckGradlePluginSpec extends Specification {
         }
 
         then:
-        with(project.dependencyCheck as DependencyCheckExtension) {
+        verifyEach(project.tasks.withType(ConfiguredTask)) {
+            autoUpdate.get() == false
+            data.directory.get() == project.layout.buildDirectory.dir('custom-data').get().toString()
+            data.password.get() == 'password'
+
             proxy.server.get() == '127.0.0.1'
             proxy.port.get() == 3128
             proxy.username.get() == 'proxyUsername'
@@ -184,10 +191,13 @@ class DependencyCheckGradlePluginSpec extends Specification {
             nvd.apiKey.get() == 'apiKey'
             nvd.delay.get() == 5000
             nvd.maxRetryCount.get() == 20
+        }
+
+        verifyEach(project.tasks.withType(AbstractAnalyze)) {
             hostedSuppressions.url.get() == 'suppressionsurl'
             hostedSuppressions.validForHours.get() == 5
             hostedSuppressions.forceupdate.get() == true
-            outputDirectory.get().asFile == project.layout.buildDirectory.dir('reports/outputDirectory').get().asFile
+            outputDir.get().asFile == project.layout.buildDirectory.dir('reports/outputDirectory').get().asFile
             scanConfigurations.get() == ['a']
             skipConfigurations.get() == ['b']
             scanProjects.get() == ['a']
@@ -195,9 +205,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
             skipGroups.get() == ['b']
             skipTestGroups.get() == false
             suppressionFile.get() == './src/config/suppression.xml'
-            suppressionFiles.get().getAt(0) == './src/config/suppression1.xml'
-            suppressionFiles.get().getAt(1) == './src/config/suppression2.xml'
-            //suppressionFiles == ['./src/config/suppression1.xml', './src/config/suppression2.xml']
+            suppressionFiles.get() == ['./src/config/suppression1.xml', './src/config/suppression2.xml']
             suppressionFileUser.get() == 'suppressionFileUsername'
             suppressionFilePassword.get() == 'suppressionFilePassword'
             analyzers.artifactory.enabled.get() == true
@@ -208,7 +216,10 @@ class DependencyCheckGradlePluginSpec extends Specification {
             analyzers.retirejs.filters.get() == ['filter1', 'filter2']
             analyzers.retirejs.filterNonVulnerable.get() == true
             slack.enabled.get() == true
-            slack.webhookUrl.get() == slackWebhookUrl
+            slack.webhookUrl.get() == 'https://slack.com/webhook'
+        }
+
+        verifyAll(project.dependencyCheck as DependencyCheckExtension) {
             additionalCpes.size() == 3
             additionalCpes.getByName('additional1').description.get() == 'Additional1'
             additionalCpes.getByName('additional1').cpe.get() == 'cpe:2.3:a:aGroup1:aPackage1:123:*:*:*:*:*:*:*'
@@ -251,7 +262,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
         task.initializeSettings()
 
         then:
-        with(task.settings as Settings) {
+        verifyAll(task.settings as Settings) {
             getBoolean(ANALYZER_NEXUS_ENABLED)
             getBoolean(ANALYZER_NEXUS_USES_PROXY)
             getString(ANALYZER_NEXUS_URL) == 'https://nexus'
@@ -281,7 +292,7 @@ class DependencyCheckGradlePluginSpec extends Specification {
         task.initializeSettings()
 
         then:
-        with(task.settings as Settings) {
+        verifyAll(task.settings as Settings) {
             getBoolean(ANALYZER_OSSINDEX_ENABLED)
             getString(ANALYZER_OSSINDEX_URL) == 'https://ossindex'
             getString(ANALYZER_OSSINDEX_USER) == 'user'
