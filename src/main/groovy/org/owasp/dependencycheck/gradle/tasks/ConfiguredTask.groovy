@@ -18,21 +18,19 @@
 
 package org.owasp.dependencycheck.gradle.tasks
 
-import com.google.common.base.Strings
 import groovy.transform.CompileStatic
 import org.gradle.api.DefaultTask
-import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Nested
+import org.owasp.dependencycheck.gradle.DependencyCheckPlugin
 import org.owasp.dependencycheck.gradle.extension.DataExtension
 import org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension
 import org.owasp.dependencycheck.gradle.extension.NvdExtension
-import org.owasp.dependencycheck.gradle.extension.ProxyExtension
 import org.owasp.dependencycheck.utils.Downloader
 import org.owasp.dependencycheck.utils.Settings
 
 import java.time.Duration
-import javax.inject.Inject
 
 import static org.owasp.dependencycheck.utils.Settings.KEYS.*
 
@@ -43,7 +41,6 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.*
  */
 @CompileStatic
 abstract class ConfiguredTask extends DefaultTask {
-
     @Internal
     DependencyCheckExtension defaults
     @Internal
@@ -60,31 +57,18 @@ abstract class ConfiguredTask extends DefaultTask {
     @Internal
     final Property<Duration> readTimeout
 
-    @Internal
-    ProxyExtension proxy
-    @Internal
-    NvdExtension nvd
-    @Internal
-    DataExtension data
+    @Nested abstract NvdExtension getNvd()
+    @Nested abstract DataExtension getData()
 
-    @Inject
-    ConfiguredTask(ObjectFactory objects) {
-        def defaults = (DependencyCheckExtension) project.getExtensions().findByName('dependencyCheck')
-        this.defaults = defaults
+    ConfiguredTask() {
+        this.defaults = project.extensions.getByName(DependencyCheckPlugin.CHECK_EXTENSION_NAME) as DependencyCheckExtension
+        def objects = project.objects
 
         this.autoUpdate = objects.property(Boolean).convention(defaults.autoUpdate)
         this.failOnError = objects.property(Boolean).convention(defaults.failOnError)
         this.connectionTimeout = objects.property(Duration).convention(defaults.connectionTimeout)
         this.readTimeout = objects.property(Duration).convention(defaults.readTimeout)
 
-        this.proxy = objects.newInstance(ProxyExtension, objects)
-        proxy.server.convention(defaults.proxy.server)
-        proxy.port.convention(defaults.proxy.port)
-        proxy.username.convention(defaults.proxy.username)
-        proxy.password.convention(defaults.proxy.password)
-        proxy.nonProxyHosts.convention(defaults.proxy.nonProxyHosts)
-
-        this.nvd = objects.newInstance(NvdExtension, objects)
         nvd.apiKey.convention(defaults.nvd.apiKey)
         nvd.endpoint.convention(defaults.nvd.endpoint)
         nvd.delay.convention(defaults.nvd.delay)
@@ -97,7 +81,6 @@ abstract class ConfiguredTask extends DefaultTask {
         nvd.datafeedBearerToken.convention(defaults.nvd.datafeedBearerToken)
         nvd.datafeedStartYear.convention(defaults.nvd.datafeedStartYear)
 
-        this.data = objects.newInstance(DataExtension, objects, project)
         data.directory.convention(defaults.data.directory)
         data.connectionString.convention(defaults.data.connectionString)
         data.username.convention(defaults.data.username)
@@ -156,42 +139,26 @@ abstract class ConfiguredTask extends DefaultTask {
     }
 
     private void configureProxy(Settings settings) {
-        String proxyServer = proxy.server.getOrNull()
-        Integer proxyPort = proxy.port.getOrNull()
-        String proxyUser = proxy.username.getOrNull()
-        String proxyPass = proxy.password.getOrNull()
-        List<String> nonProxyHostsList = proxy.nonProxyHosts.getOrElse([])
-
-        // Fall back to system properties if not configured
         String sysProxyHost = System.getProperty("https.proxyHost", System.getProperty("http.proxyHost"))
-        if (!Strings.isNullOrEmpty(sysProxyHost) && proxyServer == null) {
-            proxyServer = sysProxyHost
+        if (sysProxyHost) {
             String sysProxyPort = System.getProperty("https.proxyPort", System.getProperty("http.proxyPort"))
-            if (sysProxyPort != null) {
+            if (sysProxyPort) {
                 try {
-                    proxyPort = Integer.parseInt(sysProxyPort)
-                } catch (NumberFormatException nfe) {
+                    Integer.parseInt(sysProxyPort)
+                } catch (NumberFormatException ignored) {
                     logger.warn("Unable to convert the configured `http.proxyPort` to a number: ${sysProxyPort}")
                 }
             }
             String sysProxyUser = System.getProperty("https.proxyUser", System.getProperty("http.proxyUser"))
-            if (!Strings.isNullOrEmpty(sysProxyUser)) {
-                proxyUser = sysProxyUser
-            }
             String sysProxyPassword = System.getProperty("https.proxyPassword", System.getProperty("http.proxyPassword"))
-            if (!Strings.isNullOrEmpty(sysProxyPassword)) {
-                proxyPass = sysProxyPassword
-            }
             String sysNonProxyHosts = System.getProperty("https.nonProxyHosts", System.getProperty("http.nonProxyHosts"))
-            if (!Strings.isNullOrEmpty(sysNonProxyHosts)) {
-                nonProxyHostsList = sysNonProxyHosts.tokenize("|")
-            }
+            settings.setStringIfNotEmpty(PROXY_SERVER, sysProxyHost)
+            settings.setStringIfNotEmpty(PROXY_PORT, sysProxyPort)
+            settings.setStringIfNotEmpty(PROXY_USERNAME, sysProxyUser)
+            settings.setStringIfNotEmpty(PROXY_PASSWORD, sysProxyPassword)
+            settings.setStringIfNotEmpty(PROXY_NON_PROXY_HOSTS, sysNonProxyHosts?.tokenize("|")?.join("|"))
         }
 
-        settings.setStringIfNotEmpty(PROXY_SERVER, proxyServer)
-        settings.setStringIfNotEmpty(PROXY_PORT, proxyPort?.toString())
-        settings.setStringIfNotEmpty(PROXY_USERNAME, proxyUser)
-        settings.setStringIfNotEmpty(PROXY_PASSWORD, proxyPass)
-        settings.setStringIfNotEmpty(PROXY_NON_PROXY_HOSTS, nonProxyHostsList ? nonProxyHostsList.join("|") : null)
+
     }
 }

@@ -18,6 +18,7 @@
 
 package org.owasp.dependencycheck.gradle.extension
 
+import groovy.transform.CompileStatic
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -25,9 +26,9 @@ import org.gradle.api.tasks.Optional
 
 import javax.inject.Inject
 
-@groovy.transform.CompileStatic
-class NvdExtension {
-
+@CompileStatic
+abstract class NvdExtension {
+    @Inject abstract ObjectFactory getObjects()
     private final Property<String> apiKey
     private final Property<Integer> delay
     private final Property<Integer> resultsPerPage
@@ -40,8 +41,7 @@ class NvdExtension {
     private final Property<Integer> validForHours
     private final Property<String> endpoint
 
-    @Inject
-    NvdExtension(ObjectFactory objects) {
+    NvdExtension() {
         this.apiKey = objects.property(String)
         this.delay = objects.property(Integer)
         this.resultsPerPage = objects.property(Integer)
