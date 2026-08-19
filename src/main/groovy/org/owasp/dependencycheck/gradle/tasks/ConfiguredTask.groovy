@@ -72,17 +72,10 @@ abstract class ConfiguredTask extends DefaultTask {
         def defaults = (DependencyCheckExtension) project.getExtensions().findByName('dependencyCheck')
         this.defaults = defaults
 
-        this.autoUpdate = objects.property(Boolean)
-        this.autoUpdate.convention(defaults.autoUpdate)
-
-        this.failOnError = objects.property(Boolean)
-        this.failOnError.convention(defaults.failOnError)
-
-        this.connectionTimeout = objects.property(Duration)
-        this.connectionTimeout.convention(defaults.connectionTimeout)
-
-        this.readTimeout = objects.property(Duration)
-        this.readTimeout.convention(defaults.readTimeout)
+        this.autoUpdate = objects.property(Boolean).convention(defaults.autoUpdate)
+        this.failOnError = objects.property(Boolean).convention(defaults.failOnError)
+        this.connectionTimeout = objects.property(Duration).convention(defaults.connectionTimeout)
+        this.readTimeout = objects.property(Duration).convention(defaults.readTimeout)
 
         this.proxy = objects.newInstance(ProxyExtension, objects)
         proxy.server.convention(defaults.proxy.server)

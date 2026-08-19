@@ -43,7 +43,7 @@ class RetireJSExtension {
     @Inject
     RetireJSExtension(ObjectFactory objects) {
         this.enabled = objects.property(Boolean)
-        this.filters = objects.listProperty(String).empty()
+        this.filters = objects.listProperty(String).convention([])
         this.filterNonVulnerable = objects.property(Boolean)
         this.retireJsUrl = objects.property(String)
         this.user = objects.property(String)

@@ -46,7 +46,7 @@ class ProxyExtension {
         this.port = objects.property(Integer)
         this.username = objects.property(String)
         this.password = objects.property(String)
-        this.nonProxyHosts = objects.listProperty(String).empty()
+        this.nonProxyHosts = objects.listProperty(String).convention([])
     }
 
     @Input
