@@ -18,12 +18,12 @@
 
 package org.owasp.dependencycheck.gradle.tasks
 
-import com.google.common.base.Strings
 import groovy.transform.CompileStatic
 import org.gradle.api.DefaultTask
-import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Nested
+import org.owasp.dependencycheck.gradle.DependencyCheckPlugin
 import org.owasp.dependencycheck.gradle.extension.DataExtension
 import org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension
 import org.owasp.dependencycheck.gradle.extension.NvdExtension
@@ -31,7 +31,6 @@ import org.owasp.dependencycheck.utils.Downloader
 import org.owasp.dependencycheck.utils.Settings
 
 import java.time.Duration
-import javax.inject.Inject
 
 import static org.owasp.dependencycheck.utils.Settings.KEYS.*
 
@@ -42,7 +41,6 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.*
  */
 @CompileStatic
 abstract class ConfiguredTask extends DefaultTask {
-
     @Internal
     DependencyCheckExtension defaults
     @Internal
@@ -59,22 +57,18 @@ abstract class ConfiguredTask extends DefaultTask {
     @Internal
     final Property<Duration> readTimeout
 
-    @Internal
-    NvdExtension nvd
-    @Internal
-    DataExtension data
+    @Nested abstract NvdExtension getNvd()
+    @Nested abstract DataExtension getData()
 
-    @Inject
-    ConfiguredTask(ObjectFactory objects) {
-        def defaults = (DependencyCheckExtension) project.getExtensions().findByName('dependencyCheck')
-        this.defaults = defaults
+    ConfiguredTask() {
+        this.defaults = project.extensions.getByName(DependencyCheckPlugin.CHECK_EXTENSION_NAME) as DependencyCheckExtension
+        def objects = project.objects
 
         this.autoUpdate = objects.property(Boolean).convention(defaults.autoUpdate)
         this.failOnError = objects.property(Boolean).convention(defaults.failOnError)
         this.connectionTimeout = objects.property(Duration).convention(defaults.connectionTimeout)
         this.readTimeout = objects.property(Duration).convention(defaults.readTimeout)
 
-        this.nvd = objects.newInstance(NvdExtension, objects)
         nvd.apiKey.convention(defaults.nvd.apiKey)
         nvd.endpoint.convention(defaults.nvd.endpoint)
         nvd.delay.convention(defaults.nvd.delay)
@@ -87,7 +81,6 @@ abstract class ConfiguredTask extends DefaultTask {
         nvd.datafeedBearerToken.convention(defaults.nvd.datafeedBearerToken)
         nvd.datafeedStartYear.convention(defaults.nvd.datafeedStartYear)
 
-        this.data = objects.newInstance(DataExtension, objects, project)
         data.directory.convention(defaults.data.directory)
         data.connectionString.convention(defaults.data.connectionString)
         data.username.convention(defaults.data.username)
@@ -147,9 +140,9 @@ abstract class ConfiguredTask extends DefaultTask {
 
     private void configureProxy(Settings settings) {
         String sysProxyHost = System.getProperty("https.proxyHost", System.getProperty("http.proxyHost"))
-        if (!Strings.isNullOrEmpty(sysProxyHost)) {
+        if (sysProxyHost) {
             String sysProxyPort = System.getProperty("https.proxyPort", System.getProperty("http.proxyPort"))
-            if (sysProxyPort != null) {
+            if (sysProxyPort) {
                 try {
                     Integer.parseInt(sysProxyPort)
                 } catch (NumberFormatException ignored) {

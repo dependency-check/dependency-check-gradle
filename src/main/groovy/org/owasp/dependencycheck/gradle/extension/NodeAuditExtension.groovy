@@ -17,6 +17,7 @@
  */
 package org.owasp.dependencycheck.gradle.extension
 
+import groovy.transform.CompileStatic
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -27,9 +28,9 @@ import javax.inject.Inject
 /**
  * The configuration for the Node Audit Analyzer.
  */
-@groovy.transform.CompileStatic
-class NodeAuditExtension {
-
+@CompileStatic
+abstract class NodeAuditExtension {
+    @Inject abstract ObjectFactory getObjects()
     private final Property<Boolean> enabled
     private final Property<Boolean> useCache
     private final Property<Boolean> skipDevDependencies
@@ -39,8 +40,7 @@ class NodeAuditExtension {
     private final Property<String> pnpmPath
     private final Property<String> url
 
-    @Inject
-    NodeAuditExtension(ObjectFactory objects) {
+    NodeAuditExtension() {
         this.enabled = objects.property(Boolean)
         this.useCache = objects.property(Boolean)
         this.skipDevDependencies = objects.property(Boolean)

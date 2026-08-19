@@ -17,11 +17,12 @@
  */
 package org.owasp.dependencycheck.gradle.extension
 
+import groovy.transform.CompileStatic
 import org.gradle.api.Action
-import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 
 import javax.inject.Inject
@@ -29,9 +30,9 @@ import javax.inject.Inject
 /**
  * The analyzer configuration extension. Any value not configured will use the dependency-check-core defaults.
  */
-@groovy.transform.CompileStatic
-class AnalyzerExtension {
-
+@CompileStatic
+abstract class AnalyzerExtension {
+    @Inject abstract ObjectFactory getObjects()
     private final Property<Boolean> experimentalEnabled
     private final Property<Boolean> archiveEnabled
     private final Property<String> zipExtensions
@@ -61,11 +62,7 @@ class AnalyzerExtension {
     private final Property<Boolean> cpanEnabled
     private final Property<Boolean> nugetconfEnabled
 
-    Project project;
-
-    @Inject
-    AnalyzerExtension(Project project, ObjectFactory objects) {
-        this.project = project
+    AnalyzerExtension() {
         this.experimentalEnabled = objects.property(Boolean)
         this.archiveEnabled = objects.property(Boolean)
         this.zipExtensions = objects.property(String)
@@ -94,13 +91,6 @@ class AnalyzerExtension {
         this.composerSkipDev = objects.property(Boolean)
         this.cpanEnabled = objects.property(Boolean)
         this.nugetconfEnabled = objects.property(Boolean)
-        kev = objects.newInstance(KEVExtension, objects)
-        retirejs = objects.newInstance(RetireJSExtension, objects)
-        nodeAudit = objects.newInstance(NodeAuditExtension, objects)
-        nodePackage = objects.newInstance(NodePackageExtension, objects)
-        artifactory = objects.newInstance(ArtifactoryExtension, objects)
-        ossIndex = objects.newInstance(OssIndexExtension, objects)
-        nexus = objects.newInstance(NexusExtension)
     }
 
     /**
@@ -471,37 +461,37 @@ class AnalyzerExtension {
     /**
      * The configuration extension for known exploited vulnerabilities settings.
      */
-    KEVExtension kev
+    @Nested abstract KEVExtension getKev()
 
     /**
      * The configuration extension for retirejs settings.
      */
-    RetireJSExtension retirejs
+    @Nested abstract RetireJSExtension getRetirejs()
 
     /**
      * The configuration extension for the node audit settings.
      */
-    NodeAuditExtension nodeAudit
+    @Nested abstract NodeAuditExtension getNodeAudit()
 
     /**
      * The configuration extension for the node package settings.
      */
-    NodePackageExtension nodePackage
+    @Nested abstract NodePackageExtension getNodePackage()
 
     /**
      * The configuration extension for artifactory settings.
      */
-    ArtifactoryExtension artifactory
+    @Nested abstract ArtifactoryExtension getArtifactory()
 
     /**
      * The configuration extension for artifactory settings.
      */
-    OssIndexExtension ossIndex
+    @Nested abstract OssIndexExtension getOssIndex()
 
     /**
      * Nexus configuration extension.
      */
-    NexusExtension nexus
+    @Nested abstract NexusExtension getNexus()
 
     /**
      * Allows programmatic configuration of the KEV extension

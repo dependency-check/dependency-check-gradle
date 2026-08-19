@@ -18,17 +18,18 @@
 
 package org.owasp.dependencycheck.gradle.extension
 
+import groovy.transform.CompileStatic
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectContainer
-import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.reporting.ReportingExtension
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 
 import javax.inject.Inject
@@ -44,10 +45,11 @@ import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
  * @author Jeremy Long
  */
 
-@groovy.transform.CompileStatic
-class DependencyCheckExtension {
+@CompileStatic
+abstract class DependencyCheckExtension {
 
-    Project project;
+    @Inject abstract ObjectFactory getObjects()
+    @Inject abstract ProjectLayout getLayout()
 
     private final Property<Boolean> scanBuildEnv
     private final Property<Boolean> scanDependencies
@@ -84,48 +86,43 @@ class DependencyCheckExtension {
     /**
      * The configuration extension for slack notifications.
      */
-    SlackExtension slack
+    @Nested abstract SlackExtension getSlack()
 
     /**
      * The configuration extension that defines the location of the NVD CVE data.
      */
-    NvdExtension nvd
+    @Nested abstract NvdExtension getNvd()
 
     /**
      * The configuration extension that configures the hosted suppressions file.
      */
-    HostedSuppressionsExtension hostedSuppressions
+    @Nested abstract HostedSuppressionsExtension getHostedSuppressions()
 
     /**
      * The configuration extension for data related configuration options.
      */
-    DataExtension data
+    @Nested abstract DataExtension getData()
 
     /**
      * Configuration for the analyzers.
      */
-    AnalyzerExtension analyzers
+    @Nested abstract AnalyzerExtension getAnalyzers()
 
     /**
      * Additional CPE to be analyzed.
      */
-    NamedDomainObjectContainer<AdditionalCpe> additionalCpes
+    @Nested abstract NamedDomainObjectContainer<AdditionalCpe> getAdditionalCpes()
 
     /**
      * The configuration extension for cache settings.
      */
-    CacheExtension cache
+    @Nested abstract CacheExtension getCache()
 
-    @Inject
-    DependencyCheckExtension(Project project, ObjectFactory objects) {
-        this.project = project;
-
-        def reporting = project.extensions.getByType(ReportingExtension)
-
+    DependencyCheckExtension() {
         this.scanBuildEnv = objects.property(Boolean).convention(false)
         this.scanDependencies = objects.property(Boolean).convention(true)
         this.failOnError = objects.property(Boolean).convention(true)
-        this.outputDirectory = objects.directoryProperty().convention(reporting.baseDirectory.dir("dependency-check"))
+        this.outputDirectory = objects.directoryProperty()
         this.suppressionFile = objects.property(String)
         this.suppressionFiles = objects.listProperty(String).convention([])
         this.suppressionFileUser = objects.property(String)
@@ -150,14 +147,6 @@ class DependencyCheckExtension {
         this.scanSet = objects.fileCollection()
         this.connectionTimeout = objects.property(Duration)
         this.readTimeout = objects.property(Duration)
-
-        cache = objects.newInstance(CacheExtension, objects)
-        slack = objects.newInstance(SlackExtension, objects)
-        nvd = objects.newInstance(NvdExtension, objects)
-        hostedSuppressions = objects.newInstance(HostedSuppressionsExtension, objects)
-        data = objects.newInstance(DataExtension, objects, project)
-        analyzers = objects.newInstance(AnalyzerExtension, project, objects)
-        additionalCpes = project.objects.domainObjectContainer(AdditionalCpe.class)
     }
 
     /**
@@ -209,7 +198,7 @@ class DependencyCheckExtension {
     }
 
     void setOutputDirectory(String value) {
-        outputDirectory.set(project.file(value))
+        outputDirectory.set(layout.projectDirectory.file(value).asFile)
     }
 
     void setOutputDirectory(File value) {

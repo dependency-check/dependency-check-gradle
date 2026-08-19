@@ -20,13 +20,10 @@ package org.owasp.dependencycheck.gradle.tasks
 
 import groovy.transform.CompileStatic
 import org.gradle.api.GradleException
-import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.TaskAction
 import org.owasp.dependencycheck.Engine
 import org.owasp.dependencycheck.data.nvdcve.DatabaseException
 import org.owasp.dependencycheck.data.update.exception.UpdateException
-
-import javax.inject.Inject
 
 import static org.owasp.dependencycheck.utils.Settings.KEYS.AUTO_UPDATE
 
@@ -36,14 +33,12 @@ import static org.owasp.dependencycheck.utils.Settings.KEYS.AUTO_UPDATE
  * @author Jeremy Long
  */
 @CompileStatic
-class Update extends ConfiguredTask {
+abstract class Update extends ConfiguredTask {
 
     /**
      * Initializes the update task.
      */
-    @Inject
-    Update(ObjectFactory objects) {
-        super(objects)
+    Update() {
         group = 'OWASP dependency-check'
         description = 'Downloads and stores updates from the NVD CVE data feeds.'
     }
