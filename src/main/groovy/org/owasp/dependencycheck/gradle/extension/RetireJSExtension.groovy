@@ -17,6 +17,7 @@
  */
 package org.owasp.dependencycheck.gradle.extension
 
+import groovy.transform.CompileStatic
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
@@ -28,9 +29,9 @@ import javax.inject.Inject
 /**
  * The configuration for the RetireJS Analyzer.
  */
-@groovy.transform.CompileStatic
-class RetireJSExtension {
-
+@CompileStatic
+abstract class RetireJSExtension {
+    @Inject abstract ObjectFactory getObjects()
     private final Property<Boolean> enabled
     private final ListProperty<String> filters
     private final Property<Boolean> filterNonVulnerable
@@ -40,8 +41,7 @@ class RetireJSExtension {
     private final Property<String> bearerToken
     private final Property<Boolean> forceupdate
 
-    @Inject
-    RetireJSExtension(ObjectFactory objects) {
+    RetireJSExtension() {
         this.enabled = objects.property(Boolean)
         this.filters = objects.listProperty(String).convention([])
         this.filterNonVulnerable = objects.property(Boolean)

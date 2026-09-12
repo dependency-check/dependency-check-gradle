@@ -18,7 +18,8 @@
 
 package org.owasp.dependencycheck.gradle.extension
 
-import org.gradle.api.Project
+import groovy.transform.CompileStatic
+import org.gradle.api.invocation.Gradle
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -29,9 +30,10 @@ import javax.inject.Inject
 /**
  * The update data configuration extension. Any value not configured will use the dependency-check-core defaults.
  */
-@groovy.transform.CompileStatic
-class DataExtension {
-
+@CompileStatic
+abstract class DataExtension {
+    @Inject abstract ObjectFactory getObjects()
+    @Inject abstract Gradle getGradle()
     private final Property<String> directory
     private final Property<String> connectionString
     private final Property<String> username
@@ -39,9 +41,8 @@ class DataExtension {
     private final Property<String> driver
     private final Property<String> driverPath
 
-    @Inject
-    DataExtension(ObjectFactory objects, Project project) {
-        this.directory = objects.property(String).convention("${project.gradle.gradleUserHomeDir}/dependency-check-data/11.0".toString())
+    DataExtension() {
+        this.directory = objects.property(String).convention("${gradle.gradleUserHomeDir}/dependency-check-data/11.0".toString())
         this.connectionString = objects.property(String)
         this.username = objects.property(String)
         this.password = objects.property(String)

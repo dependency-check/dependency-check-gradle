@@ -85,10 +85,6 @@ class DependencyCheckGradlePluginSpec extends Specification {
         task.description == 'Identifies and reports known vulnerabilities (CVEs) in project dependencies.'
 
         verifyAll(project.dependencyCheck as DependencyCheckExtension) {
-            proxy.server.getOrNull() == null
-            proxy.port.getOrNull() == null
-            proxy.username.getOrNull() == null
-            proxy.password.getOrNull() == null
             nvd.apiKey.getOrNull() == null
             nvd.delay.getOrNull() == null
             nvd.maxRetryCount.getOrNull() == null
@@ -111,12 +107,6 @@ class DependencyCheckGradlePluginSpec extends Specification {
             autoUpdate = false
             data.directory = project.layout.buildDirectory.dir('custom-data').get().toString()
             data.password = 'password'
-
-            proxy.server = '127.0.0.1'
-            proxy.port = 3128
-            proxy.username = 'proxyUsername'
-            proxy.password = 'proxyPassword'
-            proxy.nonProxyHosts = ['localhost']
 
             nvd.apiKey = 'apiKey'
             nvd.delay = 5000
@@ -179,12 +169,6 @@ class DependencyCheckGradlePluginSpec extends Specification {
             data.directory.get() == project.layout.buildDirectory.dir('custom-data').get().toString()
             data.password.get() == 'password'
 
-            proxy.server.get() == '127.0.0.1'
-            proxy.port.get() == 3128
-            proxy.username.get() == 'proxyUsername'
-            proxy.password.get() == 'proxyPassword'
-            proxy.nonProxyHosts.get() == ['localhost']
-
             connectionTimeout.get() == Duration.ofMillis(3000)
             readTimeout.get() == Duration.ofMinutes(2)
 
@@ -224,27 +208,6 @@ class DependencyCheckGradlePluginSpec extends Specification {
             additionalCpes.getByName('additional1').description.get() == 'Additional1'
             additionalCpes.getByName('additional1').cpe.get() == 'cpe:2.3:a:aGroup1:aPackage1:123:*:*:*:*:*:*:*'
         }
-    }
-
-    def 'legacy nexus properties mapped to NexusExtension'() {
-        given:
-        project.dependencyCheck {
-            analyzers.nexusEnabled = enabled
-            analyzers.nexusUrl = url
-            analyzers.nexusUsesProxy = proxy
-        }
-
-        expect:
-        project.dependencyCheck {
-            assert analyzers.nexus.enabled.get() == enabled
-            assert analyzers.nexus.url.get() == url
-            assert analyzers.nexus.usesProxy.get() == proxy
-        }
-
-        where:
-        enabled | url | proxy
-        true | 'http://someurl' | true
-        false | 'https://testurl' | false
     }
 
     def 'NexusExtension properties configure task settings'() {

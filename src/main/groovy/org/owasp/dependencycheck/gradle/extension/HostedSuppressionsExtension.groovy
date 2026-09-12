@@ -1,5 +1,6 @@
 package org.owasp.dependencycheck.gradle.extension
 
+import groovy.transform.CompileStatic
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -10,9 +11,9 @@ import javax.inject.Inject
 /**
  * The advanced configuration for the hosted suppressions file.
  */
-@groovy.transform.CompileStatic
-class HostedSuppressionsExtension {
-
+@CompileStatic
+abstract class HostedSuppressionsExtension {
+    @Inject abstract ObjectFactory getObjects()
     private final Property<Boolean> enabled
     private final Property<String> url
     private final Property<String> user
@@ -21,8 +22,7 @@ class HostedSuppressionsExtension {
     private final Property<Boolean> forceupdate
     private final Property<Integer> validForHours
 
-    @Inject
-    HostedSuppressionsExtension(ObjectFactory objects) {
+    HostedSuppressionsExtension() {
         this.enabled = objects.property(Boolean)
         this.url = objects.property(String)
         this.user = objects.property(String)

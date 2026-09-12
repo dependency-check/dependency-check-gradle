@@ -22,6 +22,7 @@ import groovy.transform.CompileStatic
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ReportingBasePlugin
+import org.gradle.api.reporting.ReportingExtension
 import org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension
 import org.owasp.dependencycheck.gradle.tasks.Aggregate
 import org.owasp.dependencycheck.gradle.tasks.Analyze
@@ -40,7 +41,7 @@ class DependencyCheckPlugin implements Plugin<Project> {
     public static final String PURGE_TASK = 'dependencyCheckPurge'
 
     /* configuration extensions */
-    private static final String CHECK_EXTENSION_NAME = "dependencyCheck"
+    static final String CHECK_EXTENSION_NAME = "dependencyCheck"
 
     static {
         muteNoisyLoggers()
@@ -53,7 +54,8 @@ class DependencyCheckPlugin implements Plugin<Project> {
     }
 
     void initializeConfigurations(Project project) {
-        project.extensions.create(CHECK_EXTENSION_NAME, DependencyCheckExtension, project, project.objects)
+        def odc = project.extensions.create(CHECK_EXTENSION_NAME, DependencyCheckExtension)
+        odc.outputDirectory.convention(project.extensions.getByType(ReportingExtension).baseDirectory.dir("dependency-check"))
     }
 
     void registerTasks(Project project) {

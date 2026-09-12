@@ -19,20 +19,15 @@
 package org.owasp.dependencycheck.gradle.tasks
 
 import groovy.transform.CompileStatic
-import org.gradle.api.model.ObjectFactory
 import org.owasp.dependencycheck.Engine
-
-import javax.inject.Inject
 
 /**
  * Checks the projects dependencies for known vulnerabilities.
  */
 @CompileStatic
-class Analyze extends AbstractAnalyze {
+abstract class Analyze extends AbstractAnalyze {
 
-    @Inject
-    Analyze(ObjectFactory objects) {
-        super(objects)
+    Analyze() {
         group = 'OWASP dependency-check'
         description = 'Identifies and reports known vulnerabilities (CVEs) in project dependencies.'
     }
