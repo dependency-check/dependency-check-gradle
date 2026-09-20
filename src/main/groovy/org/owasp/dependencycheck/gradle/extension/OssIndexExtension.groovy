@@ -17,6 +17,7 @@
  */
 package org.owasp.dependencycheck.gradle.extension
 
+import groovy.transform.CompileStatic
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -27,9 +28,9 @@ import javax.inject.Inject
 /**
  * The configuration for the OSS Index Analyzer.
  */
-@groovy.transform.CompileStatic
-class OssIndexExtension {
-
+@CompileStatic
+abstract class OssIndexExtension {
+    @Inject abstract ObjectFactory getObjects()
     private final Property<Boolean> enabled
     private final Property<String> username
     private final Property<String> password
@@ -37,8 +38,7 @@ class OssIndexExtension {
     private final Property<Integer> validForHours
     private final Property<Boolean> warnOnlyOnRemoteErrors
 
-    @Inject
-    OssIndexExtension(ObjectFactory objects) {
+    OssIndexExtension() {
         this.enabled = objects.property(Boolean)
         this.username = objects.property(String)
         this.password = objects.property(String)

@@ -17,6 +17,7 @@
  */
 package org.owasp.dependencycheck.gradle.extension
 
+import groovy.transform.CompileStatic
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -27,9 +28,9 @@ import javax.inject.Inject
 /**
  * The artifactory analyzer configuration.
  */
-@groovy.transform.CompileStatic
-class ArtifactoryExtension {
-
+@CompileStatic
+abstract class ArtifactoryExtension {
+    @Inject abstract ObjectFactory getObjects()
     private final Property<Boolean> enabled
     private final Property<String> url
     private final Property<Boolean> usesProxy
@@ -38,8 +39,7 @@ class ArtifactoryExtension {
     private final Property<String> apiToken
     private final Property<String> bearerToken
 
-    @Inject
-    ArtifactoryExtension(ObjectFactory objects) {
+    ArtifactoryExtension() {
         this.enabled = objects.property(Boolean)
         this.url = objects.property(String)
         this.usesProxy = objects.property(Boolean)

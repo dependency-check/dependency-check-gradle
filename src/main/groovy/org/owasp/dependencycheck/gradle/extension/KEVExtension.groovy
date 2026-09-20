@@ -1,5 +1,6 @@
 package org.owasp.dependencycheck.gradle.extension
 
+import groovy.transform.CompileStatic
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -7,9 +8,9 @@ import org.gradle.api.tasks.Optional
 
 import javax.inject.Inject
 
-@groovy.transform.CompileStatic
-class KEVExtension {
-
+@CompileStatic
+abstract class KEVExtension {
+    @Inject abstract ObjectFactory getObjects()
     private final Property<Boolean> enabled
     private final Property<String> url
     private final Property<String> user
@@ -17,8 +18,7 @@ class KEVExtension {
     private final Property<String> bearerToken
     private final Property<Integer> validForHours
 
-    @Inject
-    KEVExtension(ObjectFactory objects) {
+    KEVExtension() {
         this.enabled = objects.property(Boolean)
         this.url = objects.property(String)
         this.user = objects.property(String)
