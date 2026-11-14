@@ -12,8 +12,8 @@ class GradleTestVersion {
      */
     final static def supportedVersions = [
             new GradleTestVersion(version: '7.6.6',  minJdk: 8,  maxJdk: 19),
-            new GradleTestVersion(version: '8.14.6', minJdk: 8,  maxJdk: 25),
-            new GradleTestVersion(version: '9.9.0',  minJdk: 17, maxJdk: 27),
+            new GradleTestVersion(version: '8.14.7', minJdk: 8,  maxJdk: 25),
+            new GradleTestVersion(version: '9.9.1',  minJdk: 17, maxJdk: 27),
     ]
 
     final static def supportedVersionsForCurrentJvm =
