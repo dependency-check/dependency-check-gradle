@@ -1,6 +1,6 @@
 [versions]
 odc = '13.0.0'
-spock = '2.4-groovy-3.0'
+spock = '2.5-groovy-3.0'
 junit = '5.14.4'
 
 [libraries]
@@ -17,4 +17,4 @@ spock-core = { module = 'org.spockframework:spock-core' }
 [bundles]
 
 [plugins]
-gradle-plugin-publish = { id = 'com.gradle.plugin-publish', version = '2.1.1' }
+gradle-plugin-publish = { id = 'com.gradle.plugin-publish', version = '2.2.1' }
