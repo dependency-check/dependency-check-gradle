@@ -149,7 +149,6 @@ abstract class ConfiguredTask extends DefaultTask {
             settings.setStringIfNotEmpty(NVD_API_DATAFEED_PASSWORD, nvd.datafeedPassword.getOrNull())
         }
         settings.setStringIfNotEmpty(NVD_API_DATAFEED_BEARER_TOKEN, nvd.datafeedBearerToken.getOrNull())
-        settings.setIntIfNotNull(NVD_API_DATAFEED_START_YEAR, nvd.datafeedStartYear.getOrNull())
         settings.setIntIfNotNull(CONNECTION_TIMEOUT, connectionTimeout.map { it.toMillis().intValue() }.getOrNull())
         settings.setIntIfNotNull(CONNECTION_READ_TIMEOUT, readTimeout.map { it.toMillis().intValue() }.getOrNull())
         Downloader.getInstance().configure(settings)

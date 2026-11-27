@@ -161,13 +161,20 @@ class NvdExtension {
 
     /**
      * The starting year for the NVD CVE Data feed cache.
+     *
+     * @deprecated since 13.0.1, for removal in a future release. This property was unsafe and is now unused.
      */
     @Input
     @Optional
+    @Deprecated(since = "13.0.1", forRemoval = true)
     Property<Integer> getDatafeedStartYear() {
         return datafeedStartYear
     }
 
+    /**
+    * @deprecated since 13.0.1, for removal in a future release. This property was unsafe and is now unused.
+    */
+    @Deprecated(since = "13.0.1", forRemoval = true)
     void setDatafeedStartYear(Number value) {
         datafeedStartYear.set(value?.intValue())
     }
