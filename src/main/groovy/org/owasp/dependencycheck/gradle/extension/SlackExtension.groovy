@@ -17,6 +17,7 @@
  */
 package org.owasp.dependencycheck.gradle.extension
 
+import groovy.transform.CompileStatic
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -27,14 +28,13 @@ import javax.inject.Inject
 /**
  * The configuration for Slack notifications.
  */
-@groovy.transform.CompileStatic
-class SlackExtension {
-
+@CompileStatic
+abstract class SlackExtension {
+    @Inject abstract ObjectFactory getObjects()
     private final Property<Boolean> enabled
     private final Property<String> webhookUrl
 
-    @Inject
-    SlackExtension(ObjectFactory objects) {
+    SlackExtension() {
         this.enabled = objects.property(Boolean)
         this.webhookUrl = objects.property(String)
     }

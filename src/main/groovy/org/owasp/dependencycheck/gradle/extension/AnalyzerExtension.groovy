@@ -17,11 +17,12 @@
  */
 package org.owasp.dependencycheck.gradle.extension
 
+import groovy.transform.CompileStatic
 import org.gradle.api.Action
-import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 
 import javax.inject.Inject
@@ -29,9 +30,9 @@ import javax.inject.Inject
 /**
  * The analyzer configuration extension. Any value not configured will use the dependency-check-core defaults.
  */
-@groovy.transform.CompileStatic
-class AnalyzerExtension {
-
+@CompileStatic
+abstract class AnalyzerExtension {
+    @Inject abstract ObjectFactory getObjects()
     private final Property<Boolean> experimentalEnabled
     private final Property<Boolean> archiveEnabled
     private final Property<String> zipExtensions
@@ -59,16 +60,9 @@ class AnalyzerExtension {
     private final Property<Boolean> composerEnabled
     private final Property<Boolean> composerSkipDev
     private final Property<Boolean> cpanEnabled
-    private final Property<Boolean> nodeEnabled
-    private final Property<Boolean> nodeAuditEnabled
     private final Property<Boolean> nugetconfEnabled
-    private final Property<Boolean> ossIndexEnabled
 
-    Project project;
-
-    @Inject
-    AnalyzerExtension(Project project, ObjectFactory objects) {
-        this.project = project
+    AnalyzerExtension() {
         this.experimentalEnabled = objects.property(Boolean)
         this.archiveEnabled = objects.property(Boolean)
         this.zipExtensions = objects.property(String)
@@ -96,17 +90,7 @@ class AnalyzerExtension {
         this.composerEnabled = objects.property(Boolean)
         this.composerSkipDev = objects.property(Boolean)
         this.cpanEnabled = objects.property(Boolean)
-        this.nodeEnabled = objects.property(Boolean)
-        this.nodeAuditEnabled = objects.property(Boolean)
         this.nugetconfEnabled = objects.property(Boolean)
-        this.ossIndexEnabled = objects.property(Boolean)
-        kev = objects.newInstance(KEVExtension, objects)
-        retirejs = objects.newInstance(RetireJSExtension, objects)
-        nodeAudit = objects.newInstance(NodeAuditExtension, objects)
-        nodePackage = objects.newInstance(NodePackageExtension, objects)
-        artifactory = objects.newInstance(ArtifactoryExtension, objects)
-        ossIndex = objects.newInstance(OssIndexExtension, objects)
-        nexus = objects.newInstance(NexusExtension)
     }
 
     /**
@@ -172,57 +156,6 @@ class AnalyzerExtension {
 
     void setCentralEnabled(Boolean value) {
         centralEnabled.set(value)
-    }
-
-    /**
-     * Sets whether Nexus Analyzer will be used. This analyzer is superceded by the Central Analyzer; however, you can configure this to run against a Nexus Pro installation.
-     * @deprecated use nexus { enabled = true }
-     */
-    @Input
-    @Optional
-    @Deprecated
-    Property<Boolean> getNexusEnabled() {
-        return nexus.enabled
-    }
-
-    /* @deprecated use nexus { enabled = true } */
-    @Deprecated
-    void setNexusEnabled(Boolean value) {
-        nexus.enabled.set(value)
-    }
-
-    /**
-     * Defines the Nexus Server's web service end point (example http://domain.enterprise/service/local/). If not set the Nexus Analyzer will be disabled.
-     * @deprecated use nexus { url = "nexus url" }
-     */
-    @Input
-    @Optional
-    @Deprecated
-    Property<String> getNexusUrl() {
-        return nexus.url
-    }
-
-    /* @deprecated use nexus { url = "nexus url" } */
-    @Deprecated
-    void setNexusUrl(String value) {
-        nexus.url.set(value)
-    }
-
-    /**
-     * whether the defined proxy should be used when connecting to Nexus.
-     * @deprecated use nexus { usesProxy = true }
-     */
-    @Input
-    @Optional
-    @Deprecated
-    Property<Boolean> getNexusUsesProxy() {
-        return nexus.usesProxy
-    }
-
-    /* @deprecated use nexus { usesProxy = true } */
-    @Deprecated
-    void setNexusUsesProxy(Boolean value) {
-        nexus.usesProxy.set(value)
     }
 
     /**
@@ -513,36 +446,6 @@ class AnalyzerExtension {
     }
 
     /**
-     * Sets whether the Node.js Analyzer should be used.
-     * @deprecated since 8.4.1 - please use nodePackage.enabled = true
-     */
-    @Input
-    @Optional
-    @Deprecated(since = "8.4.1", forRemoval = true)
-    Property<Boolean> getNodeEnabled() {
-        return nodeEnabled
-    }
-
-    void setNodeEnabled(Boolean value) {
-        nodeEnabled.set(value)
-    }
-
-    /**
-     * Sets whether the NSP Analyzer should be used.
-     * @deprecated since 5.2.5 - please use nodeAudit.enabled = true
-     */
-    @Input
-    @Optional
-    @Deprecated(since = "5.2.5", forRemoval = true)
-    Property<Boolean> getNodeAuditEnabled() {
-        return nodeAuditEnabled
-    }
-
-    void setNodeAuditEnabled(Boolean value) {
-        nodeAuditEnabled.set(value)
-    }
-
-    /**
      * Sets whether the Nuget packages.config Configuration Analyzer should be used.
      */
     @Input
@@ -556,65 +459,39 @@ class AnalyzerExtension {
     }
 
     /**
-     * Sets whether the OSS Index Analyzer should be used.
-     * @deprecated since 5.0.1 - please use ossIndex.enabled = true
-     */
-    @Input
-    @Optional
-    @Deprecated(since = "5.0.1", forRemoval = true)
-    Property<Boolean> getOssIndexEnabled() {
-        return ossIndexEnabled
-    }
-
-    void setOssIndexEnabled(Boolean value) {
-        ossIndexEnabled.set(value)
-    }
-
-    /**
      * The configuration extension for known exploited vulnerabilities settings.
      */
-    KEVExtension kev
+    @Nested abstract KEVExtension getKev()
 
     /**
      * The configuration extension for retirejs settings.
      */
-    RetireJSExtension retirejs
+    @Nested abstract RetireJSExtension getRetirejs()
 
     /**
      * The configuration extension for the node audit settings.
      */
-    NodeAuditExtension nodeAudit
+    @Nested abstract NodeAuditExtension getNodeAudit()
 
     /**
      * The configuration extension for the node package settings.
      */
-    NodePackageExtension nodePackage
+    @Nested abstract NodePackageExtension getNodePackage()
 
     /**
      * The configuration extension for artifactory settings.
      */
-    ArtifactoryExtension artifactory
+    @Nested abstract ArtifactoryExtension getArtifactory()
 
     /**
      * The configuration extension for artifactory settings.
      */
-    OssIndexExtension ossIndex
+    @Nested abstract OssIndexExtension getOssIndex()
 
     /**
      * Nexus configuration extension.
      */
-    NexusExtension nexus
-
-    /**
-     * Allows programmatic configuration of the KEV extension
-     * @param configClosure the closure to configure the KEV extension
-     * @return the KEV extension
-     * @deprecated Use the {@code Action} variant instead
-     */
-    @Deprecated
-    def kev(Closure configClosure) {
-        return project.configure(kev, configClosure)
-    }
+    @Nested abstract NexusExtension getNexus()
 
     /**
      * Allows programmatic configuration of the KEV extension
@@ -624,17 +501,6 @@ class AnalyzerExtension {
     def kev(Action<KEVExtension> config) {
         config.execute(kev)
         return kev
-    }
-
-    /**
-     * Allows programmatic configuration of the retirejs extension
-     * @param configClosure the closure to configure the retirejs extension
-     * @return the retirejs extension
-     * @deprecated Use the {@code Action} variant instead
-     */
-    @Deprecated()
-    def retirejs(Closure configClosure) {
-        return project.configure(retirejs, configClosure)
     }
 
     /**
@@ -649,34 +515,12 @@ class AnalyzerExtension {
 
     /**
      * Allows programmatic configuration of the artifactory extension
-     * @param configClosure the closure to configure the artifactory extension
-     * @return the artifactory extension
-     * @deprecated Use the {@code Action} variant instead
-     */
-    @Deprecated()
-    def artifactory(Closure configClosure) {
-        return project.configure(artifactory, configClosure)
-    }
-
-    /**
-     * Allows programmatic configuration of the artifactory extension
      * @param config the action to configure the artifactory extension
      * @return the artifactory extension
      */
     def artifactory(Action<ArtifactoryExtension> config) {
         config.execute(artifactory)
         return artifactory
-    }
-
-    /**
-     * Allows programmatic configuration of the ossIndex extension
-     * @param configClosure the closure to configure the ossIndex extension
-     * @return the ossIndex extension
-     * @deprecated Use the {@code Action} variant instead
-     */
-    @Deprecated()
-    def ossIndex(Closure configClosure) {
-        return project.configure(ossIndex, configClosure)
     }
 
     /**
@@ -691,34 +535,12 @@ class AnalyzerExtension {
 
     /**
      * Allows programmatic configuration of the nodeAudit extension
-     * @param configClosure the closure to configure the ossIndex extension
-     * @return the ossIndex extension
-     * @deprecated Use the {@code Action} variant instead
-     */
-    @Deprecated()
-    def nodeAudit(Closure configClosure) {
-        return project.configure(nodeAudit, configClosure)
-    }
-
-    /**
-     * Allows programmatic configuration of the nodeAudit extension
      * @param config the action to configure the ossIndex extension
      * @return the ossIndex extension
      */
     def nodeAudit(Action<NodeAuditExtension> config) {
         config.execute(nodeAudit)
         return nodeAudit
-    }
-
-    /**
-     * Allows programmatic configuration of the node package extension
-     * @param configClosure the closure to configure the node extension
-     * @return the node extension
-     * @deprecated Use the {@code Action} variant instead
-     */
-    @Deprecated()
-    def nodePackage(Closure configClosure) {
-        return project.configure(nodePackage, configClosure)
     }
 
     /**

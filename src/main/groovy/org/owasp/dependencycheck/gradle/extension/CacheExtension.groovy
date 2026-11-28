@@ -17,6 +17,7 @@
  */
 package org.owasp.dependencycheck.gradle.extension
 
+import groovy.transform.CompileStatic
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -27,15 +28,14 @@ import javax.inject.Inject
 /**
  * The configuration for caching external results.
  */
-@groovy.transform.CompileStatic
-class CacheExtension {
-
+@CompileStatic
+abstract class CacheExtension {
+    @Inject abstract ObjectFactory getObjects()
     private final Property<Boolean> ossIndex
     private final Property<Boolean> central
     private final Property<Boolean> nodeAudit
 
-    @Inject
-    CacheExtension(ObjectFactory objects) {
+    CacheExtension() {
         this.ossIndex = objects.property(Boolean)
         this.central = objects.property(Boolean)
         this.nodeAudit = objects.property(Boolean)

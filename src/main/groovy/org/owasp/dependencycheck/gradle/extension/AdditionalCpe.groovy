@@ -1,5 +1,6 @@
 package org.owasp.dependencycheck.gradle.extension
 
+import groovy.transform.CompileStatic
 import org.gradle.api.Named
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
@@ -11,15 +12,16 @@ import javax.inject.Inject
 /**
  * Holder for the information regarding an additional CPE to be checked.
  */
-@groovy.transform.CompileStatic
-class AdditionalCpe implements Named {
+@CompileStatic
+abstract class AdditionalCpe implements Named {
+
+    @Inject abstract ObjectFactory getObjects()
 
     private final String name
     private final Property<String> description
     private final Property<String> cpe
 
-    @Inject
-    AdditionalCpe(String name, ObjectFactory objects) {
+    AdditionalCpe(String name) {
         this.name = name
         this.description = objects.property(String)
         this.cpe = objects.property(String)

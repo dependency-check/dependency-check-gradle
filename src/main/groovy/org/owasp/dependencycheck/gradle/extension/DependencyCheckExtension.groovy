@@ -18,18 +18,18 @@
 
 package org.owasp.dependencycheck.gradle.extension
 
+import groovy.transform.CompileStatic
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectContainer
-import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.reporting.ReportingExtension
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 
 import javax.inject.Inject
@@ -45,10 +45,11 @@ import static org.owasp.dependencycheck.reporting.ReportGenerator.Format
  * @author Jeremy Long
  */
 
-@groovy.transform.CompileStatic
-class DependencyCheckExtension {
+@CompileStatic
+abstract class DependencyCheckExtension {
 
-    Project project;
+    @Inject abstract ObjectFactory getObjects()
+    @Inject abstract ProjectLayout getLayout()
 
     private final Property<Boolean> scanBuildEnv
     private final Property<Boolean> scanDependencies
@@ -83,54 +84,45 @@ class DependencyCheckExtension {
     private final Property<Duration> readTimeout
 
     /**
-     * The configuration extension for proxy settings.
-     */
-    ProxyExtension proxy
-    /**
      * The configuration extension for slack notifications.
      */
-    SlackExtension slack
+    @Nested abstract SlackExtension getSlack()
 
     /**
      * The configuration extension that defines the location of the NVD CVE data.
      */
-    NvdExtension nvd
+    @Nested abstract NvdExtension getNvd()
 
     /**
      * The configuration extension that configures the hosted suppressions file.
      */
-    HostedSuppressionsExtension hostedSuppressions
+    @Nested abstract HostedSuppressionsExtension getHostedSuppressions()
 
     /**
      * The configuration extension for data related configuration options.
      */
-    DataExtension data
+    @Nested abstract DataExtension getData()
 
     /**
      * Configuration for the analyzers.
      */
-    AnalyzerExtension analyzers
+    @Nested abstract AnalyzerExtension getAnalyzers()
 
     /**
      * Additional CPE to be analyzed.
      */
-    NamedDomainObjectContainer<AdditionalCpe> additionalCpes
+    @Nested abstract NamedDomainObjectContainer<AdditionalCpe> getAdditionalCpes()
 
     /**
      * The configuration extension for cache settings.
      */
-    CacheExtension cache
+    @Nested abstract CacheExtension getCache()
 
-    @Inject
-    DependencyCheckExtension(Project project, ObjectFactory objects) {
-        this.project = project;
-
-        def reporting = project.extensions.getByType(ReportingExtension)
-
+    DependencyCheckExtension() {
         this.scanBuildEnv = objects.property(Boolean).convention(false)
         this.scanDependencies = objects.property(Boolean).convention(true)
         this.failOnError = objects.property(Boolean).convention(true)
-        this.outputDirectory = objects.directoryProperty().convention(reporting.baseDirectory.dir("dependency-check"))
+        this.outputDirectory = objects.directoryProperty()
         this.suppressionFile = objects.property(String)
         this.suppressionFiles = objects.listProperty(String).convention([])
         this.suppressionFileUser = objects.property(String)
@@ -155,15 +147,6 @@ class DependencyCheckExtension {
         this.scanSet = objects.fileCollection()
         this.connectionTimeout = objects.property(Duration)
         this.readTimeout = objects.property(Duration)
-
-        cache = objects.newInstance(CacheExtension, objects)
-        slack = objects.newInstance(SlackExtension, objects)
-        proxy = objects.newInstance(ProxyExtension, objects)
-        nvd = objects.newInstance(NvdExtension, objects)
-        hostedSuppressions = objects.newInstance(HostedSuppressionsExtension, objects)
-        data = objects.newInstance(DataExtension, objects, project)
-        analyzers = objects.newInstance(AnalyzerExtension, project, objects)
-        additionalCpes = project.objects.domainObjectContainer(AdditionalCpe.class)
     }
 
     /**
@@ -215,7 +198,7 @@ class DependencyCheckExtension {
     }
 
     void setOutputDirectory(String value) {
-        outputDirectory.set(project.file(value))
+        outputDirectory.set(layout.projectDirectory.file(value).asFile)
     }
 
     void setOutputDirectory(File value) {
@@ -244,7 +227,7 @@ class DependencyCheckExtension {
         return suppressionFiles
     }
 
-    void setSuppressionFiles(java.lang.Object[] files) {
+    void setSuppressionFiles(Object[] files) {
         if (files != null) {
             suppressionFiles.set(Arrays.stream(files).map({ o -> o.toString() }).collect(Collectors.toList()))
         }
@@ -590,38 +573,6 @@ class DependencyCheckExtension {
     }
 
     /**
-     * Allows programmatic configuration of the proxy extension
-     * @param configClosure the closure to configure the proxy extension
-     * @return the proxy extension
-     * @deprecated Use the {@code Action} variant instead
-     */
-    @Deprecated
-    def proxy(Closure configClosure) {
-        return project.configure(proxy, configClosure)
-    }
-
-    /**
-     * Allows programmatic configuration of the proxy extension
-     * @param config the action to configure the proxy extension
-     * @return the proxy extension
-     */
-    def proxy(Action<ProxyExtension> config) {
-        config.execute(proxy)
-        return proxy
-    }
-
-    /**
-     * Allows programmatic configuration of the slack extension
-     * @param configClosure the closure to configure the slack extension
-     * @return the slack extension
-     * @deprecated Use the {@code Action} variant instead
-     */
-    @Deprecated
-    def slack(Closure configClosure) {
-        return project.configure(slack, configClosure)
-    }
-
-    /**
      * Allows programmatic configuration of the slack extension
      * @param config the action to configure the slack extension
      * @return the slack extension
@@ -629,17 +580,6 @@ class DependencyCheckExtension {
     def slack(Action<SlackExtension> config) {
         config.execute(slack)
         return slack
-    }
-
-    /**
-     * Allows programmatic configuration of the nvd extension
-     * @param configClosure the closure to configure the nvd extension
-     * @return the nvd extension
-     * n @deprecated Use the {@code Action} variant instead
-     */
-    @Deprecated
-    def nvd(Closure configClosure) {
-        return project.configure(nvd, configClosure)
     }
 
     /**
@@ -654,34 +594,12 @@ class DependencyCheckExtension {
 
     /**
      * Allows programmatic configuration of the hostedSuppressions extension.
-     * @param configClosure the closure to configure the hostedSuppressions extension
-     * @return the hostedSuppressions extension
-     * n @deprecated Use the {@code Action} variant instead
-     */
-    @Deprecated
-    def hostedSuppressions(Closure configClosure) {
-        return project.configure(hostedSuppressions, configClosure)
-    }
-
-    /**
-     * Allows programmatic configuration of the hostedSuppressions extension.
      * @param config the action to configure the hostedSuppressions extension
      * @return the hostedSuppressions extension
      */
     def hostedSuppressions(Action<HostedSuppressionsExtension> config) {
         config.execute(hostedSuppressions)
         return hostedSuppressions
-    }
-
-    /**
-     * Allows programmatic configuration of the analyzer extension
-     * @param configClosure the closure to configure the analyzers extension
-     * @return the analyzers extension
-     * @deprecated Use the {@code Action} variant instead @deprecated Use the {@code Action} variant instead
-     */
-    @Deprecated
-    def analyzers(Closure configClosure) {
-        return project.configure(analyzers, configClosure)
     }
 
     /**
@@ -696,34 +614,12 @@ class DependencyCheckExtension {
 
     /**
      * Allows programmatic configuration of the data extension
-     * @param configClosure the closure to configure the data extension
-     * @return the data extension
-     * @deprecated Use the {@code Action} variant instead
-     */
-    @Deprecated
-    def data(Closure configClosure) {
-        return project.configure(data, configClosure)
-    }
-
-    /**
-     * Allows programmatic configuration of the data extension
      * @param config the action to configure the data extension
      * @return the data extension
      */
     def data(Action<DataExtension> config) {
         config.execute(data)
         return data
-    }
-
-    /**
-     * Allows programmatic configuration of the cache extension
-     * @param configClosure the closure to configure the cache extension
-     * @return the cache extension
-     * @deprecated Use the {@code Action} variant instead
-     */
-    @Deprecated
-    def cache(Closure configClosure) {
-        return project.configure(cache, configClosure)
     }
 
     /**
