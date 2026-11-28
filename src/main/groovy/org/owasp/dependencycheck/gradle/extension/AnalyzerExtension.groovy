@@ -51,6 +51,8 @@ abstract class AnalyzerExtension {
     private final Property<Boolean> swiftPackageResolvedEnabled
     private final Property<Boolean> bundleAuditEnabled
     private final Property<String> pathToBundleAudit
+    private final Property<Boolean> cargoAuditEnabled
+    private final Property<String> pathToCargoAudit
     private final Property<Boolean> pyDistributionEnabled
     private final Property<Boolean> pyPackageEnabled
     private final Property<Boolean> rubygemsEnabled
@@ -81,6 +83,8 @@ abstract class AnalyzerExtension {
         this.swiftPackageResolvedEnabled = objects.property(Boolean)
         this.bundleAuditEnabled = objects.property(Boolean)
         this.pathToBundleAudit = objects.property(String)
+        this.cargoAuditEnabled = objects.property(Boolean)
+        this.pathToCargoAudit = objects.property(String)
         this.pyDistributionEnabled = objects.property(Boolean)
         this.pyPackageEnabled = objects.property(Boolean)
         this.rubygemsEnabled = objects.property(Boolean)
@@ -326,6 +330,32 @@ abstract class AnalyzerExtension {
 
     void setPathToBundleAudit(String value) {
         pathToBundleAudit.set(value)
+    }
+
+    /**
+     * Sets whether the Rust Cargo Audit analyzer is enabled; requires cargo-audit.
+     */
+    @Input
+    @Optional
+    Property<Boolean> getCargoAuditEnabled() {
+        return cargoAuditEnabled
+    }
+
+    void setCargoAuditEnabled(Boolean value) {
+        cargoAuditEnabled.set(value)
+    }
+
+    /**
+     * The path to the cargo-audit executable.
+     */
+    @Input
+    @Optional
+    Property<String> getPathToCargoAudit() {
+        return pathToCargoAudit
+    }
+
+    void setPathToCargoAudit(String value) {
+        pathToCargoAudit.set(value)
     }
 
     /**
