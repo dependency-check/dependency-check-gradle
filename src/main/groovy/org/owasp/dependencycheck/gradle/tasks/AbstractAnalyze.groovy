@@ -211,6 +211,8 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         analyzers.swiftPackageResolvedEnabled.convention(defaults.analyzers.swiftPackageResolvedEnabled)
         analyzers.bundleAuditEnabled.convention(defaults.analyzers.bundleAuditEnabled)
         analyzers.pathToBundleAudit.convention(defaults.analyzers.pathToBundleAudit)
+        analyzers.cargoAuditEnabled.convention(defaults.analyzers.cargoAuditEnabled)
+        analyzers.pathToCargoAudit.convention(defaults.analyzers.pathToCargoAudit)
         analyzers.pyDistributionEnabled.convention(defaults.analyzers.pyDistributionEnabled)
         analyzers.pyPackageEnabled.convention(defaults.analyzers.pyPackageEnabled)
         analyzers.rubygemsEnabled.convention(defaults.analyzers.rubygemsEnabled)
@@ -341,6 +343,8 @@ abstract class AbstractAnalyze extends ConfiguredTask {
         settings.setBooleanIfNotNull(ANALYZER_SWIFT_PACKAGE_RESOLVED_ENABLED, analyzers.swiftPackageResolvedEnabled.getOrNull())
         settings.setBooleanIfNotNull(ANALYZER_BUNDLE_AUDIT_ENABLED, analyzers.bundleAuditEnabled.getOrNull())
         settings.setStringIfNotEmpty(ANALYZER_BUNDLE_AUDIT_PATH, analyzers.pathToBundleAudit.getOrNull())
+        settings.setBooleanIfNotNull(ANALYZER_CARGO_AUDIT_ENABLED, analyzers.cargoAuditEnabled.getOrNull())
+        settings.setStringIfNotEmpty(ANALYZER_CARGO_AUDIT_PATH, analyzers.pathToCargoAudit.getOrNull())
 
         settings.setBooleanIfNotNull(ANALYZER_PYTHON_DISTRIBUTION_ENABLED, analyzers.pyDistributionEnabled.getOrNull())
         settings.setBooleanIfNotNull(ANALYZER_PYTHON_PACKAGE_ENABLED, analyzers.pyPackageEnabled.getOrNull())
@@ -764,7 +768,7 @@ abstract class AbstractAnalyze extends ConfiguredTask {
             List<String> toScan = ['src/main/resources', 'src/main/webapp',
                                    './package.json', './package-lock.json',
                                    './npm-shrinkwrap.json', './yarn.lock',
-                                   './pnpm.lock', 'pnpm-lock.yaml', './Gopkg.lock', './go.mod']
+                                   './pnpm.lock', 'pnpm-lock.yaml', './Gopkg.lock', './go.mod', './Cargo.lock']
             toScan.each {
                 File f = project.file it
                 if (f.exists()) {
